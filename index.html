@@ -9,263 +9,253 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-        }
-        
-        .shop-bg {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
-        }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); }
         
         .card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
-        
         .card:hover {
-            transform: translateY(-8px) scale(1.03);
-            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px -15px rgb(0 0 0 / 0.5);
         }
+        .item-img { transition: transform 0.4s ease; }
+        .card:hover .item-img { transform: scale(1.08); }
         
-        .rarity-border {
-            position: relative;
-        }
-        
-        .rarity-border::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: linear-gradient(45deg, #facc15, #a855f7, #3b82f6, #22d3ee);
-            border-radius: 12px;
-            z-index: -1;
-            filter: blur(8px);
-            opacity: 0.6;
-        }
-        
-        .item-img {
-            transition: transform 0.4s ease;
-        }
-        
-        .card:hover .item-img {
-            transform: scale(1.08);
-        }
-        
-        .vbuck {
-            filter: drop-shadow(0 0 6px #facc15);
+        .tab-active {
+            border-bottom: 3px solid #22d3ee;
+            color: white;
         }
     </style>
 </head>
-<body class="shop-bg text-white min-h-screen pb-12">
-    <div class="max-w-7xl mx-auto px-6">
-        <!-- Header -->
-        <header class="flex items-center justify-between py-8 border-b border-white/10">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl">
-                    🎮
-                </div>
-                <div>
-                    <h1 class="text-4xl font-bold tracking-tighter">FORTNITE SHOP</h1>
-                    <p class="text-emerald-400 text-sm flex items-center gap-2">
-                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                        LIVE • UPDATES EVERY DAY AT 00:00 UTC
-                    </p>
-                </div>
+<body class="shop-bg text-white min-h-screen">
+
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/10">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-3xl flex items-center justify-center text-4xl shadow-lg">
+                🎮
             </div>
-            
-            <div class="flex items-center gap-6 text-sm">
-                <button onclick="refreshShop()" 
-                        class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-5 py-3 rounded-2xl transition-all">
-                    <i class="fas fa-sync-alt"></i>
-                    <span>Refresh</span>
-                </button>
-                <div id="last-updated" class="text-white/60 text-xs"></div>
-            </div>
-        </header>
-
-        <div id="loading" class="flex flex-col items-center justify-center py-32">
-            <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-            <p class="text-xl">Loading today's shop...</p>
-        </div>
-
-        <!-- Shop Content -->
-        <div id="shop-content" class="hidden">
-            <!-- Featured -->
-            <div id="featured-section" class="mb-16"></div>
-
-            <!-- All Items Grid -->
-            <div class="mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <h2 class="text-3xl font-semibold">Today's Items</h2>
-                    <div class="flex-1 h-px bg-white/10"></div>
-                </div>
-                <div id="items-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-                    <!-- Populated by JS -->
-                </div>
+            <div>
+                <h1 class="text-5xl font-bold tracking-tighter">FORTNITE SHOP</h1>
+                <p class="text-emerald-400 flex items-center gap-2 text-sm">
+                    <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                    LIVE • Daily Reset at 00:00 UTC
+                </p>
             </div>
         </div>
+
+        <div class="flex items-center gap-4">
+            <input id="search" 
+                   type="text" 
+                   placeholder="Search items..." 
+                   onkeyup="filterItems()"
+                   class="bg-zinc-900 border border-white/20 rounded-2xl px-5 py-3 w-80 focus:outline-none focus:border-cyan-400">
+
+            <button onclick="refreshShop()" 
+                    class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl transition">
+                <i class="fas fa-sync"></i>
+                <span>Refresh</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="loading" class="flex flex-col items-center justify-center py-32">
+        <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p class="text-xl text-white/70">Loading today's shop...</p>
     </div>
 
-    <footer class="text-center text-white/40 text-xs py-8 mt-16 border-t border-white/10">
-        Built with ❤️ for the Fortnite community • Data from fortnite-api.com
-    </footer>
+    <div id="shop-content" class="hidden">
 
-    <script>
-        let shopData = null;
+        <!-- Tabs -->
+        <div class="flex gap-8 border-b border-white/10 mb-10 overflow-x-auto pb-1">
+            <button onclick="switchTab(0)" class="tab tab-active px-6 py-3 text-lg font-medium whitespace-nowrap" id="tab-0">All Items</button>
+            <button onclick="switchTab(1)" class="tab px-6 py-3 text-lg font-medium whitespace-nowrap" id="tab-1">Skins</button>
+            <button onclick="switchTab(2)" class="tab px-6 py-3 text-lg font-medium whitespace-nowrap" id="tab-2">Emotes</button>
+            <button onclick="switchTab(3)" class="tab px-6 py-3 text-lg font-medium whitespace-nowrap" id="tab-3">Wraps</button>
+            <button onclick="switchTab(4)" class="tab px-6 py-3 text-lg font-medium whitespace-nowrap" id="tab-4">Jam Tracks</button>
+            <button onclick="switchTab(5)" class="tab px-6 py-3 text-lg font-medium whitespace-nowrap" id="tab-5">Other</button>
+        </div>
 
-        async function fetchShop() {
-            const loading = document.getElementById('loading');
-            const content = document.getElementById('shop-content');
+        <!-- Featured -->
+        <div id="featured" class="mb-16"></div>
+
+        <!-- Grid -->
+        <div id="items-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+            <!-- JS populated -->
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-white/40 text-sm py-12 border-t border-white/10 mt-20">
+    Data from fortnite-api.com • Built with ❤️ for Fortnite players
+</footer>
+
+<script>
+    let shopData = null;
+    let currentTab = 0;
+
+    async function fetchShop() {
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('shop-content').classList.add('hidden');
+
+        try {
+            const res = await fetch('https://fortnite-api.com/v2/shop');
+            const data = await res.json();
             
-            loading.classList.remove('hidden');
-            content.classList.add('hidden');
-
-            try {
-                const res = await fetch('https://fortnite-api.com/v2/shop');
-                const data = await res.json();
-                
-                if (data.status === 200) {
-                    shopData = data.data;
-                    renderShop();
-                } else {
-                    throw new Error('API error');
-                }
-            } catch (e) {
-                console.error(e);
-                alert("Failed to load shop. The API might be temporarily down.");
-            } finally {
-                loading.classList.add('hidden');
-                content.classList.remove('hidden');
+            if (data.status === 200) {
+                shopData = data.data;
+                renderShop();
             }
+        } catch (err) {
+            console.error(err);
+            alert("Could not load the shop. Please try again later.");
+        } finally {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('shop-content').classList.remove('hidden');
         }
+    }
 
-        function getRarityColor(rarity) {
-            const colors = {
-                'legendary': '#f59e0b',
-                'epic': '#a855f7',
-                'rare': '#3b82f6',
-                'uncommon': '#22c55e',
-                'common': '#94a3b8'
-            };
-            return colors[rarity?.toLowerCase()] || '#64748b';
-        }
+    function getRarityColor(rarity) {
+        const map = { legendary: '#f59e0b', epic: '#c026d3', rare: '#3b82f6', uncommon: '#22c55e', common: '#94a3b8' };
+        return map[rarity?.toLowerCase()] || '#64748b';
+    }
 
-        function renderShop() {
-            const grid = document.getElementById('items-grid');
-            const featuredContainer = document.getElementById('featured-section');
-            grid.innerHTML = '';
-            featuredContainer.innerHTML = '';
+    function categorizeItem(entry) {
+        const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
+        const type = item.type?.displayValue?.toLowerCase() || '';
+        
+        if (entry.tracks?.length) return 'Jam Tracks';
+        if (type.includes('outfit') || type.includes('skin')) return 'Skins';
+        if (type.includes('emote')) return 'Emotes';
+        if (type.includes('wrap')) return 'Wraps';
+        return 'Other';
+    }
 
-            const entries = shopData.entries || [];
+    function renderShop() {
+        const entries = shopData.entries || [];
+        
+        // Featured (first 4 items)
+        renderFeatured(entries.slice(0, 4));
 
-            // Featured items (larger display)
-            const featured = entries.slice(0, 4);
-            
-            let featuredHTML = `
-                <div class="mb-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <h2 class="text-3xl font-semibold flex items-center gap-2">
-                            <i class="fas fa-fire text-orange-500"></i> Featured
-                        </h2>
+        // Render all items
+        renderItems(entries);
+    }
+
+    function renderFeatured(featured) {
+        let html = `
+            <h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+                <i class="fas fa-star text-yellow-400"></i> Featured Today
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        `;
+
+        featured.forEach(entry => {
+            const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
+            const price = entry.finalPrice || entry.regularPrice;
+            const name = item.name || 'Unknown Item';
+            const image = item.images?.featured || item.images?.icon || 'https://via.placeholder.com/400';
+            const rarity = item.rarity?.value || 'common';
+
+            html += `
+                <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden">
+                    <img src="${image}" class="w-full h-80 object-cover item-img" alt="${name}">
+                    <div class="p-5">
+                        <h3 class="font-semibold text-lg leading-tight mb-1">${name}</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-cyan-400 font-bold">$${price}</span>
+                            <span class="text-xs uppercase tracking-widest" style="color:${getRarityColor(rarity)}">
+                                ${rarity}
+                            </span>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
             `;
+        });
 
-            featured.forEach(entry => {
-                const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
-                const price = entry.finalPrice || entry.regularPrice;
-                const name = item.name || entry.devName?.split(' for ')[0]?.replace('[VIRTUAL]1 x ', '') || 'Unknown';
-                const image = item.images?.featured || item.images?.icon || item.albumArt || 'https://via.placeholder.com/400';
-                const rarity = item.rarity?.value || 'common';
-                const type = item.type?.displayValue || (entry.tracks ? 'Jam Track' : 'Item');
+        html += `</div>`;
+        document.getElementById('featured').innerHTML = html;
+    }
 
-                featuredHTML += `
-                    <div class="card bg-zinc-900/70 border border-white/10 rounded-3xl overflow-hidden group">
-                        <div class="relative">
-                            <img src="${image}" alt="${name}" 
-                                 class="w-full h-80 object-cover item-img">
-                            <div class="absolute top-4 right-4 bg-black/70 text-xs px-3 py-1 rounded-2xl flex items-center gap-1">
-                                <img src="https://fortnite-api.com/images/vbuck.png" class="w-4 h-4 vbuck" alt="V-Bucks">
-                                <span class="font-semibold">${price}</span>
-                            </div>
-                        </div>
-                        <div class="p-5">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-semibold text-lg leading-tight">${name}</h3>
-                                    <p class="text-white/60 text-sm">${type}</p>
-                                </div>
-                                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" 
-                                     style="background-color: ${getRarityColor(rarity)}; color: black;">
-                                    ${rarity[0]?.toUpperCase() || '?'}
-                                </div>
-                            </div>
+    function renderItems(entries) {
+        const grid = document.getElementById('items-grid');
+        grid.innerHTML = '';
+
+        entries.forEach(entry => {
+            const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
+            const price = entry.finalPrice || entry.regularPrice;
+            const name = item.name || entry.devName?.replace('[VIRTUAL]1 x ', '') || 'Item';
+            const image = item.images?.icon || item.images?.smallIcon || 'https://picsum.photos/300';
+            const rarity = (item.rarity?.value || 'common').toLowerCase();
+            const category = categorizeItem(entry);
+
+            const card = `
+                <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden group" data-category="${category}" data-name="${name.toLowerCase()}">
+                    <div class="relative">
+                        <img src="${image}" class="w-full aspect-square object-cover item-img" alt="${name}">
+                        <div class="absolute top-3 right-3 bg-black/80 px-3 py-1 rounded-2xl text-sm font-bold flex items-center gap-1">
+                            <img src="https://fortnite-api.com/images/vbuck.png" class="w-4 h-4" alt="V-Bucks">
+                            <span>${price}</span>
                         </div>
                     </div>
-                `;
-            });
-
-            featuredHTML += `</div></div>`;
-            featuredContainer.innerHTML = featuredHTML;
-
-            // All items grid
-            entries.forEach(entry => {
-                const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
-                const price = entry.finalPrice || entry.regularPrice;
-                let name = item.name || '';
-                
-                if (!name && entry.devName) {
-                    name = entry.devName.split(' for ')[0]?.replace('[VIRTUAL]1 x ', '') || 'Item';
-                }
-                
-                const image = item.images?.icon || item.images?.smallIcon || item.albumArt || 
-                             (entry.newDisplayAsset?.renderImages?.[0]?.image) || 
-                             'https://picsum.photos/300/300';
-                
-                const rarity = item.rarity?.value?.toLowerCase() || 'common';
-                const type = item.type?.displayValue || (entry.tracks?.length ? 'Jam Track' : 'Cosmetic');
-
-                const cardHTML = `
-                    <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden group rarity-border">
-                        <div class="relative">
-                            <img src="${image}" alt="${name}" 
-                                 class="w-full aspect-square object-cover item-img">
-                            
-                            <div class="absolute bottom-3 left-3 bg-black/80 text-[10px] px-2.5 py-1 rounded-xl flex items-center gap-1">
-                                <img src="https://fortnite-api.com/images/vbuck.png" class="w-3.5 h-3.5 vbuck" alt="V-Bucks">
-                                <span class="font-mono font-bold">${price}</span>
-                            </div>
-                        </div>
-                        <div class="p-4">
-                            <h3 class="font-medium text-base leading-tight mb-1 line-clamp-2">${name}</h3>
-                            <div class="flex justify-between items-center text-xs">
-                                <span class="text-white/60">${type}</span>
-                                <span class="px-3 py-0.5 rounded-full text-[10px] font-medium" 
-                                      style="background: rgba(255,255,255,0.1); color: ${getRarityColor(rarity)}">
-                                    ${rarity.toUpperCase()}
-                                </span>
-                            </div>
+                    <div class="p-4">
+                        <h3 class="font-medium leading-tight mb-2 line-clamp-2">${name}</h3>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-white/60">${category}</span>
+                            <span class="px-3 py-1 rounded-full" style="background-color: ${getRarityColor(rarity)}20; color: ${getRarityColor(rarity)}">
+                                ${rarity.toUpperCase()}
+                            </span>
                         </div>
                     </div>
-                `;
-                grid.innerHTML += cardHTML;
-            });
+                </div>
+            `;
+            grid.innerHTML += card;
+        });
+    }
 
-            // Update timestamp
-            const date = new Date(shopData.date);
-            document.getElementById('last-updated').textContent = 
-                `Last updated: ${date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`;
-        }
+    function switchTab(tabIndex) {
+        currentTab = tabIndex;
+        
+        document.querySelectorAll('.tab').forEach((tab, i) => {
+            tab.classList.toggle('tab-active', i === tabIndex);
+        });
 
-        async function refreshShop() {
-            await fetchShop();
-        }
+        filterItems();
+    }
 
-        // Auto refresh every 5 minutes
-        setInterval(() => {
-            if (shopData) fetchShop();
-        }, 300000);
+    function filterItems() {
+        const searchTerm = document.getElementById('search').value.toLowerCase();
+        const cards = document.querySelectorAll('#items-grid > div');
 
-        // Initialize
-        window.onload = fetchShop;
-    </script>
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            const category = card.dataset.category;
+            
+            let show = true;
+
+            if (currentTab !== 0) {
+                const tabNames = ['All', 'Skins', 'Emotes', 'Wraps', 'Jam Tracks', 'Other'];
+                show = category === tabNames[currentTab];
+            }
+
+            if (searchTerm && !name.includes(searchTerm)) {
+                show = false;
+            }
+
+            card.style.display = show ? 'block' : 'none';
+        });
+    }
+
+    async function refreshShop() {
+        await fetchShop();
+    }
+
+    // Auto refresh every 5 minutes
+    setInterval(() => { if (shopData) fetchShop(); }, 300000);
+
+    window.onload = fetchShop;
+</script>
 </body>
 </html>
