@@ -6,6 +6,10 @@
     <title>Drop IQ • Fortnite Companion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
@@ -20,15 +24,22 @@
             color: black;
             font-weight: 700;
         }
-        
         .card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .card:hover {
-            transform: translateY(-10px);
+        .card:hover { transform: translateY(-8px); }
+
+        /* Leaflet Map Styling */
+        #fortnite-map {
+            height: 620px;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.1);
         }
-        .item-img { transition: transform 0.4s ease; }
-        .card:hover .item-img { transform: scale(1.08); }
+        .leaflet-popup-content-wrapper {
+            background: #18181b;
+            color: white;
+            border-radius: 12px;
+        }
     </style>
 </head>
 <body class="shop-bg text-white min-h-screen">
@@ -37,14 +48,9 @@
 
     <!-- Header -->
     <header class="flex items-center justify-between pb-8 border-b border-white/10">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center text-4xl shadow-xl">
-                🧠
-            </div>
-            <div>
-                <h1 class="text-5xl font-bold tracking-tighter">DROP IQ</h1>
-                <p class="text-cyan-400 text-sm">Fortnite Intelligence • Real-Time</p>
-            </div>
+        <div>
+            <h1 class="text-5xl font-bold tracking-tighter">DROP IQ</h1>
+            <p class="text-cyan-400 text-sm">Fortnite Intelligence • Real-Time</p>
         </div>
         
         <div class="flex items-center gap-3 text-sm">
@@ -63,7 +69,6 @@
 
     <!-- SHOP SECTION -->
     <div id="shop-section">
-        <!-- Shop content from previous version (cleaned up) -->
         <div class="flex items-center justify-between my-8">
             <h2 class="text-4xl font-bold">Item Shop</h2>
             <button onclick="refreshShop()" 
@@ -72,192 +77,194 @@
             </button>
         </div>
 
-        <div id="loading" class="flex flex-col items-center justify-center py-32">
+        <div id="loading" class="hidden flex flex-col items-center justify-center py-32">
             <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-6"></div>
             <p class="text-xl">Loading live shop data...</p>
         </div>
 
         <div id="shop-content" class="hidden">
-            <!-- Featured -->
             <div id="featured" class="mb-16"></div>
-
-            <!-- All Items -->
             <div id="items-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"></div>
         </div>
     </div>
 
     <!-- MAP SECTION -->
     <div id="map-section" class="hidden">
-        <div class="mb-8">
-            <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
-            <p class="text-white/60">Current Chapter 7 • Live POIs</p>
+        <div class="mb-6 flex justify-between items-end">
+            <div>
+                <h2 class="text-4xl font-bold">Battle Royale Map</h2>
+                <p class="text-white/60">Click any location to zoom in • Drag to pan • Scroll to zoom</p>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Main Map Image -->
-            <div class="lg:col-span-8 bg-zinc-900 rounded-3xl overflow-hidden border border-white/10">
-                <img id="main-map" src="https://fortnite-api.com/images/map_en.png" 
-                     class="w-full h-auto" alt="Fortnite Map">
-                <div class="p-4 text-xs text-white/60 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i>
-                    Official minimap with named locations
-                </div>
-            </div>
+        <div class="bg-zinc-950 p-3 rounded-3xl">
+            <div id="fortnite-map"></div>
+        </div>
 
-            <!-- POIs Sidebar -->
-            <div class="lg:col-span-4">
-                <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-6 h-full">
-                    <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
-                        <i class="fas fa-location-dot text-red-400"></i> Named Locations
-                    </h3>
-                    <div id="poi-list" class="max-h-[70vh] overflow-auto space-y-3 text-sm">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
+        <div class="mt-6 bg-zinc-900/70 border border-white/10 rounded-3xl p-6">
+            <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                <i class="fas fa-location-dot text-red-400"></i> Named Locations
+            </h3>
+            <div id="poi-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-auto"></div>
         </div>
     </div>
 </div>
 
 <footer class="text-center text-white/40 text-xs py-12 border-t border-white/10 mt-20">
-    Drop IQ • Real-time Fortnite data from fortnite-api.com • Not affiliated with Epic Games
+    Drop IQ • Real-time Fortnite data • Not affiliated with Epic Games
 </footer>
 
 <script>
-    let shopData = null;
+// Tab Switching
+function switchMainTab(tab) {
+    document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
+    document.getElementById('map-section').classList.toggle('hidden', tab !== 1);
 
-    // Tab Switching
-    function switchMainTab(tab) {
-        document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
-        document.getElementById('map-section').classList.toggle('hidden', tab !== 1);
+    document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 0);
+    document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 1);
+}
 
-        document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 0);
-        document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 1);
-    }
+// ==================== SHOP ====================
+let shopData = null;
 
-    // ==================== SHOP FUNCTIONS ====================
-    async function fetchShop() {
-        const loading = document.getElementById('loading');
-        const content = document.getElementById('shop-content');
-        
-        loading.classList.remove('hidden');
-        content.classList.add('hidden');
+async function fetchShop() {
+    document.getElementById('loading').classList.remove('hidden');
+    document.getElementById('shop-content').classList.add('hidden');
 
-        try {
-            const res = await fetch('https://fortnite-api.com/v2/shop');
-            const data = await res.json();
-            if (data.status === 200) {
-                shopData = data.data;
-                renderShop();
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Shop failed to load.");
-        } finally {
-            loading.classList.add('hidden');
-            content.classList.remove('hidden');
+    try {
+        const res = await fetch('https://fortnite-api.com/v2/shop');
+        const data = await res.json();
+        if (data.status === 200) {
+            shopData = data.data;
+            renderShop();
         }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('shop-content').classList.remove('hidden');
     }
+}
 
-    function getRarityColor(rarity) {
-        const map = { legendary: '#f59e0b', epic: '#c026d3', rare: '#3b82f6', uncommon: '#22c55e', common: '#94a3b8' };
-        return map[rarity?.toLowerCase()] || '#64748b';
-    }
+function getRarityColor(rarity) {
+    const map = { legendary: '#f59e0b', epic: '#c026d3', rare: '#3b82f6', uncommon: '#22c55e', common: '#94a3b8' };
+    return map[rarity?.toLowerCase()] || '#64748b';
+}
 
-    function renderShop() {
-        const entries = shopData.entries || [];
-        document.getElementById('featured').innerHTML = '';
-        document.getElementById('items-grid').innerHTML = '';
+function renderShop() {
+    const entries = shopData.entries || [];
+    const grid = document.getElementById('items-grid');
+    grid.innerHTML = '';
 
-        // Featured
-        let featuredHTML = `<h2 class="text-3xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-fire text-orange-500"></i>Featured</h2><div class="grid grid-cols-1 md:grid-cols-4 gap-6">`;
-        
-        entries.slice(0, 4).forEach(entry => {
-            const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
-            const price = entry.finalPrice || entry.regularPrice;
-            const name = item.name || 'Fortnite Item';
-            const image = item.images?.featured || item.images?.icon || item.albumArt || '';
-            
-            featuredHTML += `
-                <div class="card bg-zinc-900 rounded-3xl overflow-hidden border border-white/10">
-                    <img src="${image}" class="w-full h-64 object-cover item-img" alt="${name}">
-                    <div class="p-4">
-                        <h3 class="font-semibold">${name}</h3>
-                        <div class="flex justify-between mt-3">
-                            <span class="text-cyan-400 font-bold">${price} V-Bucks</span>
-                        </div>
-                    </div>
+    // Featured
+    let featuredHTML = `<h2 class="text-3xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-fire text-orange-500"></i>Featured</h2><div class="grid grid-cols-1 md:grid-cols-4 gap-6">`;
+    entries.slice(0, 4).forEach(entry => {
+        const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
+        const price = entry.finalPrice || entry.regularPrice;
+        const name = item.name || 'Item';
+        const image = item.images?.featured || item.images?.icon || '';
+
+        featuredHTML += `
+            <div class="card bg-zinc-900 rounded-3xl overflow-hidden border border-white/10">
+                <img src="${image}" class="w-full h-64 object-cover" alt="${name}">
+                <div class="p-4">
+                    <h3 class="font-semibold line-clamp-2">${name}</h3>
+                    <p class="text-cyan-400 font-bold mt-2">${price} V-Bucks</p>
                 </div>
-            `;
-        });
-        featuredHTML += `</div>`;
-        document.getElementById('featured').innerHTML = featuredHTML;
+            </div>`;
+    });
+    featuredHTML += `</div>`;
+    document.getElementById('featured').innerHTML = featuredHTML;
 
-        // All Items
-        const grid = document.getElementById('items-grid');
-        entries.forEach(entry => {
-            const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
-            const price = entry.finalPrice || entry.regularPrice;
-            const name = item.name || 'Item';
-            const image = item.images?.icon || item.albumArt || 'https://picsum.photos/300';
-            const rarity = item.rarity?.value?.toLowerCase() || 'common';
+    // All Items
+    entries.forEach(entry => {
+        const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
+        const price = entry.finalPrice || entry.regularPrice;
+        const name = item.name || 'Item';
+        const image = item.images?.icon || 'https://picsum.photos/300';
+        const rarity = (item.rarity?.value || 'common').toLowerCase();
 
-            const html = `
-                <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden">
-                    <div class="relative">
-                        <img src="${image}" class="w-full aspect-square object-cover item-img">
-                        <div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl flex items-center gap-1">
-                            <span>${price}</span>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-medium line-clamp-2">${name}</h3>
-                        <span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full" 
-                              style="color: ${getRarityColor(rarity)}; background: rgba(255,255,255,0.1)">
+        const html = `
+            <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden">
+                <img src="${image}" class="w-full aspect-square object-cover">
+                <div class="p-4">
+                    <h3 class="font-medium line-clamp-2 mb-2">${name}</h3>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-cyan-400">${price}</span>
+                        <span class="text-xs uppercase px-3 py-1 rounded-full" style="color:${getRarityColor(rarity)}; background:rgba(255,255,255,0.1)">
                             ${rarity}
                         </span>
                     </div>
                 </div>
-            `;
-            grid.innerHTML += html;
-        });
-    }
+            </div>`;
+        grid.innerHTML += html;
+    });
+}
 
-    // ==================== MAP FUNCTIONS ====================
-    async function loadMap() {
-        try {
-            const res = await fetch('https://fortnite-api.com/v1/map');
-            const data = await res.json();
-            
-            if (data.status === 200) {
-                const pois = data.data.pois || [];
-                const poiList = document.getElementById('poi-list');
-                poiList.innerHTML = '';
+// ==================== INTERACTIVE MAP ====================
+let map;
+let currentMarker = null;
 
-                pois.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
-                    const div = document.createElement('div');
-                    div.className = "flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
-                    div.innerHTML = `
-                        <i class="fas fa-map-marker-alt text-red-400"></i>
-                        <span class="font-medium">${poi.name}</span>
-                    `;
-                    poiList.appendChild(div);
-                });
-            }
-        } catch (e) {
-            console.error("Map data failed to load", e);
+async function loadInteractiveMap() {
+    // Initialize Leaflet map
+    map = L.map('fortnite-map', {
+        zoomControl: true,
+        attributionControl: false
+    }).setView([0, 0], 2); // Center on map
+
+    // Add Fortnite map image
+    L.imageOverlay(
+        'https://fortnite-api.com/images/map_en.png',
+        [[-256, -256], [256, 256]]  // Bounds for full image
+    ).addTo(map);
+
+    try {
+        const res = await fetch('https://fortnite-api.com/v1/map');
+        const data = await res.json();
+        
+        if (data.status === 200) {
+            const pois = data.data.pois || [];
+            const poiList = document.getElementById('poi-list');
+            poiList.innerHTML = '';
+
+            pois.forEach(poi => {
+                // Create list item
+                const div = document.createElement('div');
+                div.className = "bg-zinc-800 hover:bg-zinc-700 p-4 rounded-2xl cursor-pointer transition flex items-center gap-3";
+                div.innerHTML = `
+                    <i class="fas fa-map-marker-alt text-red-400"></i>
+                    <span class="font-medium">${poi.name}</span>
+                `;
+                
+                // Click to zoom on map
+                div.onclick = () => {
+                    if (poi.location) {
+                        const lat = poi.location.y || 0;
+                        const lng = poi.location.x || 0;
+                        map.flyTo([lat, lng], 5, { duration: 1.5 });
+                    } else {
+                        // Fallback - zoom to center if no coords
+                        map.flyTo([0, 0], 4);
+                    }
+                };
+                
+                poiList.appendChild(div);
+            });
         }
+    } catch (e) {
+        console.error("Failed to load POIs", e);
     }
+}
 
-    async function refreshShop() {
-        await fetchShop();
-    }
+async function refreshShop() {
+    await fetchShop();
+}
 
-    // Initialize
-    window.onload = () => {
-        fetchShop();
-        loadMap();
-    };
+// Initialize everything
+window.onload = () => {
+    fetchShop();
+    loadInteractiveMap();
+};
 </script>
 </body>
 </html>
