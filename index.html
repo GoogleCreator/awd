@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
+       
         body { font-family: 'Inter', system-ui, sans-serif; }
         .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); }
-        
+       
         .nav-tab {
             transition: all 0.3s ease;
         }
@@ -20,7 +20,7 @@
             color: black;
             font-weight: 700;
         }
-        
+       
         .card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -32,21 +32,16 @@
     </style>
 </head>
 <body class="shop-bg text-white min-h-screen">
-
 <div class="max-w-7xl mx-auto px-6 py-8">
-
     <!-- Header -->
     <header class="flex items-center justify-between pb-8 border-b border-white/10">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center text-4xl shadow-xl">
-                🧠
-            </div>
+        <div class="flex items-center gap-3">
             <div>
                 <h1 class="text-5xl font-bold tracking-tighter">DROP IQ</h1>
                 <p class="text-cyan-400 text-sm">Fortnite Intelligence • Real-Time</p>
             </div>
         </div>
-        
+       
         <div class="flex items-center gap-3 text-sm">
             <div onclick="switchMainTab(0)" id="tab-shop-btn"
                  class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
@@ -63,24 +58,20 @@
 
     <!-- SHOP SECTION -->
     <div id="shop-section">
-        <!-- Shop content from previous version (cleaned up) -->
         <div class="flex items-center justify-between my-8">
             <h2 class="text-4xl font-bold">Item Shop</h2>
-            <button onclick="refreshShop()" 
+            <button onclick="refreshShop()"
                     class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
                 <i class="fas fa-sync"></i> Refresh
             </button>
         </div>
-
         <div id="loading" class="flex flex-col items-center justify-center py-32">
             <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-6"></div>
             <p class="text-xl">Loading live shop data...</p>
         </div>
-
         <div id="shop-content" class="hidden">
             <!-- Featured -->
             <div id="featured" class="mb-16"></div>
-
             <!-- All Items -->
             <div id="items-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"></div>
         </div>
@@ -92,18 +83,16 @@
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
             <p class="text-white/60">Current Chapter 7 • Live POIs</p>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- Main Map Image -->
             <div class="lg:col-span-8 bg-zinc-900 rounded-3xl overflow-hidden border border-white/10">
-                <img id="main-map" src="https://fortnite-api.com/images/map_en.png" 
+                <img id="main-map" src="https://fortnite-api.com/images/map_en.png"
                      class="w-full h-auto" alt="Fortnite Map">
                 <div class="p-4 text-xs text-white/60 flex items-center gap-2">
                     <i class="fas fa-info-circle"></i>
                     Official minimap with named locations
                 </div>
             </div>
-
             <!-- POIs Sidebar -->
             <div class="lg:col-span-4">
                 <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-6 h-full">
@@ -130,7 +119,6 @@
     function switchMainTab(tab) {
         document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
         document.getElementById('map-section').classList.toggle('hidden', tab !== 1);
-
         document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 0);
         document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 1);
     }
@@ -139,10 +127,9 @@
     async function fetchShop() {
         const loading = document.getElementById('loading');
         const content = document.getElementById('shop-content');
-        
+       
         loading.classList.remove('hidden');
         content.classList.add('hidden');
-
         try {
             const res = await fetch('https://fortnite-api.com/v2/shop');
             const data = await res.json();
@@ -171,13 +158,13 @@
 
         // Featured
         let featuredHTML = `<h2 class="text-3xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-fire text-orange-500"></i>Featured</h2><div class="grid grid-cols-1 md:grid-cols-4 gap-6">`;
-        
+       
         entries.slice(0, 4).forEach(entry => {
             const item = entry.brItems?.[0] || entry.tracks?.[0] || {};
             const price = entry.finalPrice || entry.regularPrice;
             const name = item.name || 'Fortnite Item';
             const image = item.images?.featured || item.images?.icon || item.albumArt || '';
-            
+           
             featuredHTML += `
                 <div class="card bg-zinc-900 rounded-3xl overflow-hidden border border-white/10">
                     <img src="${image}" class="w-full h-64 object-cover item-img" alt="${name}">
@@ -201,7 +188,6 @@
             const name = item.name || 'Item';
             const image = item.images?.icon || item.albumArt || 'https://picsum.photos/300';
             const rarity = item.rarity?.value?.toLowerCase() || 'common';
-
             const html = `
                 <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden">
                     <div class="relative">
@@ -212,7 +198,7 @@
                     </div>
                     <div class="p-4">
                         <h3 class="font-medium line-clamp-2">${name}</h3>
-                        <span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full" 
+                        <span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full"
                               style="color: ${getRarityColor(rarity)}; background: rgba(255,255,255,0.1)">
                             ${rarity}
                         </span>
@@ -228,12 +214,11 @@
         try {
             const res = await fetch('https://fortnite-api.com/v1/map');
             const data = await res.json();
-            
+           
             if (data.status === 200) {
                 const pois = data.data.pois || [];
                 const poiList = document.getElementById('poi-list');
                 poiList.innerHTML = '';
-
                 pois.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
                     const div = document.createElement('div');
                     div.className = "flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
