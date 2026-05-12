@@ -39,7 +39,7 @@
         </div>
         <div class="flex items-center gap-3 text-sm">
             <div onclick="switchMainTab(0)" id="tab-shop-btn"
-                 class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+                 class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
                 <i class="fas fa-store"></i>
                 <span>SHOP</span>
             </div>
@@ -49,7 +49,7 @@
                 <span>MAP</span>
             </div>
             <div onclick="switchMainTab(2)" id="tab-info-btn"
-                 class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+                 class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
                 <i class="fas fa-info-circle"></i>
                 <span>INFO</span>
             </div>
@@ -57,30 +57,27 @@
     </header>
 
     <!-- SHOP SECTION -->
-    <div id="shop-section">
+    <div id="shop-section" class="hidden">
         <div class="flex items-center justify-between my-8">
             <h2 class="text-4xl font-bold">Item Shop</h2>
-            <button onclick="refreshShop()" 
+            <button onclick="refreshShop()"
                     class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
                 <i class="fas fa-sync"></i> Refresh
             </button>
         </div>
-
         <div class="flex flex-wrap gap-4 mb-8">
-            <input type="text" id="search-input" 
-                   placeholder="Search items..." 
+            <input type="text" id="search-input"
+                   placeholder="Search items..."
                    onkeyup="filterItems()"
                    class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3 flex-1 min-w-[250px] focus:outline-none focus:border-cyan-400">
-
-            <select id="sort-select" onchange="filterItems()" 
+            <select id="sort-select" onchange="filterItems()"
                     class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
                 <option value="default">Sort: Default</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="name">Name A-Z</option>
             </select>
-
-            <select id="rarity-filter" onchange="filterItems()" 
+            <select id="rarity-filter" onchange="filterItems()"
                     class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
                 <option value="">All Rarities</option>
                 <option value="legendary">Legendary</option>
@@ -89,12 +86,10 @@
                 <option value="uncommon">Uncommon</option>
             </select>
         </div>
-
         <div id="loading" class="flex flex-col items-center justify-center py-32">
             <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-6"></div>
             <p class="text-xl">Loading live shop data...</p>
         </div>
-
         <div id="shop-content" class="hidden">
             <div id="shop-categories" class="space-y-16"></div>
         </div>
@@ -128,16 +123,16 @@
     </div>
 
     <!-- INFO SECTION -->
-    <div id="info-section" class="hidden">
+    <div id="info-section">
         <div class="max-w-3xl mx-auto pt-12">
             <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-10">
                 <h2 class="text-5xl font-bold mb-8 text-center">About Me</h2>
                 <div class="prose prose-invert max-w-none text-lg leading-relaxed">
                     <p class="text-white/80">
-                        Placeholder.
+                        This is just a passion project created to study javascript for school.
                     </p>
                     <p class="text-white/80 mt-6">
-                        All data is pulled live from fortnite-api.com. Feel free to check out my YouTube channel.
+                        All data is pulled live from fortnite-api.com. Feel free to check out my socials.
                     </p>
                 </div>
                 <div class="flex justify-center gap-8 mt-12 text-4xl text-white/30">
@@ -161,20 +156,31 @@
         document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
         document.getElementById('map-section').classList.toggle('hidden', tab !== 1);
         document.getElementById('info-section').classList.toggle('hidden', tab !== 2);
+
         document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 0);
         document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 1);
         document.getElementById('tab-info-btn').classList.toggle('nav-tab-active', tab === 2);
     }
 
     function getRarityColor(rarity) {
-        const map = { legendary: '#f59e0b', epic: '#c026d3', rare: '#3b82f6', uncommon: '#22c55e', common: '#94a3b8' };
+        const map = { 
+            legendary: '#f59e0b', 
+            epic: '#c026d3', 
+            rare: '#3b82f6', 
+            uncommon: '#22c55e', 
+            common: '#94a3b8' 
+        };
         return map[rarity?.toLowerCase()] || '#64748b';
     }
 
     function categorizeItem(entry) {
-        const item = entry.brItems?.[0] || entry.tracks?.[0] || entry.instruments?.[0] || {};
+        let item = entry.brItems?.[0] || entry.tracks?.[0] || entry.instruments?.[0] || {};
         if (!item.name) return null;
+
         let type = 'Other';
+        let finalPrice = entry.finalPrice || entry.regularPrice || 0;
+        let rarity = item.rarity?.value?.toLowerCase() || 'common';
+
         if (entry.brItems?.length) {
             const typeName = item.type?.value?.toLowerCase() || '';
             if (typeName.includes('outfit') || typeName.includes('skin')) type = 'Skins';
@@ -184,20 +190,34 @@
             else if (typeName.includes('wrap')) type = 'Wraps';
             else if (typeName.includes('backpack')) type = 'Back Bling';
             else type = 'Cosmetics';
-        } else if (entry.tracks) {
+        } 
+        else if (entry.tracks?.length) {
+            type = 'Music Tracks';
+            item = entry.tracks[0];           // Ensure we use the track object
+            rarity = 'common';                // Music tracks usually don't have rarity
+        } 
+        else if (entry.instruments?.length) {
             type = 'Music';
         }
-        return { ...item, finalPrice: entry.finalPrice || entry.regularPrice, type, rarity: item.rarity?.value?.toLowerCase() };
+
+        return { 
+            ...item, 
+            finalPrice, 
+            type, 
+            rarity 
+        };
     }
 
     function renderOrganizedShop(filteredItems = null) {
         const entries = shopData.entries || [];
         let items = filteredItems || entries.map(categorizeItem).filter(Boolean);
+
         const groups = {};
         items.forEach(item => {
             if (!groups[item.type]) groups[item.type] = [];
             groups[item.type].push(item);
         });
+
         let html = '';
         Object.keys(groups).sort().forEach(category => {
             const categoryItems = groups[category];
@@ -208,11 +228,13 @@
                     </h2>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
             `;
+
             categoryItems.forEach(item => {
+                const imgSrc = item.images?.featured || item.images?.icon || item.images?.small || 'https://picsum.photos/300';
                 html += `
                     <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden">
                         <div class="relative">
-                            <img src="${item.images?.featured || item.images?.icon || 'https://picsum.photos/300'}" 
+                            <img src="${imgSrc}"
                                  class="w-full aspect-square object-cover item-img" alt="${item.name}">
                             <div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl">
                                 ${item.finalPrice} <span class="text-amber-400">V</span>
@@ -230,6 +252,7 @@
             });
             html += `</div></div>`;
         });
+
         document.getElementById('shop-categories').innerHTML = html;
     }
 
@@ -238,13 +261,16 @@
         const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
         const sortMode = document.getElementById('sort-select').value;
         const rarityFilter = document.getElementById('rarity-filter').value;
+
         let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
+
         if (searchTerm) {
             items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
         }
         if (rarityFilter) {
             items = items.filter(item => item.rarity === rarityFilter);
         }
+
         if (sortMode === 'price-low') {
             items.sort((a, b) => a.finalPrice - b.finalPrice);
         } else if (sortMode === 'price-high') {
@@ -252,6 +278,7 @@
         } else if (sortMode === 'name') {
             items.sort((a, b) => a.name.localeCompare(b.name));
         }
+
         renderOrganizedShop(items);
     }
 
@@ -260,6 +287,7 @@
         const content = document.getElementById('shop-content');
         loading.classList.remove('hidden');
         content.classList.add('hidden');
+
         try {
             const res = await fetch('https://fortnite-api.com/v2/shop');
             const data = await res.json();
@@ -269,7 +297,7 @@
             }
         } catch (e) {
             console.error(e);
-            alert("Shop failed to load.");
+            // alert("Shop failed to load.");
         } finally {
             loading.classList.add('hidden');
             content.classList.remove('hidden');
@@ -304,8 +332,9 @@
     }
 
     window.onload = () => {
-        fetchShop();
+        fetchShop();   // Load shop in background
         loadMap();
+        switchMainTab(2); // Start on Info page
     };
 </script>
 </body>
