@@ -174,14 +174,35 @@
     }
 
     function categorizeItem(entry) {
-        let item = entry.brItems?.[0] || entry.tracks?.[0] || entry.instruments?.[0] || {};
-        if (!item.name) return null;
-
-        let type = 'Other';
         let finalPrice = entry.finalPrice || entry.regularPrice || 0;
-        let rarity = item.rarity?.value?.toLowerCase() || 'common';
+        let type = 'Other';
+        let item = {};
+        let rarity = 'common';
+        let displayName = '';
+        let imageUrl = '';
 
-        if (entry.brItems?.length) {
+        // === JAM TRACKS ===
+        if (entry.tracks?.length > 0) {
+            const track = entry.tracks[0];
+            type = 'Jam Tracks';
+            item = track;
+            displayName = track.title || track.devName || 'Unknown Track';
+            rarity = 'common';
+            imageUrl = track.albumArt || track.images?.icon || 'https://picsum.photos/300';
+        } 
+        // === INSTRUMENTS ===
+        else if (entry.instruments?.length > 0) {
+            const instr = entry.instruments[0];
+            type = 'Instruments';
+            item = instr;
+            displayName = instr.name || 'Instrument';
+            rarity = instr.rarity?.value?.toLowerCase() || 'common';
+            imageUrl = instr.images?.featured || instr.images?.icon || 'https://picsum.photos/300';
+        } 
+        // === REGULAR BR COSMETICS ===
+        else if (entry.brItems?.length > 0) {
+            item = entry.brItems[0];
+            displayName = item.name;
             const typeName = item.type?.value?.toLowerCase() || '';
             if (typeName.includes('outfit') || typeName.includes('skin')) type = 'Skins';
             else if (typeName.includes('emote')) type = 'Emotes';
@@ -190,26 +211,26 @@
             else if (typeName.includes('wrap')) type = 'Wraps';
             else if (typeName.includes('backpack')) type = 'Back Bling';
             else type = 'Cosmetics';
+
+            rarity = item.rarity?.value?.toLowerCase() || 'common';
+            imageUrl = item.images?.featured || item.images?.icon || 'https://picsum.photos/300';
         } 
-        else if (entry.tracks?.length) {
-            type = 'Music Tracks';
-            item = entry.tracks[0];           // Ensure we use the track object
-            rarity = 'common';                // Music tracks usually don't have rarity
-        } 
-        else if (entry.instruments?.length) {
-            type = 'Music';
+        else {
+            return null;
         }
 
         return { 
             ...item, 
             finalPrice, 
             type, 
-            rarity 
+            rarity,
+            displayName: displayName || item.name,
+            imageUrl
         };
     }
 
     function renderOrganizedShop(filteredItems = null) {
-        const entries = shopData.entries || [];
+        const entries = shopData?.entries || [];
         let items = filteredItems || entries.map(categorizeItem).filter(Boolean);
 
         const groups = {};
@@ -219,7 +240,12 @@
         });
 
         let html = '';
-        Object.keys(groups).sort().forEach(category => {
+        Object.keys(groups).sort((a,b) => {
+            // Put Jam Tracks first
+            if (a === 'Jam Tracks') return -1;
+            if (b === 'Jam Tracks') return 1;
+            return a.localeCompare(b);
+        }).forEach(category => {
             const categoryItems = groups[category];
             html += `
                 <div>
@@ -230,18 +256,20 @@
             `;
 
             categoryItems.forEach(item => {
-                const imgSrc = item.images?.featured || item.images?.icon || item.images?.small || 'https://picsum.photos/300';
+                const imgSrc = item.imageUrl || item.images?.featured || item.images?.icon || 'https://picsum.photos/300';
+                
                 html += `
                     <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden">
                         <div class="relative">
                             <img src="${imgSrc}"
-                                 class="w-full aspect-square object-cover item-img" alt="${item.name}">
+                                 class="w-full aspect-square object-cover item-img" alt="${item.displayName}">
                             <div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl">
                                 ${item.finalPrice} <span class="text-amber-400">V</span>
                             </div>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-medium line-clamp-2">${item.name}</h3>
+                            <h3 class="font-medium line-clamp-2">${item.displayName}</h3>
+                            ${item.artist ? `<p class="text-white/60 text-sm">${item.artist}</p>` : ''}
                             <span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full"
                                   style="color: ${getRarityColor(item.rarity)}; background: rgba(255,255,255,0.1)">
                                 ${item.rarity || 'common'}
@@ -265,19 +293,18 @@
         let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
 
         if (searchTerm) {
-            items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
+            items = items.filter(item => 
+                (item.displayName || item.name || '').toLowerCase().includes(searchTerm) ||
+                (item.artist || '').toLowerCase().includes(searchTerm)
+            );
         }
         if (rarityFilter) {
-            items = items.filter(item => item.rarity === rarityFilter);
+            items = items.filter(item => (item.rarity || 'common') === rarityFilter);
         }
 
-        if (sortMode === 'price-low') {
-            items.sort((a, b) => a.finalPrice - b.finalPrice);
-        } else if (sortMode === 'price-high') {
-            items.sort((a, b) => b.finalPrice - a.finalPrice);
-        } else if (sortMode === 'name') {
-            items.sort((a, b) => a.name.localeCompare(b.name));
-        }
+        if (sortMode === 'price-low') items.sort((a, b) => a.finalPrice - b.finalPrice);
+        else if (sortMode === 'price-high') items.sort((a, b) => b.finalPrice - a.finalPrice);
+        else if (sortMode === 'name') items.sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || ''));
 
         renderOrganizedShop(items);
     }
@@ -297,7 +324,6 @@
             }
         } catch (e) {
             console.error(e);
-            // alert("Shop failed to load.");
         } finally {
             loading.classList.add('hidden');
             content.classList.remove('hidden');
@@ -332,9 +358,9 @@
     }
 
     window.onload = () => {
-        fetchShop();   // Load shop in background
+        fetchShop();
         loadMap();
-        switchMainTab(2); // Start on Info page
+        switchMainTab(2); // Start on Info
     };
 </script>
 </body>
