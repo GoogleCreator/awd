@@ -31,6 +31,14 @@
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
+        .vbucks-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: url('https://fortnite-api.com/images/vbucks.png') center/contain no-repeat;
+            vertical-align: middle;
+            margin-bottom: 2px;
+        }
     </style>
 </head>
 <body class="shop-bg text-white min-h-screen">
@@ -147,7 +155,7 @@
                 <div>
                     <span id="modal-rarity" class="text-xs uppercase px-4 py-2 rounded-full inline-block"></span>
                 </div>
-                <div class="text-4xl font-bold text-orange-400" id="modal-price"></div>
+                <div class="text-4xl font-bold text-orange-400 flex items-center gap-2" id="modal-price"></div>
                 <div>
                     <p class="text-white/60 text-sm uppercase tracking-widest mb-1">Type</p>
                     <p id="modal-type" class="font-medium"></p>
@@ -259,7 +267,7 @@
 
     function showItemModal(item) {
         document.getElementById('modal-name').textContent = item.displayName || item.title || item.name;
-        document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="text-orange-400">V</span>`;
+        document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="vbucks-icon"></span>`;
         document.getElementById('modal-type').textContent = item.type;
 
         const rarityEl = document.getElementById('modal-rarity');
@@ -351,8 +359,8 @@
                          class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden cursor-pointer">
                         <div class="relative">
                             <img src="${imgSrc}" class="w-full aspect-square object-cover item-img" alt="${item.displayName}">
-                            <div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl">
-                                ${item.finalPrice} <span class="text-orange-400">V</span>
+                            <div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl flex items-center gap-1">
+                                ${item.finalPrice} <span class="vbucks-icon"></span>
                             </div>
                         </div>
                         <div class="p-4">
