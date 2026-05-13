@@ -11,24 +11,11 @@
         body { font-family: 'Inter', system-ui, sans-serif; }
         .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1f1208 100%); }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #4b5563;
-            border-radius: 20px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
-        }
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: #4b5563 transparent;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        * { scrollbar-width: thin; scrollbar-color: #4b5563 transparent; }
 
         .nav-tab { transition: all 0.3s ease; }
         .nav-tab-active {
@@ -36,43 +23,40 @@
             color: black;
             font-weight: 700;
         }
-        .card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card:hover {
-            transform: translateY(-10px);
-        }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-10px); }
         .item-img { transition: transform 0.4s ease; }
         .card:hover .item-img { transform: scale(1.08); }
-        .modal {
-            animation: fadeInModal 0.3s ease forwards;
-        }
+
+        .modal { animation: fadeInModal 0.3s ease forwards; }
         @keyframes fadeInModal {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
         .vbucks-icon {
             display: inline-block;
-            width: 26px;
-            height: 26px;
+            width: 26px; height: 26px;
             background: url('https://image.fnbr.co/price/icon_vbucks.png') center/contain no-repeat;
             vertical-align: middle;
             margin-bottom: 3px;
         }
 
-        #map-container {
-            overflow: auto;
-            max-height: 75vh;
-            cursor: grab;
-            user-select: none;
+        #map-wrapper {
+            overflow: hidden;
             border-radius: 1.5rem;
             background: #111;
+            cursor: grab;
+            position: relative;
+            height: 75vh;
         }
-        #map-container:active {
-            cursor: grabbing;
-        }
+        #map-wrapper:active { cursor: grabbing; }
         #main-map {
-            transition: transform 0.2s ease;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0 0;
+            transition: transform 0.05s ease-out;
+            user-select: none;
         }
     </style>
 </head>
@@ -134,19 +118,15 @@
     <div id="map-section" class="hidden">
         <div class="mb-8">
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
-            <p class="text-white/60">Current Chapter • Drag to pan • Scroll to zoom</p>
+            <p class="text-white/60">Drag to pan • Scroll to zoom</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-8">
-                <div id="map-container" class="bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden">
-                    <img id="main-map" 
-                         src="https://fortnite-api.com/images/map_en.png" 
-                         class="w-full h-auto min-w-[800px]" 
-                         alt="Fortnite Map">
+                <div id="map-wrapper">
+                    <img id="main-map" src="https://fortnite-api.com/images/map_en.png" alt="Fortnite Map">
                 </div>
                 <div class="p-4 text-xs text-white/60 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i>
-                    Drag to explore • Scroll for zoom
+                    <i class="fas fa-info-circle"></i> Click and drag to move • Scroll to zoom
                 </div>
             </div>
             <div class="lg:col-span-4">
@@ -165,12 +145,8 @@
             <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-10">
                 <h2 class="text-5xl font-bold mb-8 text-center">About Me</h2>
                 <div class="prose prose-invert max-w-none text-lg leading-relaxed">
-                    <p class="text-white/80">
-                        This is just a passion project created to study javascript for school.
-                    </p>
-                    <p class="text-white/80 mt-6">
-                        All data is pulled live from fortnite-api.com. Feel free to check out my socials.
-                    </p>
+                    <p class="text-white/80">This is just a passion project created to study javascript for school.</p>
+                    <p class="text-white/80 mt-6">All data is pulled live from fortnite-api.com. Feel free to check out my socials.</p>
                 </div>
                 <div class="flex justify-center gap-8 mt-12 text-4xl text-white/30">
                     <i class="fab fa-discord hover:text-white/70 cursor-pointer"></i>
@@ -189,8 +165,7 @@
             <button onclick="closeModal()" class="text-white/60 hover:text-white text-3xl leading-none">×</button>
         </div>
         <div class="flex flex-col lg:flex-row overflow-auto">
-            <div id="media-section" class="lg:w-3/5 bg-black/60 p-6 flex items-center justify-center relative min-h-[400px]">
-            </div>
+            <div id="media-section" class="lg:w-3/5 bg-black/60 p-6 flex items-center justify-center relative min-h-[400px]"></div>
             <div class="lg:w-2/5 p-8 space-y-6 overflow-auto">
                 <div>
                     <span id="modal-rarity" class="text-xs uppercase px-4 py-2 rounded-full inline-block"></span>
@@ -205,9 +180,7 @@
                     <p id="modal-description" class="text-white/80 leading-relaxed"></p>
                 </div>
                 <div class="pt-4 border-t border-white/10">
-                    <button onclick="closeModal()" class="w-full bg-orange-500 hover:bg-orange-600 text-black font-semibold py-4 rounded-2xl transition">
-                        Close
-                    </button>
+                    <button onclick="closeModal()" class="w-full bg-orange-500 hover:bg-orange-600 text-black font-semibold py-4 rounded-2xl transition">Close</button>
                 </div>
             </div>
         </div>
@@ -220,6 +193,60 @@
 
 <script>
     let shopData = null;
+    let scale = 1;
+    let posX = 0;
+    let posY = 0;
+    let isDragging = false;
+    let startX, startY, startPosX, startPosY;
+
+    const mapWrapper = document.getElementById('map-wrapper');
+    const mapImage = document.getElementById('main-map');
+
+    function updateTransform() {
+        mapImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    }
+
+    mapWrapper.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startPosX = posX;
+        startPosY = posY;
+        mapWrapper.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        mapWrapper.style.cursor = 'grab';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        posX = startPosX + dx;
+        posY = startPosY + dy;
+        updateTransform();
+    });
+
+    mapWrapper.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = mapWrapper.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const delta = e.deltaY < 0 ? 1.1 : 0.9;
+        const newScale = Math.max(0.5, Math.min(5, scale * delta));
+
+        const offsetX = mouseX - posX;
+        const offsetY = mouseY - posY;
+
+        posX = mouseX - offsetX * (newScale / scale);
+        posY = mouseY - offsetY * (newScale / scale);
+        scale = newScale;
+
+        updateTransform();
+    }, { passive: false });
 
     function switchMainTab(tab) {
         document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
@@ -231,13 +258,7 @@
     }
 
     function getRarityColor(rarity) {
-        const map = {
-            legendary: '#f59e0b',
-            epic: '#c026d3',
-            rare: '#3b82f6',
-            uncommon: '#22c55e',
-            common: '#94a3b8'
-        };
+        const map = { legendary: '#f59e0b', epic: '#c026d3', rare: '#3b82f6', uncommon: '#22c55e', common: '#94a3b8' };
         return map[rarity?.toLowerCase()] || '#64748b';
     }
 
@@ -265,8 +286,7 @@
             albumArt = track.albumArt;
             artist = track.artist || '';
             trackId = track.id || '';
-        }
-        else if (entry.instruments?.length > 0) {
+        } else if (entry.instruments?.length > 0) {
             const instr = entry.instruments[0];
             type = 'Instruments';
             item = instr;
@@ -274,8 +294,7 @@
             rarity = instr.rarity?.value?.toLowerCase() || 'common';
             imageUrl = instr.images?.featured || instr.images?.icon;
             description = instr.description || '';
-        }
-        else if (entry.brItems?.length > 0) {
+        } else if (entry.brItems?.length > 0) {
             item = entry.brItems[0];
             displayName = item.name;
             const typeName = item.type?.value?.toLowerCase() || '';
@@ -290,28 +309,16 @@
             imageUrl = item.images?.featured || item.images?.icon;
             description = item.description || '';
             showcaseVideo = item.showcaseVideo;
-        }
-        else return null;
+        } else return null;
 
-        return {
-            ...item,
-            finalPrice,
-            type,
-            rarity,
-            displayName: displayName || item.name,
-            imageUrl,
-            description,
-            showcaseVideo,
-            albumArt,
-            artist,
-            trackId
-        };
+        return { ...item, finalPrice, type, rarity, displayName: displayName || item.name, imageUrl, description, showcaseVideo, albumArt, artist, trackId };
     }
 
     function showItemModal(item) {
         document.getElementById('modal-name').textContent = item.displayName || item.title || item.name;
         document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="vbucks-icon"></span>`;
         document.getElementById('modal-type').textContent = item.type;
+
         const rarityEl = document.getElementById('modal-rarity');
         rarityEl.textContent = (item.rarity || 'common').toUpperCase();
         rarityEl.style.backgroundColor = `rgba(249, 115, 22, 0.15)`;
@@ -335,29 +342,17 @@
                     <img src="${item.albumArt}" class="w-52 h-52 mx-auto rounded-3xl shadow-2xl mb-6 object-cover" alt="">
                     <h4 class="text-lg font-semibold mb-1">${item.displayName}</h4>
                     <p class="text-white/60 text-sm mb-6">${item.artist || ''}</p>
-                    ${audioSrc ? `
-                    <audio id="jam-audio" controls class="w-full accent-orange-500">
-                        <source src="${audioSrc}" type="audio/mpeg">
-                    </audio>` : '<p class="text-white/50">Preview not available</p>'}
+                    ${audioSrc ? `<audio id="jam-audio" controls class="w-full accent-orange-500"><source src="${audioSrc}" type="audio/mpeg"></audio>` : '<p class="text-white/50">Preview not available</p>'}
                 </div>
             `;
-        }
-        else if (item.type === 'Emotes' && item.showcaseVideo) {
+        } else if (item.type === 'Emotes' && item.showcaseVideo) {
             mediaSection.innerHTML = `
                 <div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden">
-                    <iframe width="100%" height="100%"
-                            src="https://www.youtube.com/embed/${item.showcaseVideo}"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen></iframe>
+                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${item.showcaseVideo}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
             `;
-        }
-        else {
-            mediaSection.innerHTML = `
-                <img src="${item.imageUrl || 'https://picsum.photos/600'}"
-                     class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">
-            `;
+        } else {
+            mediaSection.innerHTML = `<img src="${item.imageUrl || 'https://picsum.photos/600'}" class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">`;
         }
 
         const modal = document.getElementById('item-modal');
@@ -389,34 +384,10 @@
             return a.localeCompare(b);
         }).forEach(category => {
             const categoryItems = groups[category];
-            html += `
-                <div>
-                    <h2 class="text-3xl font-bold mb-6 flex items-center gap-3 border-b border-white/10 pb-3">
-                        ${category} <span class="text-sm font-normal text-white/50">(${categoryItems.length})</span>
-                    </h2>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            `;
+            html += `<div><h2 class="text-3xl font-bold mb-6 flex items-center gap-3 border-b border-white/10 pb-3">${category} <span class="text-sm font-normal text-white/50">(${categoryItems.length})</span></h2><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">`;
             categoryItems.forEach(item => {
                 const imgSrc = item.imageUrl || 'https://picsum.photos/300';
-                html += `
-                    <div onclick='showItemModal(${JSON.stringify(item).replace(/'/g, "\\'")})'
-                         class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden cursor-pointer">
-                        <div class="relative">
-                            <img src="${imgSrc}" class="w-full aspect-square object-cover item-img" alt="${item.displayName}">
-                            <div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl flex items-center gap-1">
-                                ${item.finalPrice} <span class="vbucks-icon"></span>
-                            </div>
-                        </div>
-                        <div class="p-4">
-                            <h3 class="font-medium line-clamp-2">${item.displayName}</h3>
-                            ${item.artist ? `<p class="text-white/60 text-sm">${item.artist}</p>` : ''}
-                            <span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full"
-                                  style="color: ${getRarityColor(item.rarity)}; background: rgba(255,255,255,0.1)">
-                                ${item.rarity}
-                            </span>
-                        </div>
-                    </div>
-                `;
+                html += `<div onclick='showItemModal(${JSON.stringify(item).replace(/'/g, "\\'")})' class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden cursor-pointer"><div class="relative"><img src="${imgSrc}" class="w-full aspect-square object-cover item-img" alt="${item.displayName}"><div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl flex items-center gap-1">${item.finalPrice} <span class="vbucks-icon"></span></div></div><div class="p-4"><h3 class="font-medium line-clamp-2">${item.displayName}</h3>${item.artist ? `<p class="text-white/60 text-sm">${item.artist}</p>` : ''}<span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full" style="color: ${getRarityColor(item.rarity)}; background: rgba(255,255,255,0.1)">${item.rarity}</span></div></div>`;
             });
             html += `</div></div>`;
         });
@@ -431,15 +402,8 @@
 
         let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
 
-        if (searchTerm) {
-            items = items.filter(item =>
-                (item.displayName || item.name || '').toLowerCase().includes(searchTerm) ||
-                (item.artist || '').toLowerCase().includes(searchTerm)
-            );
-        }
-        if (rarityFilter) {
-            items = items.filter(item => (item.rarity || 'common') === rarityFilter);
-        }
+        if (searchTerm) items = items.filter(item => (item.displayName || item.name || '').toLowerCase().includes(searchTerm) || (item.artist || '').toLowerCase().includes(searchTerm));
+        if (rarityFilter) items = items.filter(item => (item.rarity || 'common') === rarityFilter);
         if (sortMode === 'price-low') items.sort((a, b) => a.finalPrice - b.finalPrice);
         else if (sortMode === 'price-high') items.sort((a, b) => b.finalPrice - a.finalPrice);
         else if (sortMode === 'name') items.sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || ''));
@@ -452,7 +416,6 @@
         const content = document.getElementById('shop-content');
         loading.classList.remove('hidden');
         content.classList.add('hidden');
-
         try {
             const res = await fetch('https://fortnite-api.com/v2/shop');
             const data = await res.json();
@@ -460,9 +423,8 @@
                 shopData = data.data;
                 renderOrganizedShop();
             }
-        } catch (e) {
-            console.error(e);
-        } finally {
+        } catch (e) { console.error(e); }
+        finally {
             loading.classList.add('hidden');
             content.classList.remove('hidden');
         }
@@ -479,76 +441,29 @@
                 pois.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
                     const div = document.createElement('div');
                     div.className = "flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
-                    div.innerHTML = `
-                        <i class="fas fa-map-marker-alt text-orange-400"></i>
-                        <span class="font-medium">${poi.name}</span>
-                    `;
+                    div.innerHTML = `<i class="fas fa-map-marker-alt text-orange-400"></i><span class="font-medium">${poi.name}</span>`;
                     poiList.appendChild(div);
                 });
             }
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     async function refreshShop() {
         await fetchShop();
     }
 
-    let isDragging = false;
-    let startX, startY, scrollLeft, scrollTop;
-    const mapContainer = document.getElementById('map-container');
-    const mapImage = document.getElementById('main-map');
-
-    mapContainer.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.pageX - mapContainer.offsetLeft;
-        startY = e.pageY - mapContainer.offsetTop;
-        scrollLeft = mapContainer.scrollLeft;
-        scrollTop = mapContainer.scrollTop;
-        mapContainer.style.cursor = 'grabbing';
-    });
-
-    mapContainer.addEventListener('mouseleave', () => {
-        isDragging = false;
-        mapContainer.style.cursor = 'grab';
-    });
-
-    mapContainer.addEventListener('mouseup', () => {
-        isDragging = false;
-        mapContainer.style.cursor = 'grab';
-    });
-
-    mapContainer.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - mapContainer.offsetLeft;
-        const y = e.pageY - mapContainer.offsetTop;
-        const walkX = (x - startX) * 1.5;
-        const walkY = (y - startY) * 1.5;
-        mapContainer.scrollLeft = scrollLeft - walkX;
-        mapContainer.scrollTop = scrollTop - walkY;
-    });
-
-    mapContainer.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const scale = e.deltaY > 0 ? 0.95 : 1.05;
-        const currentWidth = mapImage.clientWidth;
-        mapImage.style.width = (currentWidth * scale) + 'px';
-    }, { passive: false });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") closeModal();
-    });
-
-    document.getElementById('item-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
+    document.getElementById('item-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
     window.onload = () => {
         fetchShop();
         loadMap();
         switchMainTab(0);
+        mapImage.onload = () => {
+            posX = (mapWrapper.offsetWidth - mapImage.width) / 2;
+            posY = (mapWrapper.offsetHeight - mapImage.height) / 2;
+            updateTransform();
+        };
     };
 </script>
 </body>
