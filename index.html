@@ -75,12 +75,21 @@
             pointer-events: none;
         }
 
-        .poi-item {
-            transition: all 0.2s ease;
+        .poi-marker {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') center/contain no-repeat;
+            filter: drop-shadow(0 0 6px #f97316);
+            transform: translate(-50%, -100%);
+            z-index: 20;
+            pointer-events: none;
+            animation: drop 0.4s ease;
         }
-        .poi-item:hover {
-            background-color: #27272a !important;
-            transform: translateX(4px);
+
+        @keyframes drop {
+            0% { transform: translate(-50%, -200%); }
+            100% { transform: translate(-50%, -100%); }
         }
     </style>
 </head>
@@ -142,7 +151,7 @@
     <div id="map-section" class="hidden">
         <div class="mb-8">
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
-            <p class="text-white/60">Click any location to zoom to it • Drag to pan • Scroll to zoom</p>
+            <p class="text-white/60">Click location to zoom • Drag to pan</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-8">
@@ -150,7 +159,7 @@
                     <img id="main-map" src="https://fortnite-api.com/images/map_en.png" alt="Fortnite Map">
                 </div>
                 <div class="p-4 text-xs text-white/60 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i> Click POI • Drag to move • Scroll to zoom
+                    <i class="fas fa-info-circle"></i> Click POI to zoom • Drag to explore
                 </div>
             </div>
             <div class="lg:col-span-4">
@@ -220,7 +229,6 @@
     let posY = 0;
     let isDragging = false;
     let startX, startY, startPosX, startPosY;
-    let poisData = [];
 
     const mapWrapper = document.getElementById('map-wrapper');
     const mapImage = document.getElementById('main-map');
@@ -229,10 +237,24 @@
         mapImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
     }
 
+    function clampPosition() {
+        const wrapperRect = mapWrapper.getBoundingClientRect();
+        const imgWidth = mapImage.width * scale;
+        const imgHeight = mapImage.height * scale;
+
+        const minX = wrapperRect.width - imgWidth + 100;
+        const maxX = -100;
+        const minY = wrapperRect.height - imgHeight + 100;
+        const maxY = -100;
+
+        posX = Math.max(minX, Math.min(maxX, posX));
+        posY = Math.max(minY, Math.min(maxY, posY));
+    }
+
     function centerImage() {
         const wrapperRect = mapWrapper.getBoundingClientRect();
-        posX = wrapperRect.width / 2;
-        posY = wrapperRect.height / 2;
+        posX = (wrapperRect.width - mapImage.width) / 2;
+        posY = (wrapperRect.height - mapImage.height) / 2;
         updateTransform();
     }
 
@@ -255,6 +277,27 @@
         posY = (wrapperRect.height / 2) - targetY * scale;
 
         updateTransform();
+        clampPosition();
+
+        // Add marker
+        showPOIMarker(targetX * scale, targetY * scale);
+    }
+
+    function showPOIMarker(screenX, screenY) {
+        // Remove existing marker
+        const oldMarker = document.getElementById('poi-marker');
+        if (oldMarker) oldMarker.remove();
+
+        const marker = document.createElement('div');
+        marker.id = 'poi-marker';
+        marker.className = 'poi-marker';
+        marker.style.left = screenX + 'px';
+        marker.style.top = screenY + 'px';
+        mapWrapper.appendChild(marker);
+
+        setTimeout(() => {
+            if (marker) marker.remove();
+        }, 8000);
     }
 
     mapWrapper.addEventListener('mousedown', (e) => {
@@ -269,6 +312,8 @@
     window.addEventListener('mouseup', () => {
         isDragging = false;
         mapWrapper.style.cursor = 'grab';
+        clampPosition();
+        updateTransform();
     });
 
     window.addEventListener('mousemove', (e) => {
@@ -295,6 +340,7 @@
         scale = newScale;
 
         updateTransform();
+        clampPosition();
     }, { passive: false });
 
     function switchMainTab(tab) {
@@ -472,11 +518,11 @@
             const res = await fetch('https://fortnite-api.com/v1/map');
             const data = await res.json();
             if (data.status === 200) {
-                poisData = data.data.pois || [];
+                const pois = data.data.pois || [];
                 const poiList = document.getElementById('poi-list');
                 poiList.innerHTML = '';
 
-                poisData.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
+                pois.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
                     const div = document.createElement('div');
                     div.className = "poi-item flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
                     div.innerHTML = `<i class="fas fa-map-marker-alt text-orange-400"></i><span class="font-medium">${poi.name}</span>`;
