@@ -8,18 +8,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { 
-            font-family: 'Inter', system-ui, sans-serif; 
-            background: 
-                linear-gradient(135deg, #0a0a0a 0%, #1f1208 100%),
-                linear-gradient(#ffffff08 1px, transparent 1px),
-                linear-gradient(90deg, #ffffff08 1px, transparent 1px);
-            background-size: 
-                cover,
-                24px 24px,
-                24px 24px;
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1f1208 100%); }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        .shop-bg { background: transparent; }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 transparent;
+        }
+
         .nav-tab { transition: all 0.3s ease; }
         .nav-tab-active {
             background-color: #f97316;
@@ -49,6 +59,21 @@
             vertical-align: middle;
             margin-bottom: 3px;
         }
+
+        #map-container {
+            overflow: auto;
+            max-height: 75vh;
+            cursor: grab;
+            user-select: none;
+            border-radius: 1.5rem;
+            background: #111;
+        }
+        #map-container:active {
+            cursor: grabbing;
+        }
+        #main-map {
+            transition: transform 0.2s ease;
+        }
     </style>
 </head>
 <body class="shop-bg text-white min-h-screen">
@@ -72,6 +97,7 @@
             </div>
         </div>
     </header>
+
     <div id="shop-section">
         <div class="flex items-center justify-between my-8">
             <h2 class="text-4xl font-bold">Item Shop</h2>
@@ -104,17 +130,23 @@
             <div id="shop-categories" class="space-y-16"></div>
         </div>
     </div>
+
     <div id="map-section" class="hidden">
         <div class="mb-8">
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
-            <p class="text-white/60">Current Chapter 7 • Live POIs</p>
+            <p class="text-white/60">Current Chapter • Drag to pan • Scroll to zoom</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-8 bg-zinc-900 rounded-3xl overflow-hidden border border-white/10">
-                <img id="main-map" src="https://fortnite-api.com/images/map_en.png" class="w-full h-auto" alt="Fortnite Map">
+            <div class="lg:col-span-8">
+                <div id="map-container" class="bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden">
+                    <img id="main-map" 
+                         src="https://fortnite-api.com/images/map_en.png" 
+                         class="w-full h-auto min-w-[800px]" 
+                         alt="Fortnite Map">
+                </div>
                 <div class="p-4 text-xs text-white/60 flex items-center gap-2">
                     <i class="fas fa-info-circle"></i>
-                    Official minimap with named locations
+                    Drag to explore • Scroll for zoom
                 </div>
             </div>
             <div class="lg:col-span-4">
@@ -127,6 +159,7 @@
             </div>
         </div>
     </div>
+
     <div id="info-section" class="hidden">
         <div class="max-w-3xl mx-auto pt-12">
             <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-10">
@@ -148,6 +181,7 @@
         </div>
     </div>
 </div>
+
 <div id="item-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
     <div class="modal bg-zinc-900 border border-white/10 rounded-3xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
         <div class="flex items-center justify-between p-6 border-b border-white/10">
@@ -179,11 +213,14 @@
         </div>
     </div>
 </div>
+
 <footer class="text-center text-white/40 text-xs py-12 border-t border-white/10 mt-20">
     Drop IQ • Real-time Fortnite data from fortnite-api.com • Not affiliated with Epic Games
 </footer>
+
 <script>
     let shopData = null;
+
     function switchMainTab(tab) {
         document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
         document.getElementById('map-section').classList.toggle('hidden', tab !== 1);
@@ -192,6 +229,7 @@
         document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 1);
         document.getElementById('tab-info-btn').classList.toggle('nav-tab-active', tab === 2);
     }
+
     function getRarityColor(rarity) {
         const map = {
             legendary: '#f59e0b',
@@ -202,6 +240,7 @@
         };
         return map[rarity?.toLowerCase()] || '#64748b';
     }
+
     function categorizeItem(entry) {
         let finalPrice = entry.finalPrice || entry.regularPrice || 0;
         let type = 'Other';
@@ -214,6 +253,7 @@
         let albumArt = null;
         let artist = '';
         let trackId = '';
+
         if (entry.tracks?.length > 0) {
             const track = entry.tracks[0];
             type = 'Jam Tracks';
@@ -252,6 +292,7 @@
             showcaseVideo = item.showcaseVideo;
         }
         else return null;
+
         return {
             ...item,
             finalPrice,
@@ -266,6 +307,7 @@
             trackId
         };
     }
+
     function showItemModal(item) {
         document.getElementById('modal-name').textContent = item.displayName || item.title || item.name;
         document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="vbucks-icon"></span>`;
@@ -274,6 +316,7 @@
         rarityEl.textContent = (item.rarity || 'common').toUpperCase();
         rarityEl.style.backgroundColor = `rgba(249, 115, 22, 0.15)`;
         rarityEl.style.color = getRarityColor(item.rarity);
+
         const descContainer = document.getElementById('modal-description-container');
         if (item.description && item.description.trim() !== '') {
             document.getElementById('modal-description').textContent = item.description;
@@ -281,8 +324,10 @@
         } else {
             descContainer.classList.add('hidden');
         }
+
         const mediaSection = document.getElementById('media-section');
         mediaSection.innerHTML = '';
+
         if (item.type === 'Jam Tracks' && item.albumArt) {
             const audioSrc = item.trackId ? `https://cdn.fortnite-api.com/tracks/${item.trackId}.mp3` : '';
             mediaSection.innerHTML = `
@@ -293,7 +338,6 @@
                     ${audioSrc ? `
                     <audio id="jam-audio" controls class="w-full accent-orange-500">
                         <source src="${audioSrc}" type="audio/mpeg">
-                        Your browser does not support the audio element.
                     </audio>` : '<p class="text-white/50">Preview not available</p>'}
                 </div>
             `;
@@ -315,10 +359,12 @@
                      class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">
             `;
         }
+
         const modal = document.getElementById('item-modal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
+
     function closeModal() {
         const modal = document.getElementById('item-modal');
         modal.classList.add('hidden');
@@ -326,6 +372,7 @@
         const audio = document.getElementById('jam-audio');
         if (audio) audio.pause();
     }
+
     function renderOrganizedShop(filteredItems = null) {
         const entries = shopData?.entries || [];
         let items = filteredItems || entries.map(categorizeItem).filter(Boolean);
@@ -334,6 +381,7 @@
             if (!groups[item.type]) groups[item.type] = [];
             groups[item.type].push(item);
         });
+
         let html = '';
         Object.keys(groups).sort((a,b) => {
             if (a === 'Jam Tracks') return -1;
@@ -374,12 +422,15 @@
         });
         document.getElementById('shop-categories').innerHTML = html;
     }
+
     function filterItems() {
         if (!shopData) return;
         const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
         const sortMode = document.getElementById('sort-select').value;
         const rarityFilter = document.getElementById('rarity-filter').value;
+
         let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
+
         if (searchTerm) {
             items = items.filter(item =>
                 (item.displayName || item.name || '').toLowerCase().includes(searchTerm) ||
@@ -392,13 +443,16 @@
         if (sortMode === 'price-low') items.sort((a, b) => a.finalPrice - b.finalPrice);
         else if (sortMode === 'price-high') items.sort((a, b) => b.finalPrice - a.finalPrice);
         else if (sortMode === 'name') items.sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || ''));
+
         renderOrganizedShop(items);
     }
+
     async function fetchShop() {
         const loading = document.getElementById('loading');
         const content = document.getElementById('shop-content');
         loading.classList.remove('hidden');
         content.classList.add('hidden');
+
         try {
             const res = await fetch('https://fortnite-api.com/v2/shop');
             const data = await res.json();
@@ -413,6 +467,7 @@
             content.classList.remove('hidden');
         }
     }
+
     async function loadMap() {
         try {
             const res = await fetch('https://fortnite-api.com/v1/map');
@@ -435,15 +490,61 @@
             console.error(e);
         }
     }
+
     async function refreshShop() {
         await fetchShop();
     }
+
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
+    const mapContainer = document.getElementById('map-container');
+    const mapImage = document.getElementById('main-map');
+
+    mapContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.pageX - mapContainer.offsetLeft;
+        startY = e.pageY - mapContainer.offsetTop;
+        scrollLeft = mapContainer.scrollLeft;
+        scrollTop = mapContainer.scrollTop;
+        mapContainer.style.cursor = 'grabbing';
+    });
+
+    mapContainer.addEventListener('mouseleave', () => {
+        isDragging = false;
+        mapContainer.style.cursor = 'grab';
+    });
+
+    mapContainer.addEventListener('mouseup', () => {
+        isDragging = false;
+        mapContainer.style.cursor = 'grab';
+    });
+
+    mapContainer.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - mapContainer.offsetLeft;
+        const y = e.pageY - mapContainer.offsetTop;
+        const walkX = (x - startX) * 1.5;
+        const walkY = (y - startY) * 1.5;
+        mapContainer.scrollLeft = scrollLeft - walkX;
+        mapContainer.scrollTop = scrollTop - walkY;
+    });
+
+    mapContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const scale = e.deltaY > 0 ? 0.95 : 1.05;
+        const currentWidth = mapImage.clientWidth;
+        mapImage.style.width = (currentWidth * scale) + 'px';
+    }, { passive: false });
+
     document.addEventListener('keydown', (e) => {
         if (e.key === "Escape") closeModal();
     });
+
     document.getElementById('item-modal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
     });
+
     window.onload = () => {
         fetchShop();
         loadMap();
