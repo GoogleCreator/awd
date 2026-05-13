@@ -48,15 +48,18 @@
             cursor: grab;
             position: relative;
             height: 75vh;
+            width: 100%;
         }
         #map-wrapper:active { cursor: grabbing; }
+
         #main-map {
             position: absolute;
             top: 50%;
             left: 50%;
             transform-origin: 0 0;
-            transition: transform 0.05s ease-out;
+            transition: transform 0.08s cubic-bezier(0.25, 0.1, 0.25, 1);
             user-select: none;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -118,7 +121,7 @@
     <div id="map-section" class="hidden">
         <div class="mb-8">
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
-            <p class="text-white/60">Drag to pan • Scroll to zoom</p>
+            <p class="text-white/60">Drag to pan freely • Scroll to zoom</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-8">
@@ -126,7 +129,7 @@
                     <img id="main-map" src="https://fortnite-api.com/images/map_en.png" alt="Fortnite Map">
                 </div>
                 <div class="p-4 text-xs text-white/60 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i> Click and drag to move • Scroll to zoom
+                    <i class="fas fa-info-circle"></i> Drag the map to explore • Scroll to zoom in/out
                 </div>
             </div>
             <div class="lg:col-span-4">
@@ -167,9 +170,7 @@
         <div class="flex flex-col lg:flex-row overflow-auto">
             <div id="media-section" class="lg:w-3/5 bg-black/60 p-6 flex items-center justify-center relative min-h-[400px]"></div>
             <div class="lg:w-2/5 p-8 space-y-6 overflow-auto">
-                <div>
-                    <span id="modal-rarity" class="text-xs uppercase px-4 py-2 rounded-full inline-block"></span>
-                </div>
+                <div><span id="modal-rarity" class="text-xs uppercase px-4 py-2 rounded-full inline-block"></span></div>
                 <div class="text-4xl font-bold text-orange-400 flex items-center gap-2" id="modal-price"></div>
                 <div>
                     <p class="text-white/60 text-sm uppercase tracking-widest mb-1">Type</p>
@@ -206,6 +207,16 @@
         mapImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
     }
 
+    // Center image on load
+    function centerImage() {
+        const wrapperRect = mapWrapper.getBoundingClientRect();
+        const imgRect = mapImage.getBoundingClientRect();
+        
+        posX = (wrapperRect.width - imgRect.width * scale) / 2;
+        posY = (wrapperRect.height - imgRect.height * scale) / 2;
+        updateTransform();
+    }
+
     mapWrapper.addEventListener('mousedown', (e) => {
         isDragging = true;
         startX = e.clientX;
@@ -229,14 +240,15 @@
         updateTransform();
     });
 
+    // Zoom with mouse wheel - centered on cursor
     mapWrapper.addEventListener('wheel', (e) => {
         e.preventDefault();
         const rect = mapWrapper.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        const delta = e.deltaY < 0 ? 1.1 : 0.9;
-        const newScale = Math.max(0.5, Math.min(5, scale * delta));
+        const delta = e.deltaY < 0 ? 1.12 : 0.88;
+        const newScale = Math.max(0.4, Math.min(6, scale * delta));
 
         const offsetX = mouseX - posX;
         const offsetY = mouseY - posY;
@@ -337,20 +349,9 @@
 
         if (item.type === 'Jam Tracks' && item.albumArt) {
             const audioSrc = item.trackId ? `https://cdn.fortnite-api.com/tracks/${item.trackId}.mp3` : '';
-            mediaSection.innerHTML = `
-                <div class="w-full max-w-md text-center">
-                    <img src="${item.albumArt}" class="w-52 h-52 mx-auto rounded-3xl shadow-2xl mb-6 object-cover" alt="">
-                    <h4 class="text-lg font-semibold mb-1">${item.displayName}</h4>
-                    <p class="text-white/60 text-sm mb-6">${item.artist || ''}</p>
-                    ${audioSrc ? `<audio id="jam-audio" controls class="w-full accent-orange-500"><source src="${audioSrc}" type="audio/mpeg"></audio>` : '<p class="text-white/50">Preview not available</p>'}
-                </div>
-            `;
+            mediaSection.innerHTML = `<div class="w-full max-w-md text-center"><img src="${item.albumArt}" class="w-52 h-52 mx-auto rounded-3xl shadow-2xl mb-6 object-cover" alt=""><h4 class="text-lg font-semibold mb-1">${item.displayName}</h4><p class="text-white/60 text-sm mb-6">${item.artist || ''}</p>${audioSrc ? `<audio id="jam-audio" controls class="w-full accent-orange-500"><source src="${audioSrc}" type="audio/mpeg"></audio>` : '<p class="text-white/50">Preview not available</p>'}</div>`;
         } else if (item.type === 'Emotes' && item.showcaseVideo) {
-            mediaSection.innerHTML = `
-                <div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden">
-                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${item.showcaseVideo}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-            `;
+            mediaSection.innerHTML = `<div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${item.showcaseVideo}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
         } else {
             mediaSection.innerHTML = `<img src="${item.imageUrl || 'https://picsum.photos/600'}" class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">`;
         }
@@ -372,17 +373,10 @@
         const entries = shopData?.entries || [];
         let items = filteredItems || entries.map(categorizeItem).filter(Boolean);
         const groups = {};
-        items.forEach(item => {
-            if (!groups[item.type]) groups[item.type] = [];
-            groups[item.type].push(item);
-        });
+        items.forEach(item => { if (!groups[item.type]) groups[item.type] = []; groups[item.type].push(item); });
 
         let html = '';
-        Object.keys(groups).sort((a,b) => {
-            if (a === 'Jam Tracks') return -1;
-            if (b === 'Jam Tracks') return 1;
-            return a.localeCompare(b);
-        }).forEach(category => {
+        Object.keys(groups).sort((a,b) => a === 'Jam Tracks' ? -1 : b === 'Jam Tracks' ? 1 : a.localeCompare(b)).forEach(category => {
             const categoryItems = groups[category];
             html += `<div><h2 class="text-3xl font-bold mb-6 flex items-center gap-3 border-b border-white/10 pb-3">${category} <span class="text-sm font-normal text-white/50">(${categoryItems.length})</span></h2><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">`;
             categoryItems.forEach(item => {
@@ -402,7 +396,10 @@
 
         let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
 
-        if (searchTerm) items = items.filter(item => (item.displayName || item.name || '').toLowerCase().includes(searchTerm) || (item.artist || '').toLowerCase().includes(searchTerm));
+        if (searchTerm) items = items.filter(item => 
+            (item.displayName || item.name || '').toLowerCase().includes(searchTerm) || 
+            (item.artist || '').toLowerCase().includes(searchTerm)
+        );
         if (rarityFilter) items = items.filter(item => (item.rarity || 'common') === rarityFilter);
         if (sortMode === 'price-low') items.sort((a, b) => a.finalPrice - b.finalPrice);
         else if (sortMode === 'price-high') items.sort((a, b) => b.finalPrice - a.finalPrice);
@@ -448,9 +445,7 @@
         } catch (e) { console.error(e); }
     }
 
-    async function refreshShop() {
-        await fetchShop();
-    }
+    async function refreshShop() { await fetchShop(); }
 
     document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
     document.getElementById('item-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
@@ -459,10 +454,10 @@
         fetchShop();
         loadMap();
         switchMainTab(0);
+
         mapImage.onload = () => {
-            posX = (mapWrapper.offsetWidth - mapImage.width) / 2;
-            posY = (mapWrapper.offsetHeight - mapImage.height) / 2;
-            updateTransform();
+            scale = 1;
+            centerImage();
         };
     };
 </script>
