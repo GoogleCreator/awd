@@ -135,16 +135,15 @@
 </div>
 
 <div id="item-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-    <div class="modal bg-zinc-900 border border-white/10 rounded-3xl max-w-2xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+    <div class="modal bg-zinc-900 border border-white/10 rounded-3xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
         <div class="flex items-center justify-between p-6 border-b border-white/10">
             <h3 id="modal-name" class="text-2xl font-bold"></h3>
             <button onclick="closeModal()" class="text-white/60 hover:text-white text-3xl leading-none">×</button>
         </div>
-        <div class="flex flex-col md:flex-row overflow-auto">
-            <div class="md:w-1/2 bg-black/40 p-8 flex items-center justify-center">
-                <img id="modal-image" src="" class="max-h-[420px] w-auto object-contain rounded-2xl shadow-2xl" alt="">
+        <div class="flex flex-col lg:flex-row overflow-auto">
+            <div id="media-section" class="lg:w-3/5 bg-black/60 p-6 flex items-center justify-center relative min-h-[400px]">
             </div>
-            <div class="md:w-1/2 p-8 space-y-6">
+            <div class="lg:w-2/5 p-8 space-y-6 overflow-auto">
                 <div>
                     <span id="modal-rarity" class="text-xs uppercase px-4 py-2 rounded-full inline-block"></span>
                 </div>
@@ -202,6 +201,9 @@
         let displayName = '';
         let imageUrl = '';
         let description = '';
+        let showcaseVideo = null;
+        let albumArt = null;
+        let artist = '';
 
         if (entry.tracks?.length > 0) {
             const track = entry.tracks[0];
@@ -211,6 +213,8 @@
             rarity = 'common';
             imageUrl = track.albumArt || track.images?.icon;
             description = track.description || '';
+            albumArt = track.albumArt;
+            artist = track.artist || '';
         }
         else if (entry.instruments?.length > 0) {
             const instr = entry.instruments[0];
@@ -235,6 +239,7 @@
             rarity = item.rarity?.value?.toLowerCase() || 'common';
             imageUrl = item.images?.featured || item.images?.icon;
             description = item.description || '';
+            showcaseVideo = item.showcaseVideo;
         }
         else return null;
 
@@ -245,18 +250,20 @@
             rarity,
             displayName: displayName || item.name,
             imageUrl,
-            description
+            description,
+            showcaseVideo,
+            albumArt,
+            artist
         };
     }
 
     function showItemModal(item) {
-        document.getElementById('modal-name').textContent = item.displayName;
-        document.getElementById('modal-image').src = item.imageUrl || 'https://picsum.photos/600';
+        document.getElementById('modal-name').textContent = item.displayName || item.title || item.name;
         document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="text-orange-400">V</span>`;
         document.getElementById('modal-type').textContent = item.type;
 
         const rarityEl = document.getElementById('modal-rarity');
-        rarityEl.textContent = item.rarity.toUpperCase();
+        rarityEl.textContent = (item.rarity || 'common').toUpperCase();
         rarityEl.style.backgroundColor = `rgba(249, 115, 22, 0.15)`;
         rarityEl.style.color = getRarityColor(item.rarity);
 
@@ -268,6 +275,39 @@
             descContainer.classList.add('hidden');
         }
 
+        const mediaSection = document.getElementById('media-section');
+        mediaSection.innerHTML = '';
+
+        if (item.type === 'Jam Tracks' && item.albumArt) {
+            mediaSection.innerHTML = `
+                <div class="w-full max-w-md text-center">
+                    <img src="${item.albumArt}" class="w-52 h-52 mx-auto rounded-3xl shadow-2xl mb-6 object-cover" alt="">
+                    <h4 class="text-lg font-semibold mb-1">${item.displayName}</h4>
+                    <p class="text-white/60 text-sm mb-6">${item.artist || ''}</p>
+                    <audio id="jam-audio" controls class="w-full accent-orange-500">
+                        <source src="https://cdn.fortnite-api.com/tracks/${item.id || ''}.mp3" type="audio/mpeg">
+                    </audio>
+                </div>
+            `;
+        } 
+        else if (item.type === 'Emotes' && item.showcaseVideo) {
+            mediaSection.innerHTML = `
+                <div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden">
+                    <iframe width="100%" height="100%" 
+                            src="https://www.youtube.com/embed/${item.showcaseVideo}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen></iframe>
+                </div>
+            `;
+        } 
+        else {
+            mediaSection.innerHTML = `
+                <img src="${item.imageUrl || 'https://picsum.photos/600'}" 
+                     class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">
+            `;
+        }
+
         const modal = document.getElementById('item-modal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -277,6 +317,8 @@
         const modal = document.getElementById('item-modal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        const audio = document.getElementById('jam-audio');
+        if (audio) audio.pause();
     }
 
     function renderOrganizedShop(filteredItems = null) {
@@ -305,7 +347,7 @@
             categoryItems.forEach(item => {
                 const imgSrc = item.imageUrl || 'https://picsum.photos/300';
                 html += `
-                    <div onclick='showItemModal(${JSON.stringify(item).replace(/'/g, "\\'")})' 
+                    <div onclick='showItemModal(${JSON.stringify(item).replace(/'/g, "\\'")})'
                          class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden cursor-pointer">
                         <div class="relative">
                             <img src="${imgSrc}" class="w-full aspect-square object-cover item-img" alt="${item.displayName}">
@@ -391,7 +433,7 @@
                 });
             }
         } catch (e) {
-            console.error("Map data failed to load", e);
+            console.error(e);
         }
     }
 
