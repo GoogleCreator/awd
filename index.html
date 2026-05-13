@@ -212,6 +212,7 @@
         let showcaseVideo = null;
         let albumArt = null;
         let artist = '';
+        let trackId = '';
 
         if (entry.tracks?.length > 0) {
             const track = entry.tracks[0];
@@ -223,6 +224,7 @@
             description = track.description || '';
             albumArt = track.albumArt;
             artist = track.artist || '';
+            trackId = track.id || '';
         }
         else if (entry.instruments?.length > 0) {
             const instr = entry.instruments[0];
@@ -261,7 +263,8 @@
             description,
             showcaseVideo,
             albumArt,
-            artist
+            artist,
+            trackId
         };
     }
 
@@ -287,14 +290,17 @@
         mediaSection.innerHTML = '';
 
         if (item.type === 'Jam Tracks' && item.albumArt) {
+            const audioSrc = item.trackId ? `https://cdn.fortnite-api.com/tracks/${item.trackId}.mp3` : '';
             mediaSection.innerHTML = `
                 <div class="w-full max-w-md text-center">
                     <img src="${item.albumArt}" class="w-52 h-52 mx-auto rounded-3xl shadow-2xl mb-6 object-cover" alt="">
                     <h4 class="text-lg font-semibold mb-1">${item.displayName}</h4>
                     <p class="text-white/60 text-sm mb-6">${item.artist || ''}</p>
+                    ${audioSrc ? `
                     <audio id="jam-audio" controls class="w-full accent-orange-500">
-                        <source src="https://cdn.fortnite-api.com/tracks/${item.id || ''}.mp3" type="audio/mpeg">
-                    </audio>
+                        <source src="${audioSrc}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>` : '<p class="text-white/50">Preview not available</p>'}
                 </div>
             `;
         } 
