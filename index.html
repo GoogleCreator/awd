@@ -17,6 +17,19 @@
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         * { scrollbar-width: thin; scrollbar-color: #4b5563 transparent; }
 
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        input, textarea, [contenteditable] {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
         .nav-tab { transition: all 0.3s ease; }
         .nav-tab-active {
             background-color: #f97316;
@@ -57,9 +70,17 @@
             top: 50%;
             left: 50%;
             transform-origin: 0 0;
-            transition: transform 0.08s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
             user-select: none;
             pointer-events: none;
+        }
+
+        .poi-item {
+            transition: all 0.2s ease;
+        }
+        .poi-item:hover {
+            background-color: #27272a !important;
+            transform: translateX(4px);
         }
     </style>
 </head>
@@ -121,7 +142,7 @@
     <div id="map-section" class="hidden">
         <div class="mb-8">
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
-            <p class="text-white/60">Drag to pan freely • Scroll to zoom</p>
+            <p class="text-white/60">Click any location to zoom to it • Drag to pan • Scroll to zoom</p>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-8">
@@ -129,7 +150,7 @@
                     <img id="main-map" src="https://fortnite-api.com/images/map_en.png" alt="Fortnite Map">
                 </div>
                 <div class="p-4 text-xs text-white/60 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i> Drag the map to explore • Scroll to zoom in/out
+                    <i class="fas fa-info-circle"></i> Click POI • Drag to move • Scroll to zoom
                 </div>
             </div>
             <div class="lg:col-span-4">
@@ -137,7 +158,7 @@
                     <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
                         <i class="fas fa-location-dot text-orange-400"></i> Named Locations
                     </h3>
-                    <div id="poi-list" class="max-h-[70vh] overflow-auto space-y-3 text-sm"></div>
+                    <div id="poi-list" class="max-h-[70vh] overflow-auto space-y-2 text-sm"></div>
                 </div>
             </div>
         </div>
@@ -199,6 +220,7 @@
     let posY = 0;
     let isDragging = false;
     let startX, startY, startPosX, startPosY;
+    let poisData = [];
 
     const mapWrapper = document.getElementById('map-wrapper');
     const mapImage = document.getElementById('main-map');
@@ -207,13 +229,31 @@
         mapImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
     }
 
-    // Center image on load
     function centerImage() {
         const wrapperRect = mapWrapper.getBoundingClientRect();
-        const imgRect = mapImage.getBoundingClientRect();
+        posX = wrapperRect.width / 2;
+        posY = wrapperRect.height / 2;
+        updateTransform();
+    }
+
+    function zoomToPOI(x, y) {
+        const mapMin = -120000;
+        const mapMax = 120000;
+        const mapSize = mapMax - mapMin;
+
+        const wrapperRect = mapWrapper.getBoundingClientRect();
         
-        posX = (wrapperRect.width - imgRect.width * scale) / 2;
-        posY = (wrapperRect.height - imgRect.height * scale) / 2;
+        const percentX = (x - mapMin) / mapSize;
+        const percentY = (mapMax - y) / mapSize;
+
+        const targetX = percentX * mapImage.width;
+        const targetY = percentY * mapImage.height;
+
+        scale = 2.8;
+
+        posX = (wrapperRect.width / 2) - targetX * scale;
+        posY = (wrapperRect.height / 2) - targetY * scale;
+
         updateTransform();
     }
 
@@ -233,14 +273,11 @@
 
     window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        posX = startPosX + dx;
-        posY = startPosY + dy;
+        posX = startPosX + (e.clientX - startX);
+        posY = startPosY + (e.clientY - startY);
         updateTransform();
     });
 
-    // Zoom with mouse wheel - centered on cursor
     mapWrapper.addEventListener('wheel', (e) => {
         e.preventDefault();
         const rect = mapWrapper.getBoundingClientRect();
@@ -373,7 +410,10 @@
         const entries = shopData?.entries || [];
         let items = filteredItems || entries.map(categorizeItem).filter(Boolean);
         const groups = {};
-        items.forEach(item => { if (!groups[item.type]) groups[item.type] = []; groups[item.type].push(item); });
+        items.forEach(item => {
+            if (!groups[item.type]) groups[item.type] = [];
+            groups[item.type].push(item);
+        });
 
         let html = '';
         Object.keys(groups).sort((a,b) => a === 'Jam Tracks' ? -1 : b === 'Jam Tracks' ? 1 : a.localeCompare(b)).forEach(category => {
@@ -432,20 +472,28 @@
             const res = await fetch('https://fortnite-api.com/v1/map');
             const data = await res.json();
             if (data.status === 200) {
-                const pois = data.data.pois || [];
+                poisData = data.data.pois || [];
                 const poiList = document.getElementById('poi-list');
                 poiList.innerHTML = '';
-                pois.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
+
+                poisData.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
                     const div = document.createElement('div');
-                    div.className = "flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
+                    div.className = "poi-item flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
                     div.innerHTML = `<i class="fas fa-map-marker-alt text-orange-400"></i><span class="font-medium">${poi.name}</span>`;
+                    div.onclick = () => {
+                        if (poi.location && poi.location.x && poi.location.y) {
+                            zoomToPOI(poi.location.x, poi.location.y);
+                        }
+                    };
                     poiList.appendChild(div);
                 });
             }
         } catch (e) { console.error(e); }
     }
 
-    async function refreshShop() { await fetchShop(); }
+    async function refreshShop() {
+        await fetchShop();
+    }
 
     document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
     document.getElementById('item-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
