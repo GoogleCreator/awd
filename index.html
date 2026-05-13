@@ -9,12 +9,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', system-ui, sans-serif; }
-        .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); }
-        .nav-tab {
-            transition: all 0.3s ease;
-        }
+        .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1f1208 100%); }
+        .nav-tab { transition: all 0.3s ease; }
         .nav-tab-active {
-            background-color: #22d3ee;
+            background-color: #f97316;
             color: black;
             font-weight: 700;
         }
@@ -26,6 +24,13 @@
         }
         .item-img { transition: transform 0.4s ease; }
         .card:hover .item-img { transform: scale(1.08); }
+        .modal {
+            animation: fadeInModal 0.3s ease forwards;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body class="shop-bg text-white min-h-screen">
@@ -34,51 +39,39 @@
         <div class="flex items-center gap-3">
             <div>
                 <h1 class="text-5xl font-bold tracking-tighter">DROP IQ</h1>
-                <p class="text-cyan-400 text-sm">Fortnite Intelligence • Real-Time</p>
+                <p class="text-orange-400 text-sm">Fortnite Intelligence • Real-Time</p>
             </div>
         </div>
         <div class="flex items-center gap-3 text-sm">
-            <div onclick="switchMainTab(0)" id="tab-shop-btn"
-                 class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-store"></i>
-                <span>SHOP</span>
+            <div onclick="switchMainTab(0)" id="tab-shop-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+                <i class="fas fa-store"></i><span>SHOP</span>
             </div>
-            <div onclick="switchMainTab(1)" id="tab-map-btn"
-                 class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-map"></i>
-                <span>MAP</span>
+            <div onclick="switchMainTab(1)" id="tab-map-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+                <i class="fas fa-map"></i><span>MAP</span>
             </div>
-            <div onclick="switchMainTab(2)" id="tab-info-btn"
-                 class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-info-circle"></i>
-                <span>INFO</span>
+            <div onclick="switchMainTab(2)" id="tab-info-btn" class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+                <i class="fas fa-info-circle"></i><span>INFO</span>
             </div>
         </div>
     </header>
 
-    <!-- SHOP SECTION -->
-    <div id="shop-section" class="hidden">
+    <div id="shop-section">
         <div class="flex items-center justify-between my-8">
             <h2 class="text-4xl font-bold">Item Shop</h2>
-            <button onclick="refreshShop()"
-                    class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
+            <button onclick="refreshShop()" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
                 <i class="fas fa-sync"></i> Refresh
             </button>
         </div>
         <div class="flex flex-wrap gap-4 mb-8">
-            <input type="text" id="search-input"
-                   placeholder="Search items..."
-                   onkeyup="filterItems()"
-                   class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3 flex-1 min-w-[250px] focus:outline-none focus:border-cyan-400">
-            <select id="sort-select" onchange="filterItems()"
-                    class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
+            <input type="text" id="search-input" placeholder="Search items..." onkeyup="filterItems()"
+                   class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3 flex-1 min-w-[250px] focus:outline-none focus:border-orange-500">
+            <select id="sort-select" onchange="filterItems()" class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
                 <option value="default">Sort: Default</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="name">Name A-Z</option>
             </select>
-            <select id="rarity-filter" onchange="filterItems()"
-                    class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
+            <select id="rarity-filter" onchange="filterItems()" class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
                 <option value="">All Rarities</option>
                 <option value="legendary">Legendary</option>
                 <option value="epic">Epic</option>
@@ -87,7 +80,7 @@
             </select>
         </div>
         <div id="loading" class="flex flex-col items-center justify-center py-32">
-            <div class="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+            <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-6"></div>
             <p class="text-xl">Loading live shop data...</p>
         </div>
         <div id="shop-content" class="hidden">
@@ -95,7 +88,6 @@
         </div>
     </div>
 
-    <!-- MAP SECTION -->
     <div id="map-section" class="hidden">
         <div class="mb-8">
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
@@ -103,8 +95,7 @@
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-8 bg-zinc-900 rounded-3xl overflow-hidden border border-white/10">
-                <img id="main-map" src="https://fortnite-api.com/images/map_en.png"
-                     class="w-full h-auto" alt="Fortnite Map">
+                <img id="main-map" src="https://fortnite-api.com/images/map_en.png" class="w-full h-auto" alt="Fortnite Map">
                 <div class="p-4 text-xs text-white/60 flex items-center gap-2">
                     <i class="fas fa-info-circle"></i>
                     Official minimap with named locations
@@ -113,17 +104,15 @@
             <div class="lg:col-span-4">
                 <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-6 h-full">
                     <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
-                        <i class="fas fa-location-dot text-red-400"></i> Named Locations
+                        <i class="fas fa-location-dot text-orange-400"></i> Named Locations
                     </h3>
-                    <div id="poi-list" class="max-h-[70vh] overflow-auto space-y-3 text-sm">
-                    </div>
+                    <div id="poi-list" class="max-h-[70vh] overflow-auto space-y-3 text-sm"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- INFO SECTION -->
-    <div id="info-section">
+    <div id="info-section" class="hidden">
         <div class="max-w-3xl mx-auto pt-12">
             <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-10">
                 <h2 class="text-5xl font-bold mb-8 text-center">About Me</h2>
@@ -145,6 +134,39 @@
     </div>
 </div>
 
+<div id="item-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+    <div class="modal bg-zinc-900 border border-white/10 rounded-3xl max-w-2xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between p-6 border-b border-white/10">
+            <h3 id="modal-name" class="text-2xl font-bold"></h3>
+            <button onclick="closeModal()" class="text-white/60 hover:text-white text-3xl leading-none">×</button>
+        </div>
+        <div class="flex flex-col md:flex-row overflow-auto">
+            <div class="md:w-1/2 bg-black/40 p-8 flex items-center justify-center">
+                <img id="modal-image" src="" class="max-h-[420px] w-auto object-contain rounded-2xl shadow-2xl" alt="">
+            </div>
+            <div class="md:w-1/2 p-8 space-y-6">
+                <div>
+                    <span id="modal-rarity" class="text-xs uppercase px-4 py-2 rounded-full inline-block"></span>
+                </div>
+                <div class="text-4xl font-bold text-orange-400" id="modal-price"></div>
+                <div>
+                    <p class="text-white/60 text-sm uppercase tracking-widest mb-1">Type</p>
+                    <p id="modal-type" class="font-medium"></p>
+                </div>
+                <div id="modal-description-container">
+                    <p class="text-white/60 text-sm uppercase tracking-widest mb-1">Description</p>
+                    <p id="modal-description" class="text-white/80 leading-relaxed"></p>
+                </div>
+                <div class="pt-4 border-t border-white/10">
+                    <button onclick="closeModal()" class="w-full bg-orange-500 hover:bg-orange-600 text-black font-semibold py-4 rounded-2xl transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer class="text-center text-white/40 text-xs py-12 border-t border-white/10 mt-20">
     Drop IQ • Real-time Fortnite data from fortnite-api.com • Not affiliated with Epic Games
 </footer>
@@ -156,19 +178,18 @@
         document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
         document.getElementById('map-section').classList.toggle('hidden', tab !== 1);
         document.getElementById('info-section').classList.toggle('hidden', tab !== 2);
-
         document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 0);
         document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 1);
         document.getElementById('tab-info-btn').classList.toggle('nav-tab-active', tab === 2);
     }
 
     function getRarityColor(rarity) {
-        const map = { 
-            legendary: '#f59e0b', 
-            epic: '#c026d3', 
-            rare: '#3b82f6', 
-            uncommon: '#22c55e', 
-            common: '#94a3b8' 
+        const map = {
+            legendary: '#f59e0b',
+            epic: '#c026d3',
+            rare: '#3b82f6',
+            uncommon: '#22c55e',
+            common: '#94a3b8'
         };
         return map[rarity?.toLowerCase()] || '#64748b';
     }
@@ -180,26 +201,26 @@
         let rarity = 'common';
         let displayName = '';
         let imageUrl = '';
+        let description = '';
 
-        // === JAM TRACKS ===
         if (entry.tracks?.length > 0) {
             const track = entry.tracks[0];
             type = 'Jam Tracks';
             item = track;
             displayName = track.title || track.devName || 'Unknown Track';
             rarity = 'common';
-            imageUrl = track.albumArt || track.images?.icon || 'https://picsum.photos/300';
-        } 
-        // === INSTRUMENTS ===
+            imageUrl = track.albumArt || track.images?.icon;
+            description = track.description || '';
+        }
         else if (entry.instruments?.length > 0) {
             const instr = entry.instruments[0];
             type = 'Instruments';
             item = instr;
             displayName = instr.name || 'Instrument';
             rarity = instr.rarity?.value?.toLowerCase() || 'common';
-            imageUrl = instr.images?.featured || instr.images?.icon || 'https://picsum.photos/300';
-        } 
-        // === REGULAR BR COSMETICS ===
+            imageUrl = instr.images?.featured || instr.images?.icon;
+            description = instr.description || '';
+        }
         else if (entry.brItems?.length > 0) {
             item = entry.brItems[0];
             displayName = item.name;
@@ -211,28 +232,56 @@
             else if (typeName.includes('wrap')) type = 'Wraps';
             else if (typeName.includes('backpack')) type = 'Back Bling';
             else type = 'Cosmetics';
-
             rarity = item.rarity?.value?.toLowerCase() || 'common';
-            imageUrl = item.images?.featured || item.images?.icon || 'https://picsum.photos/300';
-        } 
-        else {
-            return null;
+            imageUrl = item.images?.featured || item.images?.icon;
+            description = item.description || '';
         }
+        else return null;
 
-        return { 
-            ...item, 
-            finalPrice, 
-            type, 
+        return {
+            ...item,
+            finalPrice,
+            type,
             rarity,
             displayName: displayName || item.name,
-            imageUrl
+            imageUrl,
+            description
         };
+    }
+
+    function showItemModal(item) {
+        document.getElementById('modal-name').textContent = item.displayName;
+        document.getElementById('modal-image').src = item.imageUrl || 'https://picsum.photos/600';
+        document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="text-orange-400">V</span>`;
+        document.getElementById('modal-type').textContent = item.type;
+
+        const rarityEl = document.getElementById('modal-rarity');
+        rarityEl.textContent = item.rarity.toUpperCase();
+        rarityEl.style.backgroundColor = `rgba(249, 115, 22, 0.15)`;
+        rarityEl.style.color = getRarityColor(item.rarity);
+
+        const descContainer = document.getElementById('modal-description-container');
+        if (item.description && item.description.trim() !== '') {
+            document.getElementById('modal-description').textContent = item.description;
+            descContainer.classList.remove('hidden');
+        } else {
+            descContainer.classList.add('hidden');
+        }
+
+        const modal = document.getElementById('item-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('item-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
     function renderOrganizedShop(filteredItems = null) {
         const entries = shopData?.entries || [];
         let items = filteredItems || entries.map(categorizeItem).filter(Boolean);
-
         const groups = {};
         items.forEach(item => {
             if (!groups[item.type]) groups[item.type] = [];
@@ -241,7 +290,6 @@
 
         let html = '';
         Object.keys(groups).sort((a,b) => {
-            // Put Jam Tracks first
             if (a === 'Jam Tracks') return -1;
             if (b === 'Jam Tracks') return 1;
             return a.localeCompare(b);
@@ -254,17 +302,15 @@
                     </h2>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
             `;
-
             categoryItems.forEach(item => {
-                const imgSrc = item.imageUrl || item.images?.featured || item.images?.icon || 'https://picsum.photos/300';
-                
+                const imgSrc = item.imageUrl || 'https://picsum.photos/300';
                 html += `
-                    <div class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden">
+                    <div onclick='showItemModal(${JSON.stringify(item).replace(/'/g, "\\'")})' 
+                         class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden cursor-pointer">
                         <div class="relative">
-                            <img src="${imgSrc}"
-                                 class="w-full aspect-square object-cover item-img" alt="${item.displayName}">
+                            <img src="${imgSrc}" class="w-full aspect-square object-cover item-img" alt="${item.displayName}">
                             <div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl">
-                                ${item.finalPrice} <span class="text-amber-400">V</span>
+                                ${item.finalPrice} <span class="text-orange-400">V</span>
                             </div>
                         </div>
                         <div class="p-4">
@@ -272,7 +318,7 @@
                             ${item.artist ? `<p class="text-white/60 text-sm">${item.artist}</p>` : ''}
                             <span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full"
                                   style="color: ${getRarityColor(item.rarity)}; background: rgba(255,255,255,0.1)">
-                                ${item.rarity || 'common'}
+                                ${item.rarity}
                             </span>
                         </div>
                     </div>
@@ -280,7 +326,6 @@
             });
             html += `</div></div>`;
         });
-
         document.getElementById('shop-categories').innerHTML = html;
     }
 
@@ -289,11 +334,10 @@
         const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
         const sortMode = document.getElementById('sort-select').value;
         const rarityFilter = document.getElementById('rarity-filter').value;
-
         let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
 
         if (searchTerm) {
-            items = items.filter(item => 
+            items = items.filter(item =>
                 (item.displayName || item.name || '').toLowerCase().includes(searchTerm) ||
                 (item.artist || '').toLowerCase().includes(searchTerm)
             );
@@ -301,7 +345,6 @@
         if (rarityFilter) {
             items = items.filter(item => (item.rarity || 'common') === rarityFilter);
         }
-
         if (sortMode === 'price-low') items.sort((a, b) => a.finalPrice - b.finalPrice);
         else if (sortMode === 'price-high') items.sort((a, b) => b.finalPrice - a.finalPrice);
         else if (sortMode === 'name') items.sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || ''));
@@ -314,7 +357,6 @@
         const content = document.getElementById('shop-content');
         loading.classList.remove('hidden');
         content.classList.add('hidden');
-
         try {
             const res = await fetch('https://fortnite-api.com/v2/shop');
             const data = await res.json();
@@ -342,7 +384,7 @@
                     const div = document.createElement('div');
                     div.className = "flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
                     div.innerHTML = `
-                        <i class="fas fa-map-marker-alt text-red-400"></i>
+                        <i class="fas fa-map-marker-alt text-orange-400"></i>
                         <span class="font-medium">${poi.name}</span>
                     `;
                     poiList.appendChild(div);
@@ -357,10 +399,18 @@
         await fetchShop();
     }
 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") closeModal();
+    });
+
+    document.getElementById('item-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
     window.onload = () => {
         fetchShop();
         loadMap();
-        switchMainTab(0); // Start on Info
+        switchMainTab(0);
     };
 </script>
 </body>
