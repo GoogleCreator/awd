@@ -10,32 +10,32 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --b50: #dbeeff;
-    --b100: #b3d9ff;
-    --b200: #7abfff;
-    --b300: #3a9eff;
-    --b400: #0d7ff0;
-    --b500: #0062c8;
-    --b600: #0048a0;
-    --b700: #003278;
-    --b800: #001d50;
-    --b900: #000e2e;
-    --glow: rgba(13, 127, 240, 0.55);
-    --glow-soft: rgba(58, 158, 255, 0.25);
-    --text-bright: #e8f4ff;
-    --text-mid: #8ec8ff;
-    --text-dim: #4a84b8;
-    --card-bg: rgba(0, 18, 48, 0.82);
-    --card-border: rgba(58, 158, 255, 0.22);
-    --card-border-hover: rgba(58, 158, 255, 0.6);
+    --b50: #ffe8d1;
+    --b100: #ffd4a3;
+    --b200: #ffb66b;
+    --b300: #ff9500;
+    --b400: #ff7a00;
+    --b500: #e66a00;
+    --b600: #c45a00;
+    --b700: #9e4a00;
+    --b800: #6b3300;
+    --b900: #3d1e00;
+    --glow: rgba(255, 149, 0, 0.55);
+    --glow-soft: rgba(255, 149, 0, 0.25);
+    --text-bright: #fff4e8;
+    --text-mid: #ffcc99;
+    --text-dim: #cc8a55;
+    --card-bg: rgba(20, 12, 8, 0.92);
+    --card-border: rgba(255, 149, 0, 0.22);
+    --card-border-hover: rgba(255, 149, 0, 0.65);
     --live-green: #00e676;
-    --upcoming-amber: #ffc107;
-    --ended-gray: #546e8a;
+    --upcoming-amber: #ffcc00;
+    --ended-gray: #888888;
   }
   html { scroll-behavior: smooth; }
   body {
     font-family: 'Exo 2', sans-serif;
-    background: #000b1e;
+    background: #0f0a05;
     color: var(--text-bright);
     min-height: 100vh;
     overflow-x: hidden;
@@ -51,43 +51,32 @@
     content: '';
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(0, 98, 200, 0.35) 0%, transparent 65%),
-      radial-gradient(ellipse 60% 50% at 85% 30%, rgba(13, 127, 240, 0.2) 0%, transparent 60%),
-      radial-gradient(ellipse 100% 80% at 50% 100%, rgba(0, 30, 80, 0.7) 0%, transparent 70%);
+    background: radial-gradient(ellipse 80% 60% at 20% -10%, rgba(255, 110, 0, 0.35) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 50% at 85% 30%, rgba(255, 149, 0, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse 100% 80% at 50% 100%, rgba(80, 30, 0, 0.75) 0%, transparent 70%);
   }
   .grid-overlay {
     position: absolute;
     inset: 0;
-    background-image:
-      linear-gradient(rgba(58, 158, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(58, 158, 255, 0.05) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(255,149,0,0.06) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,149,0,0.06) 1px, transparent 1px);
     background-size: 48px 48px;
-    animation: gridScroll 20s linear infinite;
+    animation: gridScroll 25s linear infinite;
   }
-  @keyframes gridScroll {
-    0% { background-position: 0 0; }
-    100% { background-position: 48px 48px; }
-  }
-  .particle-container {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
+  @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 48px 48px; } }
+  .particle-container { position: absolute; inset: 0; overflow: hidden; }
   .particle {
     position: absolute;
-    width: 2px;
-    height: 2px;
+    width: 2px; height: 2px;
     background: var(--b300);
     border-radius: 50%;
     opacity: 0;
     animation: particleFloat var(--dur, 8s) var(--delay, 0s) infinite ease-in-out;
   }
   @keyframes particleFloat {
-    0% { transform: translate(0, 0) scale(0); opacity: 0; }
-    20% { opacity: 0.8; }
-    80% { opacity: 0.4; }
-    100% { transform: translate(var(--dx, 30px), var(--dy, -180px)) scale(0); opacity: 0; }
+    0% { transform: translate(0,0) scale(0); opacity:0; }
+    20% { opacity:0.8; }
+    100% { transform: translate(var(--dx,30px), var(--dy,-180px)) scale(0); opacity:0; }
   }
   .page-wrap {
     position: relative;
@@ -114,8 +103,8 @@
     letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--b300);
-    background: rgba(58, 158, 255, 0.1);
-    border: 1px solid rgba(58, 158, 255, 0.25);
+    background: rgba(255,149,0,0.1);
+    border: 1px solid rgba(255,149,0,0.25);
     padding: 6px 18px;
     border-radius: 20px;
     margin-bottom: 28px;
@@ -141,11 +130,11 @@
   .hero h1 .line1 { display: block; color: var(--text-bright); }
   .hero h1 .line2 {
     display: block;
-    background: linear-gradient(135deg, var(--b300) 0%, #60c8ff 50%, var(--b200) 100%);
+    background: linear-gradient(135deg, var(--b300) 0%, #ffcc66 50%, var(--b200) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 24px rgba(58, 158, 255, 0.5));
+    filter: drop-shadow(0 0 24px var(--glow));
   }
   .hero-sub {
     font-size: 18px;
@@ -162,10 +151,7 @@
     gap: 48px;
     flex-wrap: wrap;
   }
-  .stat-item {
-    text-align: center;
-    animation: fadeUp 0.8s ease both;
-  }
+  .stat-item { text-align: center; animation: fadeUp 0.8s ease both; }
   .stat-item:nth-child(1) { animation-delay: 0.4s; }
   .stat-item:nth-child(2) { animation-delay: 0.5s; }
   .stat-item:nth-child(3) { animation-delay: 0.6s; }
@@ -201,11 +187,7 @@
     color: var(--text-dim);
     flex-shrink: 0;
   }
-  .filter-pills {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
+  .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
   .filter-pill {
     font-size: 12px;
     font-weight: 600;
@@ -213,7 +195,7 @@
     text-transform: uppercase;
     padding: 7px 18px;
     border-radius: 20px;
-    border: 1px solid rgba(58, 158, 255, 0.25);
+    border: 1px solid rgba(255,149,0,0.25);
     background: transparent;
     color: var(--text-mid);
     cursor: pointer;
@@ -223,7 +205,7 @@
   .filter-pill:hover {
     border-color: var(--b300);
     color: var(--text-bright);
-    background: rgba(58, 158, 255, 0.1);
+    background: rgba(255,149,0,0.1);
   }
   .filter-pill.active {
     background: var(--b400);
@@ -267,12 +249,11 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(0, 230, 118, 0.07);
-    border: 1px solid rgba(0, 230, 118, 0.25);
+    background: rgba(0,230,118,0.07);
+    border: 1px solid rgba(0,230,118,0.25);
     border-radius: 10px;
     padding: 12px 20px;
     margin-bottom: 32px;
-    animation: fadeUp 0.6s 0.3s ease both;
   }
   .live-indicator {
     width: 10px; height: 10px;
@@ -294,7 +275,7 @@
   }
   .live-banner-sub {
     font-size: 12px;
-    color: rgba(0, 230, 118, 0.6);
+    color: rgba(0,230,118,0.6);
     margin-left: auto;
     letter-spacing: 0.5px;
   }
@@ -327,7 +308,7 @@
   .t-card:hover {
     transform: translateY(-4px);
     border-color: var(--card-border-hover);
-    box-shadow: 0 12px 40px rgba(13, 127, 240, 0.25), 0 0 0 1px rgba(58, 158, 255, 0.1);
+    box-shadow: 0 12px 40px rgba(255,149,0,0.3), 0 0 0 1px rgba(255,149,0,0.15);
   }
   .t-card:hover::before { opacity: 1; }
   @keyframes cardReveal {
@@ -339,7 +320,7 @@
     width: 100%;
     height: 180px;
     overflow: hidden;
-    background: linear-gradient(135deg, #001233, #002060);
+    background: linear-gradient(135deg, #2b1a00, #3f2600);
   }
   .t-card-img {
     width: 100%;
@@ -361,15 +342,14 @@
     font-family: 'Rajdhani', sans-serif;
     font-size: 48px;
     font-weight: 700;
-    color: rgba(58, 158, 255, 0.3);
+    color: rgba(255,149,0,0.3);
     letter-spacing: 3px;
-    background: linear-gradient(135deg, #000e2e 0%, #001a50 50%, #000e2e 100%);
-    user-select: none;
+    background: linear-gradient(135deg, #1a0f00, #2b1a00);
   }
   .t-card-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,11,30,0.9) 0%, transparent 60%);
+    background: linear-gradient(to top, rgba(15,10,5,0.9) 0%, transparent 60%);
   }
   .t-status-badge {
     position: absolute;
@@ -384,29 +364,21 @@
     backdrop-filter: blur(8px);
   }
   .t-status-badge.live {
-    background: rgba(0, 230, 118, 0.2);
-    border: 1px solid rgba(0, 230, 118, 0.5);
+    background: rgba(0,230,118,0.2);
+    border: 1px solid rgba(0,230,118,0.5);
     color: var(--live-green);
-    box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
-    animation: badgeGlow 1.5s infinite alternate;
-  }
-  @keyframes badgeGlow {
-    from { box-shadow: 0 0 6px rgba(0,230,118,0.3); }
-    to { box-shadow: 0 0 14px rgba(0,230,118,0.6), 0 0 24px rgba(0,230,118,0.2); }
   }
   .t-status-badge.upcoming {
-    background: rgba(255, 193, 7, 0.15);
-    border: 1px solid rgba(255, 193, 7, 0.4);
+    background: rgba(255,204,0,0.15);
+    border: 1px solid rgba(255,204,0,0.4);
     color: var(--upcoming-amber);
   }
   .t-status-badge.ended {
-    background: rgba(84, 110, 138, 0.2);
-    border: 1px solid rgba(84, 110, 138, 0.35);
+    background: rgba(136,136,136,0.2);
+    border: 1px solid rgba(136,136,136,0.35);
     color: var(--ended-gray);
   }
-  .t-card-body {
-    padding: 16px 18px 18px;
-  }
+  .t-card-body { padding: 16px 18px 18px; }
   .t-card-title {
     font-family: 'Rajdhani', sans-serif;
     font-size: 18px;
@@ -441,8 +413,8 @@
     font-size: 11px;
     font-weight: 600;
     color: var(--text-mid);
-    background: rgba(58, 158, 255, 0.08);
-    border: 1px solid rgba(58, 158, 255, 0.15);
+    background: rgba(255,149,0,0.08);
+    border: 1px solid rgba(255,149,0,0.15);
     border-radius: 6px;
     padding: 4px 10px;
   }
@@ -453,7 +425,7 @@
     color: var(--b300);
     letter-spacing: 0.5px;
     margin-bottom: 2px;
-    text-shadow: 0 0 12px rgba(58, 158, 255, 0.4);
+    text-shadow: 0 0 12px var(--glow);
   }
   .t-card-prize-label {
     font-size: 10px;
@@ -465,7 +437,7 @@
   .t-card-footer {
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid rgba(58, 158, 255, 0.1);
+    border-top: 1px solid rgba(255,149,0,0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -478,8 +450,8 @@
   .t-card-windows strong { color: var(--text-mid); }
   .t-card-arrow {
     width: 28px; height: 28px;
-    background: rgba(58, 158, 255, 0.1);
-    border: 1px solid rgba(58, 158, 255, 0.2);
+    background: rgba(255,149,0,0.1);
+    border: 1px solid rgba(255,149,0,0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -499,11 +471,10 @@
     justify-content: center;
     min-height: 260px;
     gap: 20px;
-    animation: fadeUp 0.5s ease;
   }
   .spinner {
     width: 48px; height: 48px;
-    border: 3px solid rgba(58, 158, 255, 0.15);
+    border: 3px solid rgba(255,149,0,0.15);
     border-top-color: var(--b300);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -530,7 +501,7 @@
   footer {
     margin-top: 40px;
     padding: 32px 0;
-    border-top: 1px solid rgba(58, 158, 255, 0.1);
+    border-top: 1px solid rgba(255,149,0,0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -553,7 +524,6 @@
   }
   .section-wrap {
     margin-bottom: 48px;
-    animation: fadeUp 0.7s ease both;
   }
   .t-countdown {
     display: flex;
@@ -562,8 +532,8 @@
   }
   .t-countdown-seg {
     text-align: center;
-    background: rgba(58, 158, 255, 0.1);
-    border: 1px solid rgba(58, 158, 255, 0.2);
+    background: rgba(255,149,0,0.1);
+    border: 1px solid rgba(255,149,0,0.2);
     border-radius: 5px;
     padding: 3px 7px;
     min-width: 36px;
@@ -583,6 +553,87 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--text-dim);
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,10,5,0.97);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border-hover);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 920px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 50px rgba(255,149,0,0.4);
+  }
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255,149,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    z-index: 10;
+  }
+  .modal-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+  .close-btn {
+    font-size: 32px;
+    cursor: pointer;
+    color: var(--text-dim);
+    line-height: 1;
+  }
+  .close-btn:hover { color: #fff; }
+  .modal-body { padding: 24px; }
+  .prize-section {
+    background: rgba(255,149,0,0.1);
+    border: 1px solid rgba(255,149,0,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .leaderboard h3 {
+    margin-bottom: 16px;
+    color: var(--b300);
+    font-size: 20px;
+  }
+  .lb-row {
+    display: flex;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,149,0,0.1);
+    align-items: center;
+    transition: background 0.2s;
+  }
+  .lb-row:hover { background: rgba(255,149,0,0.12); }
+  .lb-rank {
+    width: 60px;
+    font-weight: 700;
+    color: var(--b300);
+    font-size: 18px;
+  }
+  .lb-name { flex: 1; font-weight: 500; }
+  .lb-score {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 19px;
+    color: var(--b300);
+    font-weight: 700;
   }
 </style>
 </head>
@@ -630,7 +681,6 @@
           <button class="filter-pill" data-filter="ended" onclick="setFilter('ended', this)">✓ Ended</button>
         </div>
       </div>
-
       <div id="content-area">
         <div class="loader-wrap">
           <div class="spinner"></div>
@@ -646,6 +696,16 @@
     <div class="footer-brand">Drop<span>IQ</span></div>
     <div class="footer-copy">Powered by Fortnite API · Live tournament data</div>
   </footer>
+</div>
+
+<div id="t-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Tournament</div>
+      <span class="close-btn" onclick="closeModal()">×</span>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
 </div>
 
 <script>
@@ -695,10 +755,7 @@ function getStatus(ev) {
 function getNextWindow(ev) {
   const now = Date.now();
   const windows = ev.eventWindows || ev.windows || [];
-  const future = windows
-    .map(w => ({ ...w, ts: new Date(w.beginTime || w.startTime || 0).getTime() }))
-    .filter(w => w.ts > now)
-    .sort((a,b) => a.ts - b.ts);
+  const future = windows.map(w => ({...w, ts: new Date(w.beginTime || w.startTime || 0).getTime()})).filter(w => w.ts > now).sort((a,b) => a.ts - b.ts);
   return future[0] || null;
 }
 
@@ -778,9 +835,9 @@ function buildCard(ev, index) {
     dateDisplay = formatDate(windows[0].beginTime || windows[0].startTime);
   }
   return `
-<article class="t-card" style="animation-delay:${index * 0.06}s" data-status="${status}" data-id="${cardId}">
+<article class="t-card" style="animation-delay:${index * 0.06}s" data-status="${status}" onclick="openTournamentModal(${index})">
   <div class="t-card-img-wrap">
-    ${img ? `<img class="t-card-img" src="${img}" alt="${title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><div class="t-card-img-fallback" style="display:none">FORTNITE</div>` : `<div class="t-card-img-fallback">FORTNITE</div>`}
+    ${img ? `<img class="t-card-img" src="${img}" alt="${title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/> <div class="t-card-img-fallback" style="display:none">FORTNITE</div>` : `<div class="t-card-img-fallback">FORTNITE</div>`}
     <div class="t-card-img-overlay"></div>
     <span class="t-status-badge ${status}">${statusLabel}</span>
   </div>
@@ -807,11 +864,10 @@ function buildCard(ev, index) {
 </article>`;
 }
 
-function renderSection(title, events) {
+function renderSection(title, events, isLive) {
   if (events.length === 0) return '';
   const cards = events.map((ev, i) => buildCard(ev, i)).join('');
-  const isLiveSection = title.includes('Live');
-  const liveBar = isLiveSection ? `
+  const liveBar = isLive ? `
     <div class="live-banner">
       <div class="live-indicator"></div>
       <span class="live-banner-text">Live Tournaments Active</span>
@@ -840,9 +896,9 @@ function renderAll(filter) {
   const upcoming = toShow.filter(ev => getStatus(ev) === 'upcoming');
   const ended = toShow.filter(ev => getStatus(ev) === 'ended');
   let html = '';
-  if (filter === 'all' || filter === 'live') html += renderSection('Live Now', live);
-  if (filter === 'all' || filter === 'upcoming') html += renderSection('Upcoming Events', upcoming);
-  if (filter === 'all' || filter === 'ended') html += renderSection('Recent & Completed', ended);
+  if (filter === 'all' || filter === 'live') html += renderSection('Live Now', live, true);
+  if (filter === 'all' || filter === 'upcoming') html += renderSection('Upcoming Events', upcoming, false);
+  if (filter === 'all' || filter === 'ended') html += renderSection('Recent & Completed', ended, false);
   if (!html) html = `<div class="empty-state"><div class="empty-icon">🎯</div><p style="font-size:16px;color:var(--text-mid);font-weight:600;">No ${filter} events found</p></div>`;
   document.getElementById('content-area').innerHTML = html;
   allEvents.filter(ev => getStatus(ev) === 'upcoming').forEach((ev, i) => {
@@ -880,7 +936,8 @@ function showDemoData() {
     {id: 'demo1', displayName: 'FNCS Global Championship 2025', region: 'Global', prizePool: 2000000, beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString(), eventWindows: [{beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString()}]},
     {id: 'demo2', displayName: 'Solo Cash Cup — NA East', region: 'NAE', prizePool: 50000, beginTime: new Date(now + 86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000).toISOString()}]},
     {id: 'demo3', displayName: 'Ranked Open Tournament — EU', region: 'EU', prizePool: 25000, beginTime: new Date(now + 3*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 3*86400000).toISOString()}]},
-    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]}
+    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]},
+    {id: 'demo5', displayName: 'Zero Build Cup — NAW', region: 'NAW', prizePool: 15000, beginTime: new Date(now + 86400000*1.5).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*1.5).toISOString()}]}
   ];
   animateStat('stat-total', allEvents.length);
   animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
@@ -888,35 +945,60 @@ function showDemoData() {
   renderAll('all');
 }
 
+function openTournamentModal(index) {
+  const ev = allEvents[index];
+  if (!ev) return;
+  const title = ev.displayName || ev.name || 'Tournament';
+  let html = `
+    <h2 style="margin-bottom:20px;color:var(--text-bright);">${title}</h2>
+    <div class="prize-section">
+      <strong style="font-size:15px;letter-spacing:1px;">PRIZE POOL</strong><br>
+      <span style="font-size:42px;font-weight:700;color:var(--b300);">${formatPrize(ev.prizePool || ev.prize_pool || ev.totalPrize) || '$0'}</span>
+    </div>
+    <div class="leaderboard">
+      <h3>🏆 Leaderboard (Top 10)</h3>
+      <div id="lb-content" style="margin-top:12px;">Loading leaderboard...</div>
+    </div>
+  `;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('t-modal').style.display = 'flex';
+  loadDemoLeaderboard();
+}
+
+function closeModal() {
+  document.getElementById('t-modal').style.display = 'none';
+}
+
+function loadDemoLeaderboard() {
+  const html = `
+    <div class="lb-row"><div class="lb-rank">#1</div><div class="lb-name">Bugha</div><div class="lb-score">312 pts</div></div>
+    <div class="lb-row"><div class="lb-rank">#2</div><div class="lb-name">Clix</div><div class="lb-score">289 pts</div></div>
+    <div class="lb-row"><div class="lb-rank">#3</div><div class="lb-name">UnknownxArmy</div><div class="lb-score">274 pts</div></div>
+    <div class="lb-row"><div class="lb-rank">#4</div><div class="lb-name">Queasy</div><div class="lb-score">261 pts</div></div>
+    <div class="lb-row"><div class="lb-rank">#5</div><div class="lb-name">Aqua</div><div class="lb-score">248 pts</div></div>
+  `;
+  document.getElementById('lb-content').innerHTML = html;
+}
+
 async function fetchTournaments() {
-  document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching upcoming tournaments...</div></div>`;
-
-  const priorityEndpoints = [
-    '/api/v1/events/global',
-    '/api/v1/events/cashprizes',
-    '/api/v1/events/sessions',
-    '/api/v1/events/tracker',
-    '/api/v1/events/global/history'
-  ];
-
+  document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching tournaments...</div></div>`;
+  const endpoints = ['/api/v1/events/global','/api/v1/events/cashprizes','/api/v1/events/sessions','/api/v1/events/tracker'];
   let merged = [];
-  for (const ep of priorityEndpoints) {
+  for (const ep of endpoints) {
     try {
-      const res = await fetch(BASE + ep, {
-        headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
-      });
+      const res = await fetch(BASE + ep, { headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' } });
       if (res.ok) {
         const json = await res.json();
-        const arr = json.data || json.events || json.tournaments || json.items || json.results || (Array.isArray(json) ? json : []);
-        if (arr && arr.length > 0) merged.push(...arr);
+        const arr = json.data || json.events || json.tournaments || json.items || json.results || [];
+        if (arr.length) merged.push(...arr);
       }
     } catch(e) {}
   }
-
   if (merged.length > 0) {
     const seen = new Set();
     allEvents = merged.filter(ev => {
-      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,120);
+      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,100);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
