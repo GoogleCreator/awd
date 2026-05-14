@@ -1,217 +1,240 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DropIQ • Fortnite Tournaments</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap');
-    
-    :root {
-      --blue: #00b4ff;
-    }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0a0f1c 0%, #001122 100%);
-      color: #e0f0ff;
-      min-height: 100vh;
-    }
-    .header-font {
-      font-family: 'Press Start 2P', cursive;
-    }
-    .card {
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .card:hover {
-      transform: translateY(-12px) scale(1.03);
-      box-shadow: 0 0 30px rgba(0, 180, 255, 0.5);
-    }
-    .live-dot {
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .tournament-img {
-      filter: brightness(0.85) contrast(1.1);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DropIQ - Fortnite Tournaments</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap');
+        
+        :root {
+            --blue-1: #0a1428;
+            --blue-2: #13294f;
+            --blue-3: #1e3a8a;
+            --accent: #00d4ff;
+            --accent2: #00f5ff;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--blue-1) 0%, #0a1f3d 100%);
+            color: #e0f0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header { position: fixed; top: 0; left: 0; right: 0; background: rgba(10, 20, 40, 0.95); backdrop-filter: blur(12px); z-index: 1000; border-bottom: 2px solid var(--accent); }
+        .nav { max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-family: 'Press Start 2P', cursive; font-size: 2rem; font-weight: 700; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 12px; }
+        
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(10, 20, 40, 0.75), rgba(10, 20, 40, 0.9)), url('https://picsum.photos/id/1015/1920/1080') center/cover;
+            display: flex; align-items: center; justify-content: center; text-align: center; position: relative;
+        }
+        
+        .section { padding: 5rem 2rem; max-width: 1400px; margin: 0 auto; }
+        .section-title { font-size: 2.8rem; text-align: center; margin-bottom: 3rem; position: relative; }
+        .section-title:after { content: ''; position: absolute; width: 80px; height: 4px; background: var(--accent); bottom: -12px; left: 50%; transform: translateX(-50%); }
+        
+        .tournaments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2rem;
+        }
+        
+        .tournament-card, .shop-item {
+            background: rgba(19, 41, 79, 0.7);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.4s;
+        }
+        
+        .tournament-card:hover, .shop-item:hover {
+            transform: translateY(-12px);
+            border-color: var(--accent);
+            box-shadow: 0 25px 50px rgba(0, 212, 255, 0.3);
+        }
+        
+        .card-image { height: 220px; background-size: cover; background-position: center; position: relative; }
+        .status { position: absolute; top: 15px; right: 15px; padding: 6px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; }
+        .live { background: #ff0066; animation: pulse 2s infinite; }
+        
+        .tab-buttons { display: flex; justify-content: center; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap; }
+        .tab { padding: 12px 32px; background: rgba(19, 41, 79, 0.6); border: none; color: #e0f0ff; border-radius: 50px; cursor: pointer; font-weight: 600; }
+        .tab.active { background: var(--accent); color: #0a1428; }
+        
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+        .shop-item img { width: 100%; height: 180px; object-fit: contain; background: #0a1428; padding: 1rem; }
+        
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
-<body class="bg-[#0a0f1c]">
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo"><i class="fas fa-trophy"></i> DROPIQ</div>
+            <ul class="nav-links" style="display:flex; gap:2rem; list-style:none;">
+                <li><a href="#" style="color:#e0f0ff; text-decoration:none;">Tournaments</a></li>
+                <li><a href="#shop" style="color:#e0f0ff; text-decoration:none;">Shop</a></li>
+                <li><a href="#news" style="color:#e0f0ff; text-decoration:none;">News</a></li>
+            </ul>
+        </nav>
+    </header>
 
-  <!-- Navbar -->
-  <nav class="border-b border-cyan-500/30 bg-black/70 backdrop-blur-xl fixed w-full z-50">
-    <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center text-2xl">🎮</div>
-        <h1 class="text-3xl font-bold header-font tracking-widest text-cyan-400">DROPIQ</h1>
-      </div>
-      <div class="flex gap-8 text-lg">
-        <a href="#" class="hover:text-cyan-400 transition">Live</a>
-        <a href="#" class="hover:text-cyan-400 transition">Upcoming</a>
-        <a href="#" class="hover:text-cyan-400 transition">Past</a>
-        <a href="#" class="hover:text-cyan-400 transition">Leaderboards</a>
-      </div>
-      <div class="flex items-center gap-4">
-        <div class="px-4 py-2 bg-cyan-500/10 border border-cyan-500 rounded-full text-sm flex items-center gap-2">
-          <div class="w-3 h-3 bg-green-400 rounded-full live-dot"></div>
-          <span>Connected</span>
+    <section class="hero">
+        <div class="hero-content" style="max-width:900px; padding:2rem; animation:fadeInUp 1.2s ease;">
+            <h1 style="font-size:4.5rem; background:linear-gradient(90deg,#fff,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">DROPIQ</h1>
+            <p style="font-size:1.5rem; margin:1rem 0;">Real-time Fortnite Hub</p>
+            <a href="#tournaments" class="btn" style="display:inline-block; padding:14px 36px; background:var(--accent); color:#0a1428; font-weight:700; border-radius:50px; text-decoration:none; margin-top:1rem;">BROWSE EVENTS</a>
         </div>
-      </div>
-    </div>
-  </nav>
+    </section>
 
-  <div class="pt-28 pb-12 max-w-7xl mx-auto px-6">
-    <div class="text-center mb-12">
-      <h2 class="text-6xl font-bold header-font tracking-widest text-cyan-300 mb-4">FORTNITE TOURNAMENTS</h2>
-      <p class="text-xl text-cyan-100/70">Real-time drops • Competitive intelligence</p>
-    </div>
-
-    <!-- Status Tabs -->
-    <div class="flex gap-2 mb-10 justify-center">
-      <button onclick="filterCategory('all')" class="active-tab px-8 py-3 rounded-2xl font-medium bg-cyan-500 text-black">ALL</button>
-      <button onclick="filterCategory('live')" class="px-8 py-3 rounded-2xl font-medium hover:bg-cyan-500/20 transition">LIVE NOW</button>
-      <button onclick="filterCategory('upcoming')" class="px-8 py-3 rounded-2xl font-medium hover:bg-cyan-500/20 transition">UPCOMING</button>
-    </div>
-
-    <!-- Tournaments Grid -->
-    <div id="tournaments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Populated by JavaScript -->
-    </div>
-  </div>
-
-  <footer class="border-t border-cyan-500/20 py-8 text-center text-cyan-400/50 text-sm">
-    DropIQ • Powered by api-fortnite.com • Not affiliated with Epic Games
-  </footer>
-
-  <script>
-    const API_KEY = "6a80995122955fa8e116ef2b683076a273eae9ea3fd9cf85581a727745951b0c";
-    const BASE_URL = "https://prod.api-fortnite.com";
-
-    // Mock data (replace with real API once we find the right endpoint)
-    let tournaments = [
-      {
-        id: 1,
-        title: "FNCS Division 1",
-        status: "live",
-        time: "LIVE • Ends in 1h 42m",
-        image: "https://picsum.photos/id/1015/800/450",
-        prize: "$50,000",
-        mode: "Battle Royale • Duos",
-        region: "NA Central"
-      },
-      {
-        id: 2,
-        title: "Reload Elite Series",
-        status: "upcoming",
-        time: "Tomorrow • 7:00 PM",
-        image: "https://picsum.photos/id/237/800/450",
-        prize: "$15,000",
-        mode: "Reload • Squads",
-        region: "Europe"
-      },
-      {
-        id: 3,
-        title: "Zero Build Ranked Cup",
-        status: "upcoming",
-        time: "May 16 • 6:00 PM",
-        image: "https://picsum.photos/id/180/800/450",
-        prize: "$8,000",
-        mode: "Zero Build • Solos",
-        region: "NA East"
-      },
-      {
-        id: 4,
-        title: "Mobile Series Qualifiers",
-        status: "upcoming",
-        time: "May 14 • 8:00 PM",
-        image: "https://picsum.photos/id/201/800/450",
-        prize: "Qualification",
-        mode: "Battle Royale • Solos",
-        region: "Global"
-      }
-    ];
-
-    function createCard(t) {
-      const statusColor = t.status === 'live' ? 'bg-red-500' : 'bg-cyan-500';
-      const statusText = t.status === 'live' ? 'LIVE' : 'UPCOMING';
-
-      return `
-        <div class="card bg-zinc-950 border border-cyan-500/30 rounded-3xl overflow-hidden">
-          <div class="relative">
-            <img src="${t.image}" class="w-full h-48 object-cover tournament-img" alt="${t.title}">
-            <div class="absolute top-4 right-4 px-4 py-1 ${statusColor} text-black text-xs font-bold rounded-full flex items-center gap-1.5">
-              <span class="relative flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-              </span>
-              ${statusText}
-            </div>
-          </div>
-          <div class="p-6">
-            <h3 class="text-2xl font-bold mb-2">${t.title}</h3>
-            <p class="text-cyan-300 mb-4">${t.mode} • ${t.region}</p>
-            
-            <div class="flex justify-between items-center text-sm mb-5">
-              <div>
-                <span class="text-cyan-400">Prize Pool</span><br>
-                <span class="font-bold text-lg">${t.prize}</span>
-              </div>
-              <div class="text-right">
-                <span class="text-cyan-400">Starts</span><br>
-                <span class="font-medium">${t.time}</span>
-              </div>
-            </div>
-
-            <button onclick="joinTournament(${t.id})" 
-                    class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold text-lg hover:brightness-110 transition">
-              ${t.status === 'live' ? 'SPECTATE NOW' : 'REGISTER / VIEW'}
-            </button>
-          </div>
+    <!-- TOURNAMENTS -->
+    <section id="tournaments" class="section">
+        <h2 class="section-title">COMPETE • DROP • WIN</h2>
+        <div class="tab-buttons">
+            <button onclick="switchTab(0)" class="tab active" id="tab-all">ALL</button>
+            <button onclick="switchTab(1)" class="tab" id="tab-live">LIVE</button>
+            <button onclick="switchTab(2)" class="tab" id="tab-upcoming">UPCOMING</button>
         </div>
-      `;
-    }
+        <div class="tournaments-grid" id="tournaments-grid"></div>
+    </section>
 
-    function renderTournaments(filtered) {
-      const container = document.getElementById('tournaments-grid');
-      container.innerHTML = filtered.map(t => createCard(t)).join('');
-    }
+    <!-- ITEM SHOP -->
+    <section id="shop" class="section" style="background:rgba(19,41,79,0.4);">
+        <h2 class="section-title">TODAY'S ITEM SHOP</h2>
+        <div class="shop-grid" id="shop-grid">
+            <!-- Populated by JS -->
+        </div>
+    </section>
 
-    function filterCategory(category) {
-      document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab', 'bg-cyan-500', 'text-black'));
-      
-      if (category === 'all') {
-        renderTournaments(tournaments);
-      } else {
-        const filtered = tournaments.filter(t => t.status === category);
-        renderTournaments(filtered);
-      }
-    }
+    <!-- NEWS -->
+    <section id="news" class="section">
+        <h2 class="section-title">FORTNITE NEWS</h2>
+        <div id="news-container" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:2rem;"></div>
+    </section>
 
-    function joinTournament(id) {
-      alert(`Opening tournament details for ID: ${id} (Demo)`);
-    }
+    <script>
+        const API_KEY = "6a80995122955fa8e116ef2b683076a273eae9ea3fd9cf85581a727745951b0c";
+        const BASE = "https://prod.api-fortnite.com";
 
-    // Initial render
-    renderTournaments(tournaments);
+        // Mock tournaments (API doesn't have public list endpoint)
+        let tournaments = [
+            { id: 1, title: "FNCS Division 1", status: "live", image: "https://picsum.photos/id/1015/800/400", prize: "$2,500,000", time: "LIVE NOW", region: "Global" },
+            { id: 2, title: "Reload Elite Series", status: "upcoming", image: "https://picsum.photos/id/201/800/400", prize: "$500,000", time: "Tonight 8 PM EDT", region: "NA-East" },
+            { id: 3, title: "Duos Ranked Cup", status: "upcoming", image: "https://picsum.photos/id/237/800/400", prize: "$50,000", time: "Tomorrow", region: "EU" }
+        ];
 
-    // Try fetching real data (you can expand this later)
-    async function fetchRealTournaments() {
-      try {
-        // Example: if there's a list endpoint
-        const res = await fetch(`${BASE_URL}/api/v2/events`, {
-          headers: { "x-api-key": API_KEY }
-        });
-        console.log("API Response:", await res.text());
-      } catch(e) {
-        console.log("Using demo data (no public list endpoint found yet)");
-      }
-    }
+        async function fetchShop() {
+            try {
+                const res = await fetch(`${BASE}/api/v1/shop`, {
+                    headers: { 'x-api-key': API_KEY }
+                });
+                const data = await res.json();
+                const container = document.getElementById('shop-grid');
+                container.innerHTML = '';
 
-    fetchRealTournaments();
-  </script>
+                const items = data.data?.featured || data.data?.daily || [];
+                items.slice(0, 8).forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'shop-item';
+                    div.innerHTML = `
+                        <div class="card-image" style="height:200px; background:#0a1428;">
+                            <img src="${item.images?.icon || item.images?.featured || 'https://via.placeholder.com/300'}" alt="${item.name}">
+                        </div>
+                        <div style="padding:1rem;">
+                            <h3 style="color:var(--accent);">${item.name}</h3>
+                            <p style="font-size:1.4rem; font-weight:700;">${item.price} V-Bucks</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch(e) {
+                console.error("Shop fetch failed", e);
+                document.getElementById('shop-grid').innerHTML = "<p style='grid-column:1/-1;text-align:center;'>Shop data unavailable at the moment.</p>";
+            }
+        }
+
+        async function fetchNews() {
+            try {
+                const res = await fetch(`${BASE}/api/v1/news`, {
+                    headers: { 'x-api-key': API_KEY }
+                });
+                const data = await res.json();
+                const container = document.getElementById('news-container');
+                container.innerHTML = '';
+
+                (data.data || []).slice(0, 6).forEach(news => {
+                    const div = document.createElement('div');
+                    div.style = "background:rgba(19,41,79,0.6); border-radius:16px; overflow:hidden;";
+                    div.innerHTML = `
+                        <img src="${news.image || 'https://picsum.photos/id/180/600/300'}" style="width:100%; height:180px; object-fit:cover;">
+                        <div style="padding:1.2rem;">
+                            <h3>${news.title}</h3>
+                            <p style="opacity:0.8; font-size:0.95rem; margin-top:0.5rem;">${news.body?.substring(0, 120)}...</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch(e) {
+                console.error("News fetch failed", e);
+            }
+        }
+
+        function createTournamentCard(t) {
+            const card = document.createElement('div');
+            card.className = 'tournament-card';
+            card.innerHTML = `
+                <div class="card-image" style="background-image:url('${t.image}')">
+                    <div class="status ${t.status === 'live' ? 'live' : 'upcoming'}">
+                        ${t.status === 'live' ? '● LIVE' : 'UPCOMING'}
+                    </div>
+                </div>
+                <div style="padding:1.5rem;">
+                    <h3 style="font-size:1.6rem;">${t.title}</h3>
+                    <div style="color:var(--accent); font-size:1.4rem; font-weight:700; margin:0.8rem 0;">${t.prize}</div>
+                    <div style="display:flex; justify-content:space-between; opacity:0.85;">
+                        <span>${t.time}</span>
+                        <span>${t.region}</span>
+                    </div>
+                    <button onclick="joinTournament('${t.title}')" style="margin-top:1.5rem; width:100%; padding:14px; background:${t.status==='live'?'#ff0066':'var(--accent)'}; color:white; border:none; border-radius:12px; font-weight:700;">
+                        ${t.status === 'live' ? 'WATCH LIVE' : 'REGISTER NOW'}
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderTournaments(filtered) {
+            const grid = document.getElementById('tournaments-grid');
+            grid.innerHTML = '';
+            filtered.forEach(t => grid.appendChild(createTournamentCard(t)));
+        }
+
+        function switchTab(n) {
+            document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', i===n));
+            let filtered = tournaments;
+            if (n===1) filtered = tournaments.filter(t => t.status==='live');
+            if (n===2) filtered = tournaments.filter(t => t.status==='upcoming');
+            renderTournaments(filtered);
+        }
+
+        function joinTournament(name) {
+            alert(`🎮 Registered for ${name}!\nGood luck in the island!`);
+        }
+
+        // Init
+        window.onload = () => {
+            renderTournaments(tournaments);
+            fetchShop();
+            fetchNews();
+        };
+    </script>
 </body>
 </html>
