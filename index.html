@@ -1090,27 +1090,54 @@ async function fetchTournaments() {
     </div>`;
 
   const endpoints = [
-    '/api/v1/events?lang=en',
-    '/api/v2/events?lang=en',
-    '/api/v1/tournaments?lang=en',
-    '/api/v2/tournaments?lang=en',
+    '/api/v1/events/global',
+    '/api/v1/events/global/history',
+    '/api/v1/events/tracker',
+    '/api/v1/events/cashprizes',
+    '/api/v1/events/sessions',
+    '/api/v1/events/tokens',
   ];
 
   let data = null;
   let lastErr = '';
 
-  for (const ep of endpoints) {
+  // Try merging global + history for the richest dataset
+  let merged = [];
+  const primaryEndpoints = ['/api/v1/events/global', '/api/v1/events/global/history'];
+  for (const ep of primaryEndpoints) {
     try {
       const res = await fetch(BASE + ep, {
-        headers: { 'x-api-key': API_KEY }
+        headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
       });
-      if (!res.ok) { lastErr = `HTTP ${res.status} from ${ep}`; continue; }
+      if (!res.ok) continue;
       const json = await res.json();
       const arr = json.data || json.events || json.tournaments || json.items || json.results || (Array.isArray(json) ? json : null);
-      if (arr && arr.length > 0) { data = arr; break; }
-      lastErr = `Empty response from ${ep}`;
-    } catch(e) {
-      lastErr = e.message;
+      if (arr && arr.length > 0) merged.push(...arr);
+    } catch(e) { lastErr = e.message; }
+  }
+  // Deduplicate by id
+  if (merged.length > 0) {
+    const seen = new Set();
+    data = merged.filter(ev => {
+      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,80);
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+  }
+
+  // Fallback to other endpoints if still nothing
+  if (!data || data.length === 0) {
+    for (const ep of endpoints.slice(2)) {
+      try {
+        const res = await fetch(BASE + ep, {
+          headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
+        });
+        if (!res.ok) { lastErr = `HTTP ${res.status} from ${ep}`; continue; }
+        const json = await res.json();
+        const arr = json.data || json.events || json.tournaments || json.items || json.results || (Array.isArray(json) ? json : null);
+        if (arr && arr.length > 0) { data = arr; break; }
+        lastErr = `Empty response from ${ep}`;
+      } catch(e) { lastErr = e.message; }
     }
   }
 
