@@ -3,1107 +3,574 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DropIQ — Fortnite Tournament Intelligence</title>
+<title>DropIQ — Tournament Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --p0: #191919;
-    --p1: #1e1e1e;
-    --p2: #242030;
-    --p3: #2c1f45;
-    --p4: #3b1a7a;
-    --p5: #5a2db5;
-    --p6: #7c4fd4;
-    --p7: #a37de8;
-    --p8: #c9aef5;
-    --p9: #ede0ff;
-    --acc: #bf4eff;
-    --acc2: #7c3aff;
-    --glow: rgba(124,79,212,0.35);
-    --glowbright: rgba(191,78,255,0.5);
-    --gold: #f5c842;
-    --silver: #b0bec5;
-    --bronze: #cd7f32;
-    --danger: #ff4e6a;
-    --success: #3cffa0;
-    --text-main: #f0e8ff;
-    --text-muted: #9980c0;
-    --border: rgba(124,79,212,0.3);
-    --card-bg: rgba(30,28,42,0.92);
-    --card-border: rgba(124,79,212,0.22);
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: #191919;
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 70% 50% at 15% 10%, rgba(91,45,181,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 40% at 85% 85%, rgba(124,79,212,0.08) 0%, transparent 55%),
-      radial-gradient(ellipse 30% 25% at 50% 50%, rgba(191,78,255,0.04) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .noise {
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    opacity: 0.4;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .grid-lines {
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(124,79,212,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,79,212,0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrap {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-
-  header {
-    position: relative;
-    z-index: 10;
-    padding: 28px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .logo-icon {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--acc2), var(--acc));
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 20px var(--glowbright);
-  }
-
-  .logo-icon svg { width: 24px; height: 24px; }
-
-  .logo-text {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    background: linear-gradient(90deg, #e0c8ff, var(--acc));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .logo-sub {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-family: 'Space Mono', monospace;
-    margin-top: -2px;
-  }
-
-  .badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid rgba(124,79,212,0.4);
-    color: var(--p7);
-    background: rgba(60,25,120,0.4);
-  }
-
-  .hero {
-    padding: 70px 0 50px;
-    text-align: center;
-  }
-
-  .hero-eyebrow {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 4px;
-    color: var(--acc);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    opacity: 0.85;
-  }
-
-  .hero h1 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(42px, 7vw, 80px);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -1px;
-    margin-bottom: 18px;
-  }
-
-  .hero h1 span {
-    background: linear-gradient(90deg, #bf4eff, #7c3aff, #a37de8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero p {
-    font-size: 16px;
-    color: var(--text-muted);
-    max-width: 480px;
-    margin: 0 auto;
-    line-height: 1.7;
-  }
-
-  .divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--p5), transparent);
-    margin: 0 0 50px;
-    opacity: 0.4;
-  }
-
-  .controls-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 36px;
-    margin-bottom: 36px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 8px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,79,212,0.1);
-  }
-
-  .controls-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-  }
-
-  .select-wrap {
-    position: relative;
-    margin-bottom: 28px;
-  }
-
-  select {
-    width: 100%;
-    padding: 16px 50px 16px 20px;
-    background: rgba(25,25,25,0.95);
-    border: 1px solid rgba(124,79,212,0.4);
-    border-radius: 12px;
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
-    appearance: none;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-  }
-
-  select:hover { border-color: rgba(124,79,212,0.7); }
-  select:focus { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(191,78,255,0.15); }
-
-  select option {
-    background: #242030;
-    color: var(--text-main);
-  }
-
-  .select-arrow {
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--p6);
-  }
-
-  .btn-row {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    padding: 14px 32px;
-    border-radius: 10px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--acc2), var(--acc));
-    color: #fff;
-    box-shadow: 0 4px 24px rgba(191,78,255,0.35);
-  }
-
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.1);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .btn-primary:hover::before { opacity: 1; }
-  .btn-primary:hover { box-shadow: 0 6px 32px rgba(191,78,255,0.5); transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid rgba(124,79,212,0.3);
-  }
-
-  .btn-ghost:hover {
-    border-color: rgba(124,79,212,0.6);
-    color: var(--text-main);
-    background: rgba(124,79,212,0.1);
-  }
-
-  .btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-
-  .loading-bar {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--acc), var(--acc2), var(--acc), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 2px;
-    margin-bottom: 28px;
-    display: none;
-  }
-
-  .loading-bar.active { display: block; }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  .status-msg {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 12px 0;
-    display: none;
-  }
-
-  .status-msg.visible { display: block; }
-
-  .results-section { display: none; }
-  .results-section.visible { display: block; }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 36px;
-  }
-
-  .stat-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 24px 24px 20px;
-    backdrop-filter: blur(20px);
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-
-  .stat-card:hover {
-    border-color: rgba(124,79,212,0.5);
-    transform: translateY(-2px);
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--acc2), var(--acc));
-    opacity: 0.7;
-  }
-
-  .stat-card.gold::before { background: linear-gradient(90deg, #f5c842, #ffdf6b); }
-  .stat-card.silver::before { background: linear-gradient(90deg, #90a4ae, #cfd8dc); }
-
-  .stat-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-  }
-
-  .stat-value {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 42px;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--acc);
-    letter-spacing: -1px;
-  }
-
-  .stat-card.gold .stat-value { color: var(--gold); }
-  .stat-card.silver .stat-value { color: var(--silver); }
-
-  .stat-sub {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 6px;
-    font-weight: 300;
-  }
-
-  .insight-box {
-    background: rgba(60,25,120,0.3);
-    border: 1px solid rgba(124,79,212,0.35);
-    border-radius: 14px;
-    padding: 20px 24px;
-    margin-bottom: 36px;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .insight-icon {
-    font-size: 22px;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .insight-text {
-    font-size: 14px;
-    line-height: 1.65;
-    color: var(--p8);
-  }
-
-  .insight-text strong {
-    color: var(--acc);
-    font-weight: 500;
-  }
-
-  .leaderboard-section {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    overflow: hidden;
-    backdrop-filter: blur(20px);
-    margin-bottom: 36px;
-  }
-
-  .lb-header {
-    padding: 22px 28px 18px;
-    border-bottom: 1px solid rgba(124,79,212,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .lb-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    color: var(--p8);
-  }
-
-  .lb-count {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-
-  .lb-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .lb-table thead th {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    padding: 12px 18px;
-    text-align: left;
-    border-bottom: 1px solid rgba(124,79,212,0.15);
-    background: rgba(10,0,16,0.4);
-  }
-
-  .lb-table thead th:last-child { text-align: right; }
-
-  .lb-table tbody tr {
-    border-bottom: 1px solid rgba(124,79,212,0.1);
-    transition: background 0.15s;
-  }
-
-  .lb-table tbody tr:hover { background: rgba(124,79,212,0.08); }
-  .lb-table tbody tr:last-child { border-bottom: none; }
-
-  .lb-table tbody td {
-    padding: 13px 18px;
-    font-size: 14px;
-    color: var(--text-main);
-    font-weight: 300;
-  }
-
-  .lb-table tbody td:last-child {
-    text-align: right;
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-  }
-
-  .rank-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: var(--text-muted);
-    min-width: 32px;
-    display: inline-block;
-  }
-
-  .rank-1 .rank-num { color: var(--gold); }
-  .rank-2 .rank-num { color: var(--silver); }
-  .rank-3 .rank-num { color: var(--bronze); }
-
-  .points-pill {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 13px;
-    background: rgba(91,45,181,0.25);
-    color: var(--acc);
-    border: 1px solid rgba(124,79,212,0.3);
-  }
-
-  .points-pill.above { background: rgba(60,255,160,0.1); color: var(--success); border-color: rgba(60,255,160,0.25); }
-  .points-pill.below { background: rgba(255,78,106,0.1); color: var(--danger); border-color: rgba(255,78,106,0.25); }
-
-  .player-name {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .bar-bg {
-    height: 4px;
-    background: rgba(60,25,120,0.5);
-    border-radius: 2px;
-    margin-top: 5px;
-    overflow: hidden;
-  }
-
-  .bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    background: linear-gradient(90deg, var(--acc2), var(--acc));
-    transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
-  }
-
-  .window-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 28px;
-  }
-
-  .window-pill {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(124,79,212,0.3);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.15s;
-    background: transparent;
-  }
-
-  .window-pill:hover { border-color: rgba(124,79,212,0.6); color: var(--text-main); }
-  .window-pill.active { border-color: var(--acc); color: var(--acc); background: rgba(191,78,255,0.1); }
-
-  .empty-state {
-    text-align: center;
-    padding: 80px 24px;
-  }
-
-  .empty-state .big-icon {
-    font-size: 52px;
-    margin-bottom: 18px;
-    opacity: 0.4;
-  }
-
-  .empty-state p {
-    color: var(--text-muted);
-    font-size: 15px;
-  }
-
-  .error-msg {
-    background: rgba(255,78,106,0.1);
-    border: 1px solid rgba(255,78,106,0.3);
-    border-radius: 12px;
-    padding: 16px 20px;
-    color: #ff8fa0;
-    font-size: 14px;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    display: none;
-    margin-bottom: 20px;
-  }
-
-  .error-msg.visible { display: block; }
-
-  footer {
-    text-align: center;
-    padding: 50px 0 36px;
-    font-size: 12px;
-    color: rgba(153,128,192,0.5);
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 1px;
-  }
-
-  footer a { color: var(--p6); text-decoration: none; }
-
-  @media (max-width: 600px) {
-    .hero h1 { font-size: 38px; }
-    .controls-card { padding: 22px; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .stat-value { font-size: 32px; }
-    .lb-table thead th:nth-child(3),
-    .lb-table tbody td:nth-child(3) { display: none; }
-  }
-
-  .pulse-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: var(--success);
-    border-radius: 50%;
-    margin-right: 6px;
-    animation: pulse 1.8s ease-in-out infinite;
-    box-shadow: 0 0 0 0 rgba(60,255,160,0.5);
-  }
-
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(60,255,160,0.5); }
-    70% { box-shadow: 0 0 0 6px rgba(60,255,160,0); }
-    100% { box-shadow: 0 0 0 0 rgba(60,255,160,0); }
-  }
-
-  .fade-in {
-    animation: fadeUp 0.4s ease-out;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#191919;
+  --bg2:#1f1f1f;
+  --bg3:#252525;
+  --bg4:#2c2c2c;
+  --acc:#bf4eff;
+  --acc2:#7c3aff;
+  --acc3:#9d5cf5;
+  --gold:#f5c842;
+  --silver:#b0bec5;
+  --bronze:#cd7f32;
+  --live:#ff4e6a;
+  --upcoming:#3cffa0;
+  --past:#9980c0;
+  --text:#f0e8ff;
+  --muted:#8870aa;
+  --border:rgba(124,79,212,0.18);
+  --border2:rgba(124,79,212,0.35);
+  --card:rgba(31,28,44,0.95);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 5%,rgba(91,45,181,0.1) 0%,transparent 55%),radial-gradient(ellipse 40% 30% at 90% 90%,rgba(124,79,212,0.07) 0%,transparent 50%);pointer-events:none;z-index:0}
+.gridbg{position:fixed;inset:0;background-image:linear-gradient(rgba(124,79,212,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,79,212,0.03) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 24px}
+header{padding:26px 0 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:0}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--acc2),var(--acc));border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(191,78,255,0.4)}
+.logo-icon svg{width:22px;height:22px}
+.logo-text{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;letter-spacing:2px;background:linear-gradient(90deg,#dcc8ff,var(--acc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;font-family:'Space Mono',monospace;margin-top:-2px}
+.refresh-btn{background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);padding:7px 14px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.refresh-btn:hover{border-color:var(--acc);color:var(--acc);background:rgba(191,78,255,0.08)}
+.refresh-btn svg{width:13px;height:13px}
+.hero{padding:44px 0 32px;text-align:center}
+.hero h1{font-family:'Rajdhani',sans-serif;font-size:clamp(36px,6vw,66px);font-weight:700;line-height:1;letter-spacing:-1px;margin-bottom:12px}
+.hero h1 span{background:linear-gradient(90deg,#bf4eff,#7c3aff,#a37de8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:15px;color:var(--muted);max-width:460px;margin:0 auto;line-height:1.7}
+.stats-bar{display:flex;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px}
+.sb-item{flex:1;padding:14px 20px;text-align:center;border-right:1px solid var(--border)}
+.sb-item:last-child{border-right:none}
+.sb-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.sb-val{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;line-height:1}
+.sb-val.clive{color:var(--live)}
+.sb-val.cupcoming{color:var(--upcoming)}
+.sb-val.cgold{color:var(--gold)}
+.sb-val.cpurple{color:var(--acc)}
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--bg2);border-radius:12px;padding:4px;width:fit-content}
+.tab{padding:9px 22px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--bg4);color:var(--text);box-shadow:0 0 0 1px var(--border2)}
+.tdot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.tdot.live{background:var(--live);box-shadow:0 0 6px var(--live)}
+.tdot.upcoming{background:var(--upcoming)}
+.tdot.past{background:var(--past)}
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 0;gap:16px}
+.spinner{width:36px;height:36px;border:2px solid rgba(124,79,212,0.2);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted)}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:600;letter-spacing:1px;color:var(--text);display:flex;align-items:center;gap:10px}
+.section-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:48px}
+.t-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .2s,transform .2s;position:relative}
+.t-card:hover{border-color:rgba(124,79,212,0.38);transform:translateY(-2px)}
+.t-card.expanded{border-color:rgba(124,79,212,0.5)}
+.t-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.t-card.live-card::before{background:linear-gradient(90deg,var(--live),rgba(255,78,106,0.2))}
+.t-card.upcoming-card::before{background:linear-gradient(90deg,var(--upcoming),rgba(60,255,160,0.15))}
+.t-card.past-card::before{background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.t-card-top{padding:18px 18px 14px}
+.t-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.t-name{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:600;line-height:1.25;color:var(--text);flex:1}
+.t-status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;flex-shrink:0}
+.badge-live{background:rgba(255,78,106,0.15);color:var(--live);border:1px solid rgba(255,78,106,0.3)}
+.badge-upcoming{background:rgba(60,255,160,0.1);color:var(--upcoming);border:1px solid rgba(60,255,160,0.25)}
+.badge-past{background:rgba(153,128,192,0.12);color:var(--past);border:1px solid rgba(153,128,192,0.2)}
+.t-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:12px}
+.t-meta-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;font-family:'Space Mono',monospace}
+.t-meta-item svg{width:11px;height:11px;flex-shrink:0}
+.t-prize-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.t-prize{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:-0.5px;line-height:1}
+.t-prize-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:2px}
+.t-prize-none{font-size:12px;color:rgba(153,128,192,0.5);font-style:italic}
+.t-expand-btn{background:rgba(124,79,212,0.1);border:1px solid var(--border2);border-radius:7px;color:var(--muted);padding:6px 10px;font-size:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;font-family:'Space Mono',monospace;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.t-expand-btn:hover{background:rgba(124,79,212,0.2);color:var(--text)}
+.t-expand-btn svg{width:11px;height:11px;transition:transform .2s}
+.t-card.expanded .t-expand-btn svg{transform:rotate(180deg)}
+.lb-panel{border-top:1px solid var(--border);overflow:hidden;max-height:0;transition:max-height .45s cubic-bezier(0.16,1,0.3,1)}
+.lb-panel.open{max-height:2400px}
+.lb-loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:28px;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px}
+.lb-spinner{width:16px;height:16px;border:2px solid rgba(124,79,212,0.2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
+.lb-sessions{display:flex;flex-wrap:wrap;gap:5px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.session-pill{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;background:transparent;transition:all .15s;text-transform:uppercase}
+.session-pill:hover{border-color:var(--border2);color:var(--text)}
+.session-pill.active{border-color:var(--acc);color:var(--acc);background:rgba(191,78,255,0.1)}
+.avg-bar{background:rgba(245,200,66,0.07);border-left:2px solid var(--gold);padding:7px 16px;font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:1px}
+.lb-table-wrap{padding:0 0 2px}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table thead th{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:9px 16px;text-align:left;background:rgba(0,0,0,0.25);border-bottom:1px solid var(--border)}
+.lb-table thead th:last-child{text-align:right}
+.lb-table tbody tr{border-bottom:1px solid rgba(124,79,212,0.06);transition:background .12s}
+.lb-table tbody tr:last-child{border-bottom:none}
+.lb-table tbody tr:hover{background:rgba(124,79,212,0.06)}
+.lb-table tbody td{padding:9px 16px;font-size:13px;color:var(--text);font-weight:300}
+.lb-table tbody td:last-child{text-align:right}
+.rank-cell{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);display:inline-block;min-width:30px}
+.rank-cell.r1{color:var(--gold)}
+.rank-cell.r2{color:var(--silver)}
+.rank-cell.r3{color:var(--bronze)}
+.pts-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;background:rgba(91,45,181,0.18);color:var(--acc3);border:1px solid rgba(124,79,212,0.22)}
+.pbar-wrap{height:3px;background:rgba(60,25,120,0.35);border-radius:2px;margin-top:4px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.player-name-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-footer{padding:9px 16px;text-align:center;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;border-top:1px solid var(--border)}
+.no-data{padding:28px;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px}
+.upcoming-detail{padding:14px 18px 18px;border-top:1px solid var(--border)}
+.ud-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ud-item{background:rgba(0,0,0,0.2);border-radius:9px;padding:10px 12px}
+.ud-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.ud-val{font-size:13px;font-weight:400;color:var(--text)}
+.ud-val.green{color:var(--upcoming)}
+.countdown{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--upcoming);letter-spacing:1px}
+.empty{text-align:center;padding:80px 0;color:var(--muted)}
+.empty-icon{font-size:44px;margin-bottom:14px;opacity:0.4}
+.empty p{font-size:14px}
+.error-banner{background:rgba(255,78,106,0.1);border:1px solid rgba(255,78,106,0.25);border-radius:10px;padding:12px 16px;color:#ff8fa0;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;margin-bottom:18px}
+footer{text-align:center;padding:36px 0 26px;font-size:11px;color:rgba(153,128,192,0.35);font-family:'Space Mono',monospace;letter-spacing:1px}
+footer a{color:var(--acc3);text-decoration:none}
+.fade-in{animation:fadeUp .32s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:640px){
+  .cards-grid{grid-template-columns:1fr}
+  .stats-bar{flex-wrap:wrap}
+  .sb-item{flex:1 1 50%;border-bottom:1px solid var(--border)}
+  .tabs{width:100%;overflow-x:auto}
+  .ud-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-
-<div class="noise"></div>
-<div class="grid-lines"></div>
-
+<div class="gridbg"></div>
 <div class="wrap">
 
-  <header>
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      </div>
-      <div>
-        <div class="logo-text">DropIQ</div>
-        <div class="logo-sub">Tournament Intelligence</div>
-      </div>
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     </div>
-    <div class="badge">FORTNITE API v2</div>
-  </header>
-
-  <div class="hero">
-    <div class="hero-eyebrow">⬡ Qualification Intelligence</div>
-    <h1>Know Your <span>Target Score</span></h1>
-    <p>Analyze tournament leaderboards and calculate the average points needed to qualify — before you drop.</p>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="controls-card">
-    <div class="controls-label">01 — Select Tournament</div>
-    <div class="select-wrap">
-      <select id="eventSelect">
-        <option value="">Loading tournaments...</option>
-      </select>
-      <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-    </div>
-
-    <div id="windowSection" style="display:none;">
-      <div class="controls-label">02 — Select Session Window</div>
-      <div class="window-pills" id="windowPills"></div>
-    </div>
-
-    <div class="error-msg" id="errorMsg"></div>
-    <div class="loading-bar" id="loadingBar"></div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()" disabled>
-        ⚡ Analyze Tournament
-      </button>
-      <button class="btn btn-ghost" onclick="resetAll()">
-        Reset
-      </button>
+    <div>
+      <div class="logo-text">DropIQ</div>
+      <div class="logo-sub">Tournament Hub</div>
     </div>
   </div>
+  <button class="refresh-btn" onclick="init()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    Refresh
+  </button>
+</header>
 
-  <div class="status-msg" id="statusMsg"></div>
+<div class="hero">
+  <h1>Fortnite <span>Tournament Hub</span></h1>
+  <p>Live events, upcoming competitions, and full leaderboards with prize pools — all in one place.</p>
+</div>
 
-  <div class="results-section" id="resultsSection">
-    <div class="stats-grid" id="statsGrid"></div>
-    <div class="insight-box" id="insightBox"></div>
-    <div class="leaderboard-section">
-      <div class="lb-header">
-        <div class="lb-title" id="lbTitle">Leaderboard</div>
-        <div class="lb-count" id="lbCount"></div>
-      </div>
-      <div id="lbBody"></div>
-    </div>
-  </div>
+<div id="errorBanner" class="error-banner" style="display:none"></div>
 
-  <div id="emptyState" class="empty-state">
-    <div class="big-icon">🎯</div>
-    <p>Select a tournament above and click Analyze to see qualification data.</p>
-  </div>
+<div id="statsBar" class="stats-bar" style="display:none">
+  <div class="sb-item"><div class="sb-label">Live Now</div><div class="sb-val clive" id="sb-live">—</div></div>
+  <div class="sb-item"><div class="sb-label">Upcoming</div><div class="sb-val cupcoming" id="sb-upcoming">—</div></div>
+  <div class="sb-item"><div class="sb-label">Total Prize</div><div class="sb-val cgold" id="sb-prize">—</div></div>
+  <div class="sb-item"><div class="sb-label">Past Events</div><div class="sb-val cpurple" id="sb-past">—</div></div>
+</div>
 
-  <footer>
-    <p>DropIQ — Powered by <a href="https://api-fortnite.com" target="_blank">api-fortnite.com</a> &nbsp;|&nbsp; Unofficial. Not affiliated with Epic Games.</p>
-  </footer>
+<div id="tabRow" class="tabs" style="display:none">
+  <button class="tab active" onclick="switchTab('live',this)"><span class="tdot live"></span>Live</button>
+  <button class="tab" onclick="switchTab('upcoming',this)"><span class="tdot upcoming"></span>Upcoming</button>
+  <button class="tab" onclick="switchTab('past',this)"><span class="tdot past"></span>Past</button>
+</div>
 
+<div id="pageLoading" class="page-loading">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading tournaments...</div>
+</div>
+
+<div id="tabContent"></div>
+
+<footer>DropIQ — Powered by <a href="https://api-fortnite.com" target="_blank">api-fortnite.com</a> &nbsp;·&nbsp; Unofficial. Not affiliated with Epic Games.</footer>
 </div>
 
 <script>
-const API_KEY = 'f1758950fe4aaf77a7741f5deb3e7a6687f48a2d12ed029a41e3f18adb46f759';
-const BASE = 'https://prod.api-fortnite.com';
+const API_KEY='f1758950fe4aaf77a7741f5deb3e7a6687f48a2d12ed029a41e3f18adb46f759';
+const BASE='https://prod.api-fortnite.com';
+let allEvents=[];
+let cashPrizesMap={};
+let currentTab='live';
+let timers=[];
 
-let allEvents = [];
-let selectedWindowId = null;
-let currentSessions = [];
-let globalAvgForAnalyze = 0;
+async function apiFetch(path){
+  const r=await fetch(BASE+path,{headers:{'x-api-key':API_KEY}});
+  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+  return r.json();
+}
 
-async function apiFetch(path) {
-  const res = await fetch(BASE + path, { headers: { 'x-api-key': API_KEY } });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '');
-    throw new Error(`${res.status} ${res.statusText}${txt ? ': ' + txt.slice(0,120) : ''}`);
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function fmtDate(ts){
+  if(!ts)return'—';
+  return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+}
+
+function fmtDateTime(ts){
+  if(!ts)return'—';
+  return new Date(ts).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function fmtPrize(val){
+  if(val===null||val===undefined)return null;
+  const n=Number(val);
+  if(isNaN(n)||n<=0)return null;
+  if(n>=1000000)return'$'+(n/1000000).toFixed(1)+'M';
+  if(n>=1000)return'$'+(n/1000).toFixed(0)+'K';
+  return'$'+n.toLocaleString();
+}
+
+function classify(ev){
+  const now=Date.now();
+  const s=ev.beginTime?new Date(ev.beginTime).getTime():null;
+  const e=ev.endTime?new Date(ev.endTime).getTime():null;
+  if(s&&e){if(now>=s&&now<=e)return'live';if(now<s)return'upcoming';return'past';}
+  if(s&&now<s)return'upcoming';
+  if(e&&now>e)return'past';
+  return'past';
+}
+
+function getPrize(ev){
+  const id=ev.eventId||ev.id;
+  if(cashPrizesMap[id])return cashPrizesMap[id];
+  return ev.prizePool||ev.cashPrize||ev.totalPrize||ev.prize||null;
+}
+
+function extractList(data,keys){
+  if(!data)return[];
+  for(const k of keys){
+    if(Array.isArray(data[k])&&data[k].length)return data[k];
   }
-  return res.json();
+  if(Array.isArray(data)&&data.length)return data;
+  return[];
 }
 
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.classList.add('visible');
+function getPoints(e){return e.points??e.score??e.totalPoints??e.teamPoints??e.value??e.pts??0}
+
+function getPlayerName(e){
+  return e.playerName||e.displayName||e.epicDisplayName||e.teamName||e.name||e.accountId||e.playerId||'Unknown';
 }
 
-function hideError() {
-  document.getElementById('errorMsg').classList.remove('visible');
+function formatCountdown(ms){
+  if(ms<=0)return'Starting now';
+  const d=Math.floor(ms/86400000);
+  const h=Math.floor((ms%86400000)/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  const s=Math.floor((ms%60000)/1000);
+  if(d>0)return`${d}d ${h}h ${m}m`;
+  if(h>0)return`${h}h ${m}m ${s}s`;
+  return`${m}m ${s}s`;
 }
 
-function setLoading(on) {
-  document.getElementById('loadingBar').classList.toggle('active', on);
-  document.getElementById('analyzeBtn').disabled = on;
-}
+async function init(){
+  allEvents=[];cashPrizesMap={};
+  timers.forEach(clearInterval);timers=[];
+  document.getElementById('pageLoading').style.display='flex';
+  document.getElementById('tabContent').innerHTML='';
+  document.getElementById('statsBar').style.display='none';
+  document.getElementById('tabRow').style.display='none';
+  document.getElementById('errorBanner').style.display='none';
 
-function setStatus(msg) {
-  const el = document.getElementById('statusMsg');
-  if (msg) {
-    el.innerHTML = `<span class="pulse-dot"></span>${msg}`;
-    el.classList.add('visible');
-  } else {
-    el.classList.remove('visible');
+  try{
+    const[gd,hd,cd]=await Promise.allSettled([
+      apiFetch('/api/v1/events/global'),
+      apiFetch('/api/v1/events/global/history'),
+      apiFetch('/api/v1/events/cashprizes')
+    ]);
+
+    const evA=gd.status==='fulfilled'?extractList(gd.value,['events','data','items']):[];
+    const evB=hd.status==='fulfilled'?extractList(hd.value,['events','data','items']):[];
+    const seen=new Set();
+    for(const ev of[...evA,...evB]){
+      const id=ev.eventId||ev.id;
+      if(id&&!seen.has(id)){seen.add(id);allEvents.push(ev);}
+    }
+
+    if(cd.status==='fulfilled'){
+      const prizes=cd.value;
+      const list=extractList(prizes,['events','data','cashPrizes','prizes','items']);
+      for(const p of list){
+        const id=p.eventId||p.id;
+        const v=p.totalPrize||p.prizePool||p.cashPrize||p.prize||p.amount;
+        if(id&&v)cashPrizesMap[id]=v;
+      }
+    }
+
+    if(!allEvents.length)throw new Error('No tournament data returned from API.');
+    renderUI();
+  }catch(e){
+    document.getElementById('pageLoading').style.display='none';
+    const eb=document.getElementById('errorBanner');
+    eb.style.display='block';
+    eb.textContent='Error loading tournaments: '+e.message;
   }
 }
 
-async function loadEvents() {
-  setStatus('Fetching global events...');
-  try {
-    const data = await apiFetch('/api/v1/events/global');
-    const events = data.events || data.data || (Array.isArray(data) ? data : []);
-    allEvents = events;
-    populateSelect();
-  } catch(e) {
-    showError('Could not load events: ' + e.message);
-    document.getElementById('eventSelect').innerHTML = '<option value="">Failed to load — check console</option>';
-    console.error(e);
-  }
-  setStatus('');
+function renderUI(){
+  document.getElementById('pageLoading').style.display='none';
+  const live=allEvents.filter(e=>classify(e)==='live');
+  const upcoming=allEvents.filter(e=>classify(e)==='upcoming');
+  const past=allEvents.filter(e=>classify(e)==='past');
+
+  let totalPrize=0;
+  for(const ev of allEvents){const p=getPrize(ev);if(p)totalPrize+=Number(p);}
+  document.getElementById('sb-live').textContent=live.length;
+  document.getElementById('sb-upcoming').textContent=upcoming.length;
+  document.getElementById('sb-prize').textContent=fmtPrize(totalPrize)||'—';
+  document.getElementById('sb-past').textContent=past.length;
+  document.getElementById('statsBar').style.display='flex';
+  document.getElementById('tabRow').style.display='flex';
+  renderTab(currentTab);
 }
 
-function populateSelect() {
-  const sel = document.getElementById('eventSelect');
-  if (!allEvents.length) {
-    sel.innerHTML = '<option value="">No events found</option>';
+function switchTab(tab,el){
+  currentTab=tab;
+  timers.forEach(clearInterval);timers=[];
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(tab);
+}
+
+function renderTab(tab){
+  let events=allEvents.filter(e=>classify(e)===tab);
+  const container=document.getElementById('tabContent');
+
+  if(!events.length){
+    container.innerHTML=`<div class="empty"><div class="empty-icon">🎮</div><p>No ${tab} tournaments found.</p></div>`;
     return;
   }
-  sel.innerHTML = '<option value="">— Choose a tournament —</option>';
-  allEvents.forEach(ev => {
-    const opt = document.createElement('option');
-    const id = ev.eventId || ev.id || ev.event_id || '';
-    opt.value = id;
-    const name = ev.eventDisplayName || ev.name || ev.displayName || ev.title || id || 'Unnamed';
-    const date = ev.beginTime || ev.startTime || ev.start_time || '';
-    opt.textContent = name + (date ? ` · ${new Date(date).toLocaleDateString()}` : '');
-    sel.appendChild(opt);
-  });
-  sel.onchange = onEventChange;
-}
 
-async function onEventChange() {
-  const sel = document.getElementById('eventSelect');
-  const eventId = sel.value;
-  hideError();
-  resetResults();
-  document.getElementById('windowSection').style.display = 'none';
-  document.getElementById('windowPills').innerHTML = '';
-  selectedWindowId = null;
-  currentSessions = [];
-  document.getElementById('analyzeBtn').disabled = true;
-
-  if (!eventId) return;
-  document.getElementById('analyzeBtn').disabled = false;
-
-  setStatus('Loading sessions...');
-  setLoading(true);
-  try {
-    const data = await apiFetch(`/api/v1/events/sessions?eventId=${encodeURIComponent(eventId)}`);
-    const sessions = data.sessions || data.windows || data.data || (Array.isArray(data) ? data : []);
-    currentSessions = sessions;
-    if (currentSessions.length > 0) {
-      renderWindowPills(currentSessions);
-      document.getElementById('windowSection').style.display = 'block';
-    }
-  } catch(e) {
-    // Sessions endpoint may 404 for some events — just proceed without window filter
-  }
-  setLoading(false);
-  setStatus('');
-}
-
-function renderWindowPills(sessions) {
-  const container = document.getElementById('windowPills');
-  container.innerHTML = '';
-
-  const allPill = document.createElement('button');
-  allPill.className = 'window-pill active';
-  allPill.textContent = 'ALL SESSIONS';
-  allPill.dataset.id = 'all';
-  allPill.onclick = () => selectWindow('all', allPill);
-  container.appendChild(allPill);
-
-  sessions.forEach((s, i) => {
-    const pill = document.createElement('button');
-    pill.className = 'window-pill';
-    const wid = s.eventWindowId || s.windowId || s.id || i;
-    const label = s.name || s.sessionName || s.eventWindowId || `Session ${i + 1}`;
-    pill.textContent = String(label).toUpperCase();
-    pill.dataset.id = wid;
-    pill.onclick = () => selectWindow(pill.dataset.id, pill);
-    container.appendChild(pill);
+  events.sort((a,b)=>{
+    const ta=new Date(a.beginTime||a.startTime||0).getTime();
+    const tb=new Date(b.beginTime||b.startTime||0).getTime();
+    return tab==='upcoming'?ta-tb:tb-ta;
   });
 
-  selectedWindowId = 'all';
+  container.innerHTML=`
+    <div class="section-hd">
+      <div class="section-title"><span class="tdot ${tab}" style="width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0"></span>${tab.charAt(0).toUpperCase()+tab.slice(1)} Tournaments</div>
+      <div class="section-count">${events.length} event${events.length!==1?'s':''}</div>
+    </div>
+    <div class="cards-grid fade-in" id="cardsGrid">
+      ${events.map(ev=>renderCard(ev,tab)).join('')}
+    </div>`;
+
+  if(tab==='upcoming'){
+    events.forEach(ev=>{
+      const id=ev.eventId||ev.id;
+      const start=ev.beginTime?new Date(ev.beginTime).getTime():null;
+      if(!start)return;
+      const el=document.getElementById('cd-'+id);
+      if(!el)return;
+      el.textContent=formatCountdown(start-Date.now());
+      const t=setInterval(()=>{
+        const diff=start-Date.now();
+        if(!document.getElementById('cd-'+id)){clearInterval(t);return;}
+        document.getElementById('cd-'+id).textContent=diff<=0?'Starting now':formatCountdown(diff);
+        if(diff<=0)clearInterval(t);
+      },1000);
+      timers.push(t);
+    });
+  }
 }
 
-function selectWindow(id, el) {
-  document.querySelectorAll('.window-pill').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  selectedWindowId = id;
+function renderCard(ev,tab){
+  const id=ev.eventId||ev.id||'';
+  const name=ev.eventDisplayName||ev.name||ev.displayName||ev.title||id||'Unnamed Tournament';
+  const prize=getPrize(ev);
+  const prizeStr=fmtPrize(prize);
+  const start=ev.beginTime||ev.startTime;
+  const end=ev.endTime;
+  const region=ev.region||ev.regionId||'';
+  const badgeClass=tab==='live'?'badge-live':tab==='upcoming'?'badge-upcoming':'badge-past';
+  const cardClass=tab+'-card';
+  const badgeLabel=tab==='live'?'● Live':tab==='upcoming'?'◆ Upcoming':'○ Ended';
+
+  const prizeHTML=prizeStr
+    ?`<div><div class="t-prize">${esc(prizeStr)}</div><div class="t-prize-label">Prize Pool</div></div>`
+    :`<div class="t-prize-none">No prize data</div>`;
+
+  const expandBtn=tab!=='upcoming'
+    ?`<button class="t-expand-btn" onclick="toggleLb('${esc(id)}',this)">Leaderboard<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>`
+    :'';
+
+  return`<div class="t-card ${cardClass}" id="card-${esc(id)}">
+  <div class="t-card-top">
+    <div class="t-card-header">
+      <div class="t-name">${esc(name)}</div>
+      <span class="t-status-badge ${badgeClass}">${badgeLabel}</span>
+    </div>
+    <div class="t-meta">
+      ${start?`<span class="t-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${esc(fmtDateTime(start))}</span>`:''}
+      ${end?`<span class="t-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Ends ${esc(fmtDate(end))}</span>`:''}
+      ${region?`<span class="t-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>${esc(region)}</span>`:''}
+    </div>
+    <div class="t-prize-row">${prizeHTML}${expandBtn}</div>
+  </div>
+  ${tab==='upcoming'?renderUpcomingDetail(ev,id):`<div class="lb-panel" id="lb-${esc(id)}"></div>`}
+</div>`;
 }
 
-function resetResults() {
-  document.getElementById('resultsSection').classList.remove('visible');
-  document.getElementById('emptyState').style.display = 'block';
-  document.getElementById('statsGrid').innerHTML = '';
-  document.getElementById('lbBody').innerHTML = '';
+function renderUpcomingDetail(ev,id){
+  const start=ev.beginTime?new Date(ev.beginTime).getTime():null;
+  const prize=getPrize(ev);
+  const prizeStr=fmtPrize(prize);
+  const maxP=ev.maxTeams||ev.maxPlayers||null;
+  const scoring=ev.scoreType||ev.gameType||null;
+  return`<div class="upcoming-detail">
+    <div class="ud-grid">
+      <div class="ud-item"><div class="ud-label">Starts In</div><div class="countdown" id="cd-${esc(id)}">—</div></div>
+      <div class="ud-item"><div class="ud-label">Start Date</div><div class="ud-val">${esc(fmtDateTime(ev.beginTime))}</div></div>
+      ${prizeStr?`<div class="ud-item"><div class="ud-label">Prize Pool</div><div class="ud-val green">${esc(prizeStr)}</div></div>`:''}
+      ${ev.endTime?`<div class="ud-item"><div class="ud-label">End Date</div><div class="ud-val">${esc(fmtDateTime(ev.endTime))}</div></div>`:''}
+      ${maxP?`<div class="ud-item"><div class="ud-label">Max Teams</div><div class="ud-val">${esc(maxP)}</div></div>`:''}
+      ${scoring?`<div class="ud-item"><div class="ud-label">Format</div><div class="ud-val">${esc(scoring)}</div></div>`:''}
+    </div>
+  </div>`;
 }
 
-function resetAll() {
-  document.getElementById('eventSelect').value = '';
-  document.getElementById('windowSection').style.display = 'none';
-  document.getElementById('analyzeBtn').disabled = true;
-  hideError();
-  resetResults();
-  setStatus('');
-  selectedWindowId = null;
-  currentSessions = [];
-}
+async function toggleLb(eventId,btn){
+  const card=document.getElementById('card-'+eventId);
+  const panel=document.getElementById('lb-'+eventId);
+  const isOpen=panel.classList.contains('open');
+  if(isOpen){panel.classList.remove('open');card.classList.remove('expanded');return;}
+  card.classList.add('expanded');
+  panel.classList.add('open');
+  if(panel.dataset.loaded)return;
+  panel.dataset.loaded='1';
+  panel.innerHTML=`<div class="lb-loading"><div class="lb-spinner"></div>Loading leaderboard...</div>`;
 
-async function analyze() {
-  const sel = document.getElementById('eventSelect');
-  const eventId = sel.value;
-  if (!eventId) return;
+  try{
+    const[lbR,sessR]=await Promise.allSettled([
+      apiFetch(`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}`),
+      apiFetch(`/api/v1/events/sessions?eventId=${encodeURIComponent(eventId)}`)
+    ]);
 
-  hideError();
-  resetResults();
-  setLoading(true);
-  setStatus('Fetching leaderboard...');
+    const entries=lbR.status==='fulfilled'?extractEntries(lbR.value):[];
+    const sessions=sessR.status==='fulfilled'?extractList(sessR.value,['sessions','windows','eventWindows','data']):[];
 
-  try {
-    let entries = [];
-    let cashPrizes = null;
-
-    if (selectedWindowId && selectedWindowId !== 'all') {
-      // Specific session window — use cashprize endpoint
-      setStatus('Loading session leaderboard...');
-      const [lbData, prizeData] = await Promise.all([
-        apiFetch(`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}&eventWindowId=${encodeURIComponent(selectedWindowId)}`).catch(() => null),
-        apiFetch(`/api/v1/events/cashprize/${encodeURIComponent(selectedWindowId)}`).catch(() => null)
-      ]);
-      entries = extractEntries(lbData);
-      cashPrizes = prizeData;
-    } else {
-      // All sessions — use global leaderboard
-      const lbData = await apiFetch(`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}`).catch(() => null)
-        || await apiFetch(`/api/v1/events/global/leaderboard`).catch(() => null);
-      entries = extractEntries(lbData);
-
-      // If still empty, try aggregating from cashprizes list
-      if (!entries.length) {
-        setStatus('Trying cashprizes endpoint...');
-        const cpData = await apiFetch(`/api/v1/events/cashprizes`).catch(() => null);
-        if (cpData) {
-          const cpEntries = extractEntries(cpData);
-          const filtered = cpEntries.filter(e => {
-            const eid = e.eventId || e.event_id || '';
-            return !eid || eid === eventId;
-          });
-          entries = filtered.length ? filtered : cpEntries;
-        }
-      }
-
-      // Try per-session aggregation if still empty
-      if (!entries.length && currentSessions.length) {
-        setStatus('Aggregating sessions...');
-        const all = [];
-        for (const s of currentSessions.slice(0, 6)) {
-          const wid = s.eventWindowId || s.windowId || s.id;
-          const sd = await apiFetch(`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}&eventWindowId=${encodeURIComponent(wid)}`).catch(() => null);
-          all.push(...extractEntries(sd));
-        }
-        entries = mergeEntries(all);
-      }
+    let wPrizes={};
+    if(sessions.length){
+      await Promise.all(sessions.slice(0,5).map(async s=>{
+        const wid=s.eventWindowId||s.windowId||s.id;
+        if(!wid)return;
+        try{
+          const pd=await apiFetch(`/api/v1/events/cashprize/${encodeURIComponent(wid)}`);
+          const v=pd.totalPrize||pd.prizePool||pd.cashPrize||pd.prize||pd.amount;
+          if(v)wPrizes[wid]=v;
+        }catch{}
+      }));
     }
 
-    if (!entries.length) {
-      throw new Error('No leaderboard data found for this tournament. It may not have results yet, or try selecting a specific session window.');
-    }
-
-    const eventName = sel.options[sel.selectedIndex].textContent.split('·')[0].trim();
-    renderResults(entries, eventName, cashPrizes);
-
-  } catch(e) {
-    showError(e.message || 'Failed to fetch data.');
-    console.error(e);
+    panel.innerHTML=buildLbPanel(eventId,entries,sessions,wPrizes);
+  }catch(e){
+    panel.innerHTML=`<div class="no-data">Could not load: ${esc(e.message)}</div>`;
   }
-
-  setLoading(false);
-  setStatus('');
 }
 
-function extractEntries(data) {
-  if (!data) return [];
-  const candidates = [
-    data.entries, data.leaderboard, data.data, data.players, data.results,
-    data.scores, data.rankings, data.items, data.leaderboardEntries,
-    data.eventEntries, data.cashPrizes, data.prizes,
-    Array.isArray(data) ? data : null
-  ];
-  for (const c of candidates) {
-    if (Array.isArray(c) && c.length) {
-      const first = c[0];
-      if (first && (first.points !== undefined || first.score !== undefined || first.totalPoints !== undefined
-          || first.teamPoints !== undefined || first.value !== undefined || first.rank !== undefined
-          || first.cashPrize !== undefined || first.prize !== undefined)) {
-        return c;
-      }
+function extractEntries(data){
+  if(!data)return[];
+  const keys=['entries','leaderboard','data','players','results','scores','rankings','items','leaderboardEntries'];
+  for(const k of keys){
+    if(Array.isArray(data[k])&&data[k].length){
+      const f=data[k][0];
+      if(f&&(f.points!==undefined||f.score!==undefined||f.totalPoints!==undefined||f.teamPoints!==undefined||f.rank!==undefined||f.value!==undefined))return data[k];
     }
   }
-  return [];
+  if(Array.isArray(data)&&data.length)return data;
+  return[];
 }
 
-function mergeEntries(all) {
-  const map = {};
-  for (const e of all) {
-    const id = e.accountId || e.playerId || e.epicAccountId || e.teamId || JSON.stringify(e);
-    const pts = getPoints(e);
-    if (!map[id] || pts > getPoints(map[id])) map[id] = e;
+function buildLbPanel(eventId,entries,sessions,wPrizes){
+  const sorted=[...entries].sort((a,b)=>getPoints(b)-getPoints(a));
+  const top50=sorted.slice(0,50);
+  const maxPts=getPoints(top50[0])||1;
+  const avg=entries.length?entries.reduce((s,e)=>s+getPoints(e),0)/entries.length:0;
+
+  const sessHTML=sessions.length?`<div class="lb-sessions">
+    <button class="session-pill active" onclick="loadSessionLb('${esc(eventId)}','all',this)">All Sessions</button>
+    ${sessions.map((s,i)=>{
+      const wid=s.eventWindowId||s.windowId||s.id||i;
+      const label=s.name||s.sessionName||s.eventWindowId||`Session ${i+1}`;
+      const p=wPrizes[wid];
+      const ps=p?` · ${fmtPrize(p)}`:''
+      return`<button class="session-pill" onclick="loadSessionLb('${esc(eventId)}','${esc(wid)}',this)">${esc(String(label))}${esc(ps)}</button>`;
+    }).join('')}
+  </div>`:'';
+
+  if(!entries.length){
+    return sessHTML+`<div class="no-data">No leaderboard data available yet.</div>`;
   }
-  return Object.values(map).sort((a, b) => getPoints(b) - getPoints(a));
-}
 
-function getPoints(e) {
-  return e.points ?? e.score ?? e.totalPoints ?? e.teamPoints ?? e.value ?? e.pts ?? e.cashPrize ?? e.prize ?? 0;
-}
+  const avgHTML=avg>0?`<div class="avg-bar">Avg score across all players: ${Math.round(avg).toLocaleString()} pts</div>`:'';
 
-function getPlayerName(e) {
-  return e.playerName || e.displayName || e.epicDisplayName || e.teamName || e.name
-    || e.accountId || e.playerId || e.teamId || 'Unknown';
-}
+  const rows=top50.map((e,i)=>{
+    const pts=getPoints(e);
+    const pct=Math.round((pts/maxPts)*100);
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    return`<tr>
+      <td><span class="rank-cell ${rc}">#${i+1}</span></td>
+      <td><div class="player-name-cell">${esc(String(getPlayerName(e)))}</div><div class="pbar-wrap"><div class="pbar-fill" style="width:${pct}%"></div></div></td>
+      <td><span class="pts-pill">${Math.round(pts).toLocaleString()}</span></td>
+    </tr>`;
+  }).join('');
 
-function renderResults(entries, eventName, cashPrizes) {
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('resultsSection').classList.add('visible');
-
-  const points = entries.map(getPoints).filter(p => typeof p === 'number' && !isNaN(p));
-  const sorted = [...points].sort((a, b) => b - a);
-  const avg = points.reduce((a, b) => a + b, 0) / points.length;
-  const median = calcMedian(points);
-  const max = sorted[0] || 0;
-  const min = sorted[sorted.length - 1] || 0;
-  const top10Cutoff = sorted[Math.floor(sorted.length * 0.1)] ?? 0;
-  const qualifiers = entries.filter(e => getPoints(e) >= avg).length;
-  globalAvgForAnalyze = avg;
-
-  const hasPrize = cashPrizes && (cashPrizes.totalPrize || cashPrizes.prizePool || cashPrizes.cashPrize);
-  const prizeLabel = hasPrize ? `$${Number(cashPrizes.totalPrize || cashPrizes.prizePool || cashPrizes.cashPrize).toLocaleString()}` : null;
-
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card gold fade-in">
-      <div class="stat-label">Avg Qual. Points</div>
-      <div class="stat-value">${Math.round(avg).toLocaleString()}</div>
-      <div class="stat-sub">Your target score to qualify</div>
-    </div>
-    <div class="stat-card silver fade-in">
-      <div class="stat-label">Median Score</div>
-      <div class="stat-value">${Math.round(median).toLocaleString()}</div>
-      <div class="stat-sub">Mid-point of the field</div>
-    </div>
-    <div class="stat-card fade-in">
-      <div class="stat-label">Top 10% Cutoff</div>
-      <div class="stat-value">${Math.round(top10Cutoff).toLocaleString()}</div>
-      <div class="stat-sub">Elite threshold</div>
-    </div>
-    <div class="stat-card fade-in">
-      <div class="stat-label">Total Players</div>
-      <div class="stat-value">${entries.length.toLocaleString()}</div>
-      <div class="stat-sub">${qualifiers.toLocaleString()} above avg${prizeLabel ? ` · ${prizeLabel} prize` : ''}</div>
-    </div>
-  `;
-
-  const difficulty = avg > top10Cutoff * 0.7 ? 'extremely competitive' : avg > top10Cutoff * 0.5 ? 'competitive' : 'approachable';
-  document.getElementById('insightBox').innerHTML = `
-    <div class="insight-icon">🧠</div>
-    <div class="insight-text">
-      <strong>${eventName}</strong> had <strong>${entries.length.toLocaleString()} participants</strong> with scores ranging from <strong>${Math.round(min).toLocaleString()}</strong> to <strong>${Math.round(max).toLocaleString()} pts</strong>. 
-      To qualify at an average level, target <strong>${Math.round(avg).toLocaleString()} pts</strong>. 
-      The top 10% required <strong>${Math.round(top10Cutoff).toLocaleString()} pts</strong> — the field is <strong>${difficulty}</strong>.
-      ${prizeLabel ? `Total prize pool: <strong>${prizeLabel}</strong>.` : ''}
-    </div>
-  `;
-
-  const topEntries = [...entries].sort((a, b) => getPoints(b) - getPoints(a)).slice(0, 50);
-  const maxPts = getPoints(topEntries[0]) || 1;
-
-  document.getElementById('lbTitle').textContent = 'Top 50 Leaderboard';
-  document.getElementById('lbCount').textContent = `${entries.length.toLocaleString()} total players`;
-
-  document.getElementById('lbBody').innerHTML = `
+  return`${sessHTML}${avgHTML}
+  <div class="lb-table-wrap">
     <table class="lb-table">
-      <thead>
-        <tr>
-          <th style="width:52px;">Rank</th>
-          <th>Player</th>
-          <th>Progress</th>
-          <th>Points</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${topEntries.map((e, i) => {
-          const pts = getPoints(e);
-          const pct = Math.round((pts / maxPts) * 100);
-          const aboveAvg = pts >= avg;
-          const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
-          const pillClass = aboveAvg ? 'above' : 'below';
-          return `<tr class="${rankClass}">
-            <td><span class="rank-num">#${i + 1}</span></td>
-            <td><div class="player-name">${escHtml(String(getPlayerName(e)))}</div></td>
-            <td style="min-width:100px;"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div></td>
-            <td><span class="points-pill ${pillClass}">${Math.round(pts).toLocaleString()}</span></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
+      <thead><tr><th style="width:44px">Rank</th><th>Player</th><th>Points</th></tr></thead>
+      <tbody id="lb-rows-${esc(eventId)}">${rows}</tbody>
     </table>
-  `;
-
-  document.getElementById('resultsSection').classList.add('fade-in');
+  </div>
+  <div class="lb-footer">${entries.length.toLocaleString()} total players · Top 50 shown</div>`;
 }
 
-function calcMedian(arr) {
-  if (!arr.length) return 0;
-  const s = [...arr].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+async function loadSessionLb(eventId,windowId,pill){
+  const panel=document.getElementById('lb-'+eventId);
+  panel.querySelectorAll('.session-pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+  const tbody=document.getElementById('lb-rows-'+eventId);
+  if(!tbody)return;
+  tbody.innerHTML=`<tr><td colspan="3"><div class="lb-loading"><div class="lb-spinner"></div>Loading...</div></td></tr>`;
+  try{
+    const path=windowId==='all'
+      ?`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}`
+      :`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}&eventWindowId=${encodeURIComponent(windowId)}`;
+    const data=await apiFetch(path);
+    const entries=extractEntries(data);
+    const sorted=[...entries].sort((a,b)=>getPoints(b)-getPoints(a));
+    const top50=sorted.slice(0,50);
+    const maxPts=getPoints(top50[0])||1;
+    tbody.innerHTML=top50.map((e,i)=>{
+      const pts=getPoints(e);
+      const pct=Math.round((pts/maxPts)*100);
+      const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+      return`<tr>
+        <td><span class="rank-cell ${rc}">#${i+1}</span></td>
+        <td><div class="player-name-cell">${esc(String(getPlayerName(e)))}</div><div class="pbar-wrap"><div class="pbar-fill" style="width:${pct}%"></div></div></td>
+        <td><span class="pts-pill">${Math.round(pts).toLocaleString()}</span></td>
+      </tr>`;
+    }).join('')||`<tr><td colspan="3"><div class="no-data">No data for this session.</div></td></tr>`;
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="3"><div class="no-data">Error: ${esc(e.message)}</div></td></tr>`;
+  }
 }
 
-function escHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-loadEvents();
+init();
 </script>
-
 </body>
 </html>
