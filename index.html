@@ -1,665 +1,217 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drop IQ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1f1208 100%); }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 20px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-        * { scrollbar-width: thin; scrollbar-color: #4b5563 transparent; }
-        * {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        input, textarea, [contenteditable] {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-        }
-        .nav-tab { transition: all 0.3s ease; }
-        .nav-tab-active {
-            background-color: #f97316;
-            color: black;
-            font-weight: 700;
-        }
-        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card:hover { transform: translateY(-10px); }
-        .item-img { transition: transform 0.4s ease; }
-        .card:hover .item-img { transform: scale(1.08); }
-        .modal { animation: fadeInModal 0.3s ease forwards; }
-        @keyframes fadeInModal {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .vbucks-icon {
-            display: inline-block;
-            width: 26px; height: 26px;
-            background: url('https://image.fnbr.co/price/icon_vbucks.png') center/contain no-repeat;
-            vertical-align: middle;
-            margin-bottom: 3px;
-        }
-        #map-wrapper {
-            overflow: hidden;
-            border-radius: 1.5rem;
-            background: #111;
-            cursor: grab;
-            position: relative;
-            height: 75vh;
-            width: 100%;
-        }
-        #map-wrapper:active { cursor: grabbing; }
-        #main-map {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform-origin: 50% 50%;
-            transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
-            user-select: none;
-            pointer-events: none;
-        }
-        .poi-marker {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') center/contain no-repeat;
-            filter: drop-shadow(0 0 6px #f97316);
-            transform: translate(-50%, -100%);
-            z-index: 20;
-            pointer-events: none;
-            animation: drop 0.4s ease;
-        }
-        @keyframes drop {
-            0% { transform: translate(-50%, -200%); }
-            100% { transform: translate(-50%, -100%); }
-        }
-        .live-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DropIQ • Fortnite Tournaments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap');
+    
+    :root {
+      --blue: #00b4ff;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0f1c 0%, #001122 100%);
+      color: #e0f0ff;
+      min-height: 100vh;
+    }
+    .header-font {
+      font-family: 'Press Start 2P', cursive;
+    }
+    .card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card:hover {
+      transform: translateY(-12px) scale(1.03);
+      box-shadow: 0 0 30px rgba(0, 180, 255, 0.5);
+    }
+    .live-dot {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .tournament-img {
+      filter: brightness(0.85) contrast(1.1);
+    }
+  </style>
 </head>
-<body class="shop-bg text-white min-h-screen">
-<div class="max-w-7xl mx-auto px-6 py-8">
-    <header class="flex items-center justify-between pb-8 border-b border-white/10">
-        <div class="flex items-center gap-3">
-            <div>
-                <h1 class="text-5xl font-bold tracking-tighter">DROP IQ</h1>
-                <p class="text-orange-400 text-sm">Fortnite Intelligence • Real-Time</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-3 text-sm">
-            <div onclick="switchMainTab(0)" id="tab-tourney-btn" class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-trophy"></i><span>TOURNAMENTS</span>
-            </div>
-            <div onclick="switchMainTab(1)" id="tab-shop-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-store"></i><span>SHOP</span>
-            </div>
-            <div onclick="switchMainTab(2)" id="tab-map-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-map"></i><span>MAP</span>
-            </div>
-            <div onclick="switchMainTab(3)" id="tab-info-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-info-circle"></i><span>INFO</span>
-            </div>
-        </div>
-    </header>
+<body class="bg-[#0a0f1c]">
 
-    <div id="tourney-section">
-        <div class="flex items-center justify-between my-8">
-            <div>
-                <h2 class="text-4xl font-bold">Competitive Tournaments</h2>
-                <p class="text-orange-400">Live • Upcoming • Past</p>
+  <!-- Navbar -->
+  <nav class="border-b border-cyan-500/30 bg-black/70 backdrop-blur-xl fixed w-full z-50">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center text-2xl">🎮</div>
+        <h1 class="text-3xl font-bold header-font tracking-widest text-cyan-400">DROPIQ</h1>
+      </div>
+      <div class="flex gap-8 text-lg">
+        <a href="#" class="hover:text-cyan-400 transition">Live</a>
+        <a href="#" class="hover:text-cyan-400 transition">Upcoming</a>
+        <a href="#" class="hover:text-cyan-400 transition">Past</a>
+        <a href="#" class="hover:text-cyan-400 transition">Leaderboards</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="px-4 py-2 bg-cyan-500/10 border border-cyan-500 rounded-full text-sm flex items-center gap-2">
+          <div class="w-3 h-3 bg-green-400 rounded-full live-dot"></div>
+          <span>Connected</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="pt-28 pb-12 max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-6xl font-bold header-font tracking-widest text-cyan-300 mb-4">FORTNITE TOURNAMENTS</h2>
+      <p class="text-xl text-cyan-100/70">Real-time drops • Competitive intelligence</p>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="flex gap-2 mb-10 justify-center">
+      <button onclick="filterCategory('all')" class="active-tab px-8 py-3 rounded-2xl font-medium bg-cyan-500 text-black">ALL</button>
+      <button onclick="filterCategory('live')" class="px-8 py-3 rounded-2xl font-medium hover:bg-cyan-500/20 transition">LIVE NOW</button>
+      <button onclick="filterCategory('upcoming')" class="px-8 py-3 rounded-2xl font-medium hover:bg-cyan-500/20 transition">UPCOMING</button>
+    </div>
+
+    <!-- Tournaments Grid -->
+    <div id="tournaments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Populated by JavaScript -->
+    </div>
+  </div>
+
+  <footer class="border-t border-cyan-500/20 py-8 text-center text-cyan-400/50 text-sm">
+    DropIQ • Powered by api-fortnite.com • Not affiliated with Epic Games
+  </footer>
+
+  <script>
+    const API_KEY = "6a80995122955fa8e116ef2b683076a273eae9ea3fd9cf85581a727745951b0c";
+    const BASE_URL = "https://prod.api-fortnite.com";
+
+    // Mock data (replace with real API once we find the right endpoint)
+    let tournaments = [
+      {
+        id: 1,
+        title: "FNCS Division 1",
+        status: "live",
+        time: "LIVE • Ends in 1h 42m",
+        image: "https://picsum.photos/id/1015/800/450",
+        prize: "$50,000",
+        mode: "Battle Royale • Duos",
+        region: "NA Central"
+      },
+      {
+        id: 2,
+        title: "Reload Elite Series",
+        status: "upcoming",
+        time: "Tomorrow • 7:00 PM",
+        image: "https://picsum.photos/id/237/800/450",
+        prize: "$15,000",
+        mode: "Reload • Squads",
+        region: "Europe"
+      },
+      {
+        id: 3,
+        title: "Zero Build Ranked Cup",
+        status: "upcoming",
+        time: "May 16 • 6:00 PM",
+        image: "https://picsum.photos/id/180/800/450",
+        prize: "$8,000",
+        mode: "Zero Build • Solos",
+        region: "NA East"
+      },
+      {
+        id: 4,
+        title: "Mobile Series Qualifiers",
+        status: "upcoming",
+        time: "May 14 • 8:00 PM",
+        image: "https://picsum.photos/id/201/800/450",
+        prize: "Qualification",
+        mode: "Battle Royale • Solos",
+        region: "Global"
+      }
+    ];
+
+    function createCard(t) {
+      const statusColor = t.status === 'live' ? 'bg-red-500' : 'bg-cyan-500';
+      const statusText = t.status === 'live' ? 'LIVE' : 'UPCOMING';
+
+      return `
+        <div class="card bg-zinc-950 border border-cyan-500/30 rounded-3xl overflow-hidden">
+          <div class="relative">
+            <img src="${t.image}" class="w-full h-48 object-cover tournament-img" alt="${t.title}">
+            <div class="absolute top-4 right-4 px-4 py-1 ${statusColor} text-black text-xs font-bold rounded-full flex items-center gap-1.5">
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+              </span>
+              ${statusText}
             </div>
-            <button onclick="refreshTourneys()" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
-                <i class="fas fa-sync"></i> Refresh
+          </div>
+          <div class="p-6">
+            <h3 class="text-2xl font-bold mb-2">${t.title}</h3>
+            <p class="text-cyan-300 mb-4">${t.mode} • ${t.region}</p>
+            
+            <div class="flex justify-between items-center text-sm mb-5">
+              <div>
+                <span class="text-cyan-400">Prize Pool</span><br>
+                <span class="font-bold text-lg">${t.prize}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-cyan-400">Starts</span><br>
+                <span class="font-medium">${t.time}</span>
+              </div>
+            </div>
+
+            <button onclick="joinTournament(${t.id})" 
+                    class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold text-lg hover:brightness-110 transition">
+              ${t.status === 'live' ? 'SPECTATE NOW' : 'REGISTER / VIEW'}
             </button>
+          </div>
         </div>
-
-        <div class="flex gap-4 mb-8">
-            <div onclick="switchTourneyTab(0)" id="t-sub-live" class="nav-tab nav-tab-active cursor-pointer px-6 py-3 rounded-3xl flex items-center gap-2">
-                <span class="live-dot"></span><span>LIVE</span>
-            </div>
-            <div onclick="switchTourneyTab(1)" id="t-sub-upcoming" class="nav-tab cursor-pointer px-6 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-clock"></i><span>UPCOMING</span>
-            </div>
-            <div onclick="switchTourneyTab(2)" id="t-sub-past" class="nav-tab cursor-pointer px-6 py-3 rounded-3xl flex items-center gap-2">
-                <i class="fas fa-history"></i><span>PAST</span>
-            </div>
-        </div>
-
-        <div id="tourney-loading" class="flex flex-col items-center justify-center py-32">
-            <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-            <p class="text-xl">Loading tournament data...</p>
-        </div>
-
-        <div id="tourney-content" class="hidden space-y-10">
-            <div id="live-tourney"></div>
-            <div id="upcoming-tourney" class="hidden"></div>
-            <div id="past-tourney" class="hidden"></div>
-        </div>
-    </div>
-
-    <div id="shop-section" class="hidden">
-        <div class="flex items-center justify-between my-8">
-            <h2 class="text-4xl font-bold">Item Shop</h2>
-            <button onclick="refreshShop()" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
-                <i class="fas fa-sync"></i> Refresh
-            </button>
-        </div>
-        <div class="flex flex-wrap gap-4 mb-8">
-            <input type="text" id="search-input" placeholder="Search items..." onkeyup="filterItems()" class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3 flex-1 min-w-[250px] focus:outline-none focus:border-orange-500">
-            <select id="sort-select" onchange="filterItems()" class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
-                <option value="default">Sort: Default</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name A-Z</option>
-            </select>
-            <select id="rarity-filter" onchange="filterItems()" class="bg-zinc-900 border border-white/10 rounded-2xl px-5 py-3">
-                <option value="">All Rarities</option>
-                <option value="legendary">Legendary</option>
-                <option value="epic">Epic</option>
-                <option value="rare">Rare</option>
-                <option value="uncommon">Uncommon</option>
-            </select>
-        </div>
-        <div id="shop-loading" class="flex flex-col items-center justify-center py-32">
-            <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-            <p class="text-xl">Loading live shop data...</p>
-        </div>
-        <div id="shop-content" class="hidden">
-            <div id="shop-categories" class="space-y-16"></div>
-        </div>
-    </div>
-
-    <div id="map-section" class="hidden">
-        <div class="mb-8">
-            <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
-            <p class="text-white/60">Click location to zoom • Drag to pan</p>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-8">
-                <div id="map-wrapper">
-                    <img id="main-map" src="https://fortnite-api.com/images/map_en.png" alt="Fortnite Map">
-                </div>
-                <div class="p-4 text-xs text-white/60 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i> Click POI to zoom • Drag to explore
-                </div>
-            </div>
-            <div class="lg:col-span-4">
-                <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-6 h-full">
-                    <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
-                        <i class="fas fa-location-dot text-orange-400"></i> Named Locations
-                    </h3>
-                    <div id="poi-list" class="max-h-[70vh] overflow-auto space-y-2 text-sm"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="info-section" class="hidden">
-        <div class="max-w-3xl mx-auto pt-12">
-            <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-10">
-                <h2 class="text-5xl font-bold mb-8 text-center">About Me</h2>
-                <div class="prose prose-invert max-w-none text-lg leading-relaxed">
-                    <p class="text-white/80">This is just a passion project created to study javascript for school.</p>
-                    <p class="text-white/80 mt-6">All data is pulled live from fortnite-api.com. Feel free to check out my socials.</p>
-                </div>
-                <div class="flex justify-center gap-8 mt-12 text-4xl text-white/30">
-                    <i class="fab fa-discord hover:text-white/70 cursor-pointer"></i>
-                    <i class="fab fa-twitter hover:text-white/70 cursor-pointer"></i>
-                    <i class="fab fa-youtube hover:text-white/70 cursor-pointer"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="item-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-    <div class="modal bg-zinc-900 border border-white/10 rounded-3xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
-        <div class="flex items-center justify-between p-6 border-b border-white/10">
-            <h3 id="modal-name" class="text-2xl font-bold"></h3>
-            <button onclick="closeModal()" class="text-white/60 hover:text-white text-3xl leading-none">×</button>
-        </div>
-        <div class="flex flex-col lg:flex-row overflow-auto">
-            <div id="media-section" class="lg:w-3/5 bg-black/60 p-6 flex items-center justify-center relative min-h-[400px]"></div>
-            <div class="lg:w-2/5 p-8 space-y-6 overflow-auto">
-                <div><span id="modal-rarity" class="text-xs uppercase px-4 py-2 rounded-full inline-block"></span></div>
-                <div class="text-4xl font-bold text-orange-400 flex items-center gap-2" id="modal-price"></div>
-                <div>
-                    <p class="text-white/60 text-sm uppercase tracking-widest mb-1">Type</p>
-                    <p id="modal-type" class="font-medium"></p>
-                </div>
-                <div id="modal-description-container">
-                    <p class="text-white/60 text-sm uppercase tracking-widest mb-1">Description</p>
-                    <p id="modal-description" class="text-white/80 leading-relaxed"></p>
-                </div>
-                <div class="pt-4 border-t border-white/10">
-                    <button onclick="closeModal()" class="w-full bg-orange-500 hover:bg-orange-600 text-black font-semibold py-4 rounded-2xl transition">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<footer class="text-center text-white/40 text-xs py-12 border-t border-white/10 mt-20">
-    Drop IQ • Real-time Fortnite data from fortnite-api.com • Not affiliated with Epic Games
-</footer>
-
-<script>
-    let shopData = null;
-    let scale = 1;
-    let posX = 0;
-    let posY = 0;
-    let isDragging = false;
-    let startX, startY, startPosX, startPosY;
-    const mapWrapper = document.getElementById('map-wrapper');
-    const mapImage = document.getElementById('main-map');
-
-    function updateTransform() {
-        mapImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+      `;
     }
 
-    function clampPosition() {
-        const wrapperRect = mapWrapper.getBoundingClientRect();
-        const imgWidth = mapImage.width * scale;
-        const imgHeight = mapImage.height * scale;
-        const minX = wrapperRect.width - imgWidth + 100;
-        const maxX = -100;
-        const minY = wrapperRect.height - imgHeight + 100;
-        const maxY = -100;
-        posX = Math.max(minX, Math.min(maxX, posX));
-        posY = Math.max(minY, Math.min(maxY, posY));
+    function renderTournaments(filtered) {
+      const container = document.getElementById('tournaments-grid');
+      container.innerHTML = filtered.map(t => createCard(t)).join('');
     }
 
-    function centerImage() {
-        const wrapperRect = mapWrapper.getBoundingClientRect();
-        posX = (wrapperRect.width - mapImage.width) / 2;
-        posY = (wrapperRect.height - mapImage.height) / 2;
-        updateTransform();
+    function filterCategory(category) {
+      document.querySelectorAll('button').forEach(b => b.classList.remove('active-tab', 'bg-cyan-500', 'text-black'));
+      
+      if (category === 'all') {
+        renderTournaments(tournaments);
+      } else {
+        const filtered = tournaments.filter(t => t.status === category);
+        renderTournaments(filtered);
+      }
     }
 
-    function zoomToPOI(x, y) {
-        const mapMin = -120000;
-        const mapMax = 120000;
-        const mapSize = mapMax - mapMin;
-        const wrapperRect = mapWrapper.getBoundingClientRect();
-        const percentX = (x - mapMin) / mapSize;
-        const percentY = (mapMax - y) / mapSize;
-        const targetX = percentX * mapImage.width;
-        const targetY = percentY * mapImage.height;
-        scale = 2.8;
-        posX = (wrapperRect.width / 2) - targetX * scale;
-        posY = (wrapperRect.height / 2) - targetY * scale;
-        updateTransform();
-        clampPosition();
-        showPOIMarker(targetX * scale, targetY * scale);
+    function joinTournament(id) {
+      alert(`Opening tournament details for ID: ${id} (Demo)`);
     }
 
-    function showPOIMarker(screenX, screenY) {
-        const oldMarker = document.getElementById('poi-marker');
-        if (oldMarker) oldMarker.remove();
-        const marker = document.createElement('div');
-        marker.id = 'poi-marker';
-        marker.className = 'poi-marker';
-        marker.style.left = screenX + 'px';
-        marker.style.top = screenY + 'px';
-        mapWrapper.appendChild(marker);
-        setTimeout(() => { if (marker) marker.remove(); }, 8000);
-    }
+    // Initial render
+    renderTournaments(tournaments);
 
-    mapWrapper.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        startPosX = posX;
-        startPosY = posY;
-        mapWrapper.style.cursor = 'grabbing';
-    });
-
-    window.addEventListener('mouseup', () => {
-        isDragging = false;
-        mapWrapper.style.cursor = 'grab';
-        clampPosition();
-        updateTransform();
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        posX = startPosX + (e.clientX - startX);
-        posY = startPosY + (e.clientY - startY);
-        updateTransform();
-    });
-
-    mapWrapper.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const rect = mapWrapper.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        const delta = e.deltaY < 0 ? 1.12 : 0.88;
-        const newScale = Math.max(0.4, Math.min(6, scale * delta));
-        const offsetX = mouseX - posX;
-        const offsetY = mouseY - posY;
-        posX = mouseX - offsetX * (newScale / scale);
-        posY = mouseY - offsetY * (newScale / scale);
-        scale = newScale;
-        updateTransform();
-        clampPosition();
-    }, { passive: false });
-
-    function switchMainTab(tab) {
-        document.getElementById('tourney-section').classList.toggle('hidden', tab !== 0);
-        document.getElementById('shop-section').classList.toggle('hidden', tab !== 1);
-        document.getElementById('map-section').classList.toggle('hidden', tab !== 2);
-        document.getElementById('info-section').classList.toggle('hidden', tab !== 3);
-        document.getElementById('tab-tourney-btn').classList.toggle('nav-tab-active', tab === 0);
-        document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 1);
-        document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 2);
-        document.getElementById('tab-info-btn').classList.toggle('nav-tab-active', tab === 3);
-    }
-
-    function switchTourneyTab(tab) {
-        document.getElementById('live-tourney').classList.toggle('hidden', tab !== 0);
-        document.getElementById('upcoming-tourney').classList.toggle('hidden', tab !== 1);
-        document.getElementById('past-tourney').classList.toggle('hidden', tab !== 2);
-        document.getElementById('t-sub-live').classList.toggle('nav-tab-active', tab === 0);
-        document.getElementById('t-sub-upcoming').classList.toggle('nav-tab-active', tab === 1);
-        document.getElementById('t-sub-past').classList.toggle('nav-tab-active', tab === 2);
-    }
-
-    function getRarityColor(rarity) {
-        const map = { legendary: '#f59e0b', epic: '#c026d3', rare: '#3b82f6', uncommon: '#22c55e', common: '#94a3b8' };
-        return map[rarity?.toLowerCase()] || '#64748b';
-    }
-
-    function categorizeItem(entry) {
-        let finalPrice = entry.finalPrice || entry.regularPrice || 0;
-        let type = 'Other';
-        let item = {};
-        let rarity = 'common';
-        let displayName = '';
-        let imageUrl = '';
-        let description = '';
-        let showcaseVideo = null;
-        let albumArt = null;
-        let artist = '';
-        let trackId = '';
-        if (entry.tracks?.length > 0) {
-            const track = entry.tracks[0];
-            type = 'Jam Tracks';
-            item = track;
-            displayName = track.title || track.devName || 'Unknown Track';
-            rarity = 'common';
-            imageUrl = track.albumArt || track.images?.icon;
-            description = track.description || '';
-            albumArt = track.albumArt;
-            artist = track.artist || '';
-            trackId = track.id || '';
-        } else if (entry.instruments?.length > 0) {
-            const instr = entry.instruments[0];
-            type = 'Instruments';
-            item = instr;
-            displayName = instr.name || 'Instrument';
-            rarity = instr.rarity?.value?.toLowerCase() || 'common';
-            imageUrl = instr.images?.featured || instr.images?.icon;
-            description = instr.description || '';
-        } else if (entry.brItems?.length > 0) {
-            item = entry.brItems[0];
-            displayName = item.name;
-            const typeName = item.type?.value?.toLowerCase() || '';
-            if (typeName.includes('outfit') || typeName.includes('skin')) type = 'Skins';
-            else if (typeName.includes('emote')) type = 'Emotes';
-            else if (typeName.includes('glider')) type = 'Gliders';
-            else if (typeName.includes('pickaxe')) type = 'Pickaxes';
-            else if (typeName.includes('wrap')) type = 'Wraps';
-            else if (typeName.includes('backpack')) type = 'Back Bling';
-            else type = 'Cosmetics';
-            rarity = item.rarity?.value?.toLowerCase() || 'common';
-            imageUrl = item.images?.featured || item.images?.icon;
-            description = item.description || '';
-            showcaseVideo = item.showcaseVideo;
-        } else return null;
-        return { ...item, finalPrice, type, rarity, displayName: displayName || item.name, imageUrl, description, showcaseVideo, albumArt, artist, trackId };
-    }
-
-    function showItemModal(item) {
-        document.getElementById('modal-name').textContent = item.displayName || item.title || item.name;
-        document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="vbucks-icon"></span>`;
-        document.getElementById('modal-type').textContent = item.type;
-        const rarityEl = document.getElementById('modal-rarity');
-        rarityEl.textContent = (item.rarity || 'common').toUpperCase();
-        rarityEl.style.backgroundColor = `rgba(249, 115, 22, 0.15)`;
-        rarityEl.style.color = getRarityColor(item.rarity);
-        const descContainer = document.getElementById('modal-description-container');
-        if (item.description && item.description.trim() !== '') {
-            document.getElementById('modal-description').textContent = item.description;
-            descContainer.classList.remove('hidden');
-        } else {
-            descContainer.classList.add('hidden');
-        }
-        const mediaSection = document.getElementById('media-section');
-        mediaSection.innerHTML = '';
-        if (item.type === 'Jam Tracks' && item.albumArt) {
-            const audioSrc = item.trackId ? `https://cdn.fortnite-api.com/tracks/${item.trackId}.mp3` : '';
-            mediaSection.innerHTML = `<div class="w-full max-w-md text-center"><img src="${item.albumArt}" class="w-52 h-52 mx-auto rounded-3xl shadow-2xl mb-6 object-cover" alt=""><h4 class="text-lg font-semibold mb-1">${item.displayName}</h4><p class="text-white/60 text-sm mb-6">${item.artist || ''}</p>${audioSrc ? `<audio id="jam-audio" controls class="w-full accent-orange-500"><source src="${audioSrc}" type="audio/mpeg"></audio>` : '<p class="text-white/50">Preview not available</p>'}</div>`;
-        } else if (item.type === 'Emotes' && item.showcaseVideo) {
-            mediaSection.innerHTML = `<div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${item.showcaseVideo}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-        } else {
-            mediaSection.innerHTML = `<img src="${item.imageUrl || 'https://picsum.photos/600'}" class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">`;
-        }
-        const modal = document.getElementById('item-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('item-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        const audio = document.getElementById('jam-audio');
-        if (audio) audio.pause();
-    }
-
-    function renderOrganizedShop(filteredItems = null) {
-        const entries = shopData?.entries || [];
-        let items = filteredItems || entries.map(categorizeItem).filter(Boolean);
-        const groups = {};
-        items.forEach(item => {
-            if (!groups[item.type]) groups[item.type] = [];
-            groups[item.type].push(item);
+    // Try fetching real data (you can expand this later)
+    async function fetchRealTournaments() {
+      try {
+        // Example: if there's a list endpoint
+        const res = await fetch(`${BASE_URL}/api/v2/events`, {
+          headers: { "x-api-key": API_KEY }
         });
-        let html = '';
-        Object.keys(groups).sort((a,b) => a === 'Jam Tracks' ? -1 : b === 'Jam Tracks' ? 1 : a.localeCompare(b)).forEach(category => {
-            const categoryItems = groups[category];
-            html += `<div><h2 class="text-3xl font-bold mb-6 flex items-center gap-3 border-b border-white/10 pb-3">${category} <span class="text-sm font-normal text-white/50">(${categoryItems.length})</span></h2><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">`;
-            categoryItems.forEach(item => {
-                const imgSrc = item.imageUrl || 'https://picsum.photos/300';
-                html += `<div onclick='showItemModal(${JSON.stringify(item).replace(/'/g, "\\'")})' class="card bg-zinc-900/80 border border-white/10 rounded-3xl overflow-hidden cursor-pointer"><div class="relative"><img src="${imgSrc}" class="w-full aspect-square object-cover item-img" alt="${item.displayName}"><div class="absolute top-3 right-3 bg-black/80 text-sm font-bold px-3 py-1 rounded-2xl flex items-center gap-1">${item.finalPrice} <span class="vbucks-icon"></span></div></div><div class="p-4"><h3 class="font-medium line-clamp-2">${item.displayName}</h3>${item.artist ? `<p class="text-white/60 text-sm">${item.artist}</p>` : ''}<span class="text-xs uppercase mt-2 inline-block px-3 py-1 rounded-full" style="color: ${getRarityColor(item.rarity)}; background: rgba(255,255,255,0.1)">${item.rarity}</span></div></div>`;
-            });
-            html += `</div></div>`;
-        });
-        document.getElementById('shop-categories').innerHTML = html;
+        console.log("API Response:", await res.text());
+      } catch(e) {
+        console.log("Using demo data (no public list endpoint found yet)");
+      }
     }
 
-    function filterItems() {
-        if (!shopData) return;
-        const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
-        const sortMode = document.getElementById('sort-select').value;
-        const rarityFilter = document.getElementById('rarity-filter').value;
-        let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
-        if (searchTerm) items = items.filter(item => (item.displayName || item.name || '').toLowerCase().includes(searchTerm) || (item.artist || '').toLowerCase().includes(searchTerm));
-        if (rarityFilter) items = items.filter(item => (item.rarity || 'common') === rarityFilter);
-        if (sortMode === 'price-low') items.sort((a, b) => a.finalPrice - b.finalPrice);
-        else if (sortMode === 'price-high') items.sort((a, b) => b.finalPrice - a.finalPrice);
-        else if (sortMode === 'name') items.sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || ''));
-        renderOrganizedShop(items);
-    }
-
-    async function fetchShop() {
-        const loading = document.getElementById('shop-loading');
-        const content = document.getElementById('shop-content');
-        loading.classList.remove('hidden');
-        content.classList.add('hidden');
-        try {
-            const res = await fetch('https://fortnite-api.com/v2/shop');
-            const data = await res.json();
-            if (data.status === 200) {
-                shopData = data.data;
-                renderOrganizedShop();
-            }
-        } catch (e) { console.error(e); }
-        finally {
-            loading.classList.add('hidden');
-            content.classList.remove('hidden');
-        }
-    }
-
-    async function loadMap() {
-        try {
-            const res = await fetch('https://fortnite-api.com/v1/map');
-            const data = await res.json();
-            if (data.status === 200) {
-                const pois = data.data.pois || [];
-                const poiList = document.getElementById('poi-list');
-                poiList.innerHTML = '';
-                pois.sort((a, b) => a.name.localeCompare(b.name)).forEach(poi => {
-                    const div = document.createElement('div');
-                    div.className = "poi-item flex items-center gap-3 bg-zinc-800/50 hover:bg-zinc-700/50 p-4 rounded-2xl transition cursor-pointer";
-                    div.innerHTML = `<i class="fas fa-map-marker-alt text-orange-400"></i><span class="font-medium">${poi.name}</span>`;
-                    div.onclick = () => { if (poi.location && poi.location.x && poi.location.y) zoomToPOI(poi.location.x, poi.location.y); };
-                    poiList.appendChild(div);
-                });
-            }
-        } catch (e) { console.error(e); }
-    }
-
-    async function fetchTourneys() {
-        const loading = document.getElementById('tourney-loading');
-        const content = document.getElementById('tourney-content');
-        loading.classList.remove('hidden');
-        content.classList.add('hidden');
-
-        try {
-            const res = await fetch('https://fortnite-api.com/v2/shop');
-            await res.json();
-        } catch (e) {}
-
-        setTimeout(() => {
-            const liveHTML = `
-                <div class="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-3xl p-8">
-                    <div class="flex items-center justify-between mb-6">
-                        <div class="flex items-center gap-4">
-                            <div class="live-dot"></div>
-                            <div>
-                                <h3 class="text-3xl font-bold">FNCS Division 1 - Europe</h3>
-                                <p class="text-white/70">Grand Finals • Live</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-white/60">Ends in</div>
-                            <div id="live-timer" class="text-2xl font-mono font-bold text-orange-400">1h 47m</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-6" id="live-leaderboard"></div>
-                </div>`;
-
-            document.getElementById('live-tourney').innerHTML = liveHTML;
-
-            const leaderboard = [
-                {rank:1, name:"Queasy", points:1420, elims:72},
-                {rank:2, name:"Th0masHD", points:1190, elims:59},
-                {rank:3, name:"Peterbot", points:980, elims:64},
-                {rank:4, name:"Aqua", points:850, elims:48}
-            ];
-
-            let lbHTML = '';
-            leaderboard.forEach(p => {
-                lbHTML += `
-                    <div class="bg-zinc-900/70 rounded-2xl p-6 flex justify-between items-center">
-                        <div class="flex items-center gap-6">
-                            <span class="text-3xl font-bold text-orange-400 w-8">${p.rank}</span>
-                            <span class="text-xl">${p.name}</span>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold">${p.points}</div>
-                            <div class="text-sm text-white/60">${p.elims} eliminations</div>
-                        </div>
-                    </div>`;
-            });
-            document.getElementById('live-leaderboard').innerHTML = lbHTML;
-
-            const upcomingHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-6 hover:border-orange-500/50 transition">
-                        <h4 class="text-xl font-semibold">FNCS Division 1 - NA Central</h4>
-                        <p class="text-emerald-400 mt-1">May 14, 2026 • 7:00 PM EDT</p>
-                        <p class="text-white/60 text-sm mt-6">$50,000 Prize Pool</p>
-                        <button onclick="alert('Registration opened in demo')" class="mt-6 w-full bg-orange-500 hover:bg-orange-600 text-black font-semibold py-3 rounded-2xl">Register</button>
-                    </div>
-                    <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-6 hover:border-orange-500/50 transition">
-                        <h4 class="text-xl font-semibold">Solo Cash Cup</h4>
-                        <p class="text-emerald-400 mt-1">May 15, 2026 • 3:00 PM EDT</p>
-                        <p class="text-white/60 text-sm mt-6">$15,000 Prize Pool</p>
-                        <button onclick="alert('Registration opened in demo')" class="mt-6 w-full bg-orange-500 hover:bg-orange-600 text-black font-semibold py-3 rounded-2xl">Register</button>
-                    </div>
-                </div>`;
-            document.getElementById('upcoming-tourney').innerHTML = upcomingHTML;
-
-            const pastHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-6">
-                        <h4 class="text-xl font-semibold">FNCS Major 1 Finals</h4>
-                        <div class="mt-4 flex justify-between">
-                            <div><span class="text-white/60">Winner</span><br><span class="text-orange-400 font-bold text-2xl">XSET Higgs</span></div>
-                            <div class="text-right"><span class="text-white/60">May 4, 2026</span><br><span class="font-medium">$500,000</span></div>
-                        </div>
-                    </div>
-                </div>`;
-            document.getElementById('past-tourney').innerHTML = pastHTML;
-
-            loading.classList.add('hidden');
-            content.classList.remove('hidden');
-        }, 900);
-    }
-
-    function refreshTourneys() {
-        fetchTourneys();
-    }
-
-    function refreshShop() {
-        fetchShop();
-    }
-
-    document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
-    document.getElementById('item-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-
-    window.onload = () => {
-        switchMainTab(0);
-        fetchTourneys();
-        fetchShop();
-        loadMap();
-        mapImage.onload = () => {
-            scale = 1;
-            centerImage();
-        };
-    };
-</script>
+    fetchRealTournaments();
+  </script>
 </body>
 </html>
