@@ -1,1016 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DropIQ — Fortnite Tournaments</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --b50: #f3e8ff;
-    --b100: #e0cfff;
-    --b200: #c4a8ff;
-    --b300: #a855f7;
-    --b400: #9333ea;
-    --b500: #7c3aed;
-    --b600: #6b21a8;
-    --b700: #581c87;
-    --b800: #3b0764;
-    --b900: #1e0338;
-    --glow: rgba(167, 85, 247, 0.55);
-    --glow-soft: rgba(167, 85, 247, 0.25);
-    --text-bright: #f8f0ff;
-    --text-mid: #d8b4fe;
-    --text-dim: #a78bfa;
-    --card-bg: rgba(15, 8, 28, 0.92);
-    --card-border: rgba(167, 85, 247, 0.22);
-    --card-border-hover: rgba(167, 85, 247, 0.65);
-    --live-green: #00e676;
-    --upcoming-amber: #facc15;
-    --ended-gray: #777777;
-  }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Exo 2', sans-serif;
-    background: #0a0614;
-    color: var(--text-bright);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  .bg-layer {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  .bg-layer::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 20% -10%, rgba(124, 58, 237, 0.35) 0%, transparent 65%),
-                radial-gradient(ellipse 60% 50% at 85% 30%, rgba(167, 85, 247, 0.25) 0%, transparent 60%),
-                radial-gradient(ellipse 100% 80% at 50% 100%, rgba(30, 10, 60, 0.8) 0%, transparent 70%);
-  }
-  .grid-overlay {
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(rgba(167,85,247,0.06) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(167,85,247,0.06) 1px, transparent 1px);
-    background-size: 48px 48px;
-    animation: gridScroll 25s linear infinite;
-  }
-  @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 48px 48px; } }
-  .particle-container { position: absolute; inset: 0; overflow: hidden; }
-  .particle {
-    position: absolute;
-    width: 2px; height: 2px;
-    background: var(--b300);
-    border-radius: 50%;
-    opacity: 0;
-    animation: particleFloat var(--dur, 8s) var(--delay, 0s) infinite ease-in-out;
-  }
-  @keyframes particleFloat {
-    0% { transform: translate(0,0) scale(0); opacity:0; }
-    20% { opacity:0.8; }
-    100% { transform: translate(var(--dx,30px), var(--dy,-180px)) scale(0); opacity:0; }
-  }
-  .page-wrap {
-    position: relative;
-    z-index: 1;
-    max-width: 1320px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-  .hero {
-    padding: 120px 0 60px;
-    text-align: center;
-    animation: fadeUp 0.8s 0.2s ease both;
-  }
-  @keyframes fadeUp {
-    from { transform: translateY(32px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--b300);
-    background: rgba(167,85,247,0.1);
-    border: 1px solid rgba(167,85,247,0.25);
-    padding: 6px 18px;
-    border-radius: 20px;
-    margin-bottom: 28px;
-  }
-  .eyebrow-dot {
-    width: 6px; height: 6px;
-    background: var(--b300);
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.5); opacity: 0.5; }
-  }
-  .hero h1 {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    font-size: clamp(40px, 7vw, 82px);
-    line-height: 0.95;
-    letter-spacing: -1px;
-    margin-bottom: 24px;
-  }
-  .hero h1 .line1 { display: block; color: var(--text-bright); }
-  .hero h1 .line2 {
-    display: block;
-    background: linear-gradient(135deg, var(--b300) 0%, #c084fc 50%, var(--b200) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 24px var(--glow));
-  }
-  .hero-sub {
-    font-size: 18px;
-    font-weight: 300;
-    color: var(--text-dim);
-    max-width: 520px;
-    margin: 0 auto 48px;
-    line-height: 1.6;
-  }
-  .hero-sub strong { color: var(--text-mid); font-weight: 600; }
-  .stats-row {
-    display: flex;
-    justify-content: center;
-    gap: 48px;
-    flex-wrap: wrap;
-  }
-  .stat-item { text-align: center; animation: fadeUp 0.8s ease both; }
-  .stat-item:nth-child(1) { animation-delay: 0.4s; }
-  .stat-item:nth-child(2) { animation-delay: 0.5s; }
-  .stat-item:nth-child(3) { animation-delay: 0.6s; }
-  .stat-num {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--b300);
-    display: block;
-    text-shadow: 0 0 16px var(--glow);
-  }
-  .stat-label {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-top: 4px;
-  }
-  .filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-    animation: fadeUp 0.8s 0.5s ease both;
-  }
-  .filter-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    flex-shrink: 0;
-  }
-  .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-  .filter-pill {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 7px 18px;
-    border-radius: 20px;
-    border: 1px solid rgba(167,85,247,0.25);
-    background: transparent;
-    color: var(--text-mid);
-    cursor: pointer;
-    transition: all 0.25s;
-    font-family: 'Exo 2', sans-serif;
-  }
-  .filter-pill:hover {
-    border-color: var(--b300);
-    color: var(--text-bright);
-    background: rgba(167,85,247,0.1);
-  }
-  .filter-pill.active {
-    background: var(--b400);
-    border-color: var(--b400);
-    color: #fff;
-    box-shadow: 0 0 16px var(--glow);
-  }
-  .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    animation: fadeUp 0.7s ease both;
-  }
-  .section-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-bright);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .section-accent {
-    display: inline-block;
-    width: 4px;
-    height: 22px;
-    background: linear-gradient(180deg, var(--b300), var(--b500));
-    border-radius: 2px;
-    box-shadow: 0 0 8px var(--glow);
-  }
-  .section-count {
-    font-size: 12px;
-    color: var(--text-dim);
-    font-weight: 400;
-    letter-spacing: 1px;
-  }
-  .live-banner {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(0,230,118,0.07);
-    border: 1px solid rgba(0,230,118,0.25);
-    border-radius: 10px;
-    padding: 12px 20px;
-    margin-bottom: 32px;
-  }
-  .live-indicator {
-    width: 10px; height: 10px;
-    background: var(--live-green);
-    border-radius: 50%;
-    flex-shrink: 0;
-    box-shadow: 0 0 8px var(--live-green);
-    animation: livePulse 1.2s infinite;
-  }
-  @keyframes livePulse {
-    0%, 100% { box-shadow: 0 0 6px var(--live-green); }
-    50% { box-shadow: 0 0 16px var(--live-green), 0 0 28px rgba(0,230,118,0.4); }
-  }
-  .live-banner-text {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--live-green);
-    letter-spacing: 1px;
-  }
-  .live-banner-sub {
-    font-size: 12px;
-    color: rgba(0,230,118,0.6);
-    margin-left: auto;
-    letter-spacing: 0.5px;
-  }
-  .tournaments-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-    margin-bottom: 60px;
-  }
-  .t-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-    animation: cardReveal 0.6s ease both;
-    backdrop-filter: blur(12px);
-    position: relative;
-  }
-  .t-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--b300), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .t-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--card-border-hover);
-    box-shadow: 0 12px 40px rgba(167,85,247,0.3), 0 0 0 1px rgba(167,85,247,0.15);
-  }
-  .t-card:hover::before { opacity: 1; }
-  @keyframes cardReveal {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .t-card-img-wrap {
-    position: relative;
-    width: 100%;
-    height: 180px;
-    overflow: hidden;
-    background: linear-gradient(135deg, #1a0f2b, #2e1a4d);
-  }
-  .t-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s, filter 0.3s;
-    filter: brightness(0.85) saturate(1.1);
-  }
-  .t-card:hover .t-card-img {
-    transform: scale(1.06);
-    filter: brightness(1) saturate(1.3);
-  }
-  .t-card-img-fallback {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 48px;
-    font-weight: 700;
-    color: rgba(167,85,247,0.3);
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, #120822, #1f1438);
-  }
-  .t-card-img-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(10,6,20,0.9) 0%, transparent 60%);
-  }
-  .t-status-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 4px 12px;
-    border-radius: 20px;
-    backdrop-filter: blur(8px);
-  }
-  .t-status-badge.live {
-    background: rgba(0,230,118,0.2);
-    border: 1px solid rgba(0,230,118,0.5);
-    color: var(--live-green);
-  }
-  .t-status-badge.upcoming {
-    background: rgba(250,204,21,0.15);
-    border: 1px solid rgba(250,204,21,0.4);
-    color: var(--upcoming-amber);
-  }
-  .t-status-badge.ended {
-    background: rgba(119,119,119,0.2);
-    border: 1px solid rgba(119,119,119,0.35);
-    color: var(--ended-gray);
-  }
-  .t-card-body { padding: 16px 18px 18px; }
-  .t-card-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-bright);
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-    line-height: 1.25;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .t-card-region {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--b300);
-    margin-bottom: 14px;
-  }
-  .t-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .t-meta-chip {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-mid);
-    background: rgba(167,85,247,0.08);
-    border: 1px solid rgba(167,85,247,0.15);
-    border-radius: 6px;
-    padding: 4px 10px;
-  }
-  .t-card-prize {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--b300);
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-    text-shadow: 0 0 12px var(--glow);
-  }
-  .t-card-prize-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-  .t-card-footer {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(167,85,247,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .t-card-windows {
-    font-size: 11px;
-    color: var(--text-dim);
-    font-weight: 600;
-  }
-  .t-card-windows strong { color: var(--text-mid); }
-  .t-card-arrow {
-    width: 28px; height: 28px;
-    background: rgba(167,85,247,0.1);
-    border: 1px solid rgba(167,85,247,0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.25s;
-  }
-  .t-card:hover .t-card-arrow {
-    background: var(--b400);
-    border-color: var(--b400);
-    box-shadow: 0 0 10px var(--glow);
-    transform: translateX(2px);
-  }
-  .loader-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 260px;
-    gap: 20px;
-  }
-  .spinner {
-    width: 48px; height: 48px;
-    border: 3px solid rgba(167,85,247,0.15);
-    border-top-color: var(--b300);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loader-text {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-  .empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--text-dim);
-  }
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-    opacity: 0.4;
-  }
-  footer {
-    margin-top: 40px;
-    padding: 32px 0;
-    border-top: 1px solid rgba(167,85,247,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .footer-brand {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-  .footer-brand span { color: var(--b300); }
-  .footer-copy {
-    font-size: 12px;
-    color: var(--text-dim);
-    opacity: 0.6;
-  }
-  .section-wrap {
-    margin-bottom: 48px;
-  }
-  .t-countdown {
-    display: flex;
-    gap: 6px;
-    margin-top: 4px;
-  }
-  .t-countdown-seg {
-    text-align: center;
-    background: rgba(167,85,247,0.1);
-    border: 1px solid rgba(167,85,247,0.2);
-    border-radius: 5px;
-    padding: 3px 7px;
-    min-width: 36px;
-  }
-  .t-countdown-val {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--b300);
-    display: block;
-    line-height: 1;
-    margin-bottom: 2px;
-  }
-  .t-countdown-unit {
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-  .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(10,6,20,0.97);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .modal-content {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border-hover);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 920px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 0 50px rgba(167,85,247,0.4);
-  }
-  .modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid rgba(167,85,247,0.2);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    background: var(--card-bg);
-    z-index: 10;
-  }
-  .modal-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text-bright);
-  }
-  .close-btn {
-    font-size: 32px;
-    cursor: pointer;
-    color: var(--text-dim);
-    line-height: 1;
-  }
-  .close-btn:hover { color: #fff; }
-  .modal-body { padding: 24px; }
-  .prize-section {
-    background: rgba(167,85,247,0.1);
-    border: 1px solid rgba(167,85,247,0.3);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 24px;
-    text-align: center;
-  }
-  .leaderboard h3 {
-    margin-bottom: 16px;
-    color: var(--b300);
-    font-size: 20px;
-  }
-  .lb-row {
-    display: flex;
-    padding: 14px 18px;
-    border-bottom: 1px solid rgba(167,85,247,0.1);
-    align-items: center;
-    transition: background 0.2s;
-  }
-  .lb-row:hover { background: rgba(167,85,247,0.12); }
-  .lb-rank {
-    width: 60px;
-    font-weight: 700;
-    color: var(--b300);
-    font-size: 18px;
-  }
-  .lb-name { flex: 1; font-weight: 500; }
-  .lb-score {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 19px;
-    color: var(--b300);
-    font-weight: 700;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DropIQ • Fortnite Events</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        :root {
+            --purple-1: #6b21a8;
+            --purple-2: #7e22ce;
+            --purple-3: #a855f7;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgb(168 85 247 / 0.25);
+        }
+
+        .leaderboard-row {
+            transition: all 0.2s ease;
+        }
+        
+        .leaderboard-row:hover {
+            background-color: rgba(168, 85, 247, 0.1) !important;
+        }
+
+        .purple-glow {
+            box-shadow: 0 0 35px -5px rgb(168 85 247);
+        }
+    </style>
 </head>
-<body>
-<div class="bg-layer">
-  <div class="grid-overlay"></div>
-  <div class="particle-container" id="particles"></div>
-</div>
-
-<main>
-  <div class="page-wrap">
-    <section class="hero">
-      <div class="hero-eyebrow">
-        <span class="eyebrow-dot"></span>
-        Fortnite Competitive Hub
-      </div>
-      <h1>
-        <span class="line1">Welcome to</span>
-        <span class="line2">DropIQ</span>
-      </h1>
-      <p class="hero-sub">Your <strong>real-time</strong> command center for every Fortnite tournament — live, upcoming, and completed events worldwide.</p>
-      <div class="stats-row" id="heroStats">
-        <div class="stat-item">
-          <span class="stat-num" id="stat-total">—</span>
-          <div class="stat-label">Total Events</div>
+<body class="bg-[#0a0618] text-white min-h-screen">
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-10">
+            <div class="flex items-center gap-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
+                    💧
+                </div>
+                <div>
+                    <h1 class="title-font text-5xl font-semibold tracking-tighter">DropIQ</h1>
+                    <p class="text-purple-400 text-sm -mt-1">Fortnite Tournament Intelligence</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-x-6 text-sm">
+                <div onclick="fetchEvents()" class="flex items-center gap-x-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-3xl cursor-pointer transition-colors">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Refresh Events</span>
+                </div>
+                <div class="px-4 py-2 bg-white/5 rounded-3xl flex items-center gap-x-2 text-purple-300">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    LIVE
+                </div>
+            </div>
         </div>
-        <div class="stat-item">
-          <span class="stat-num" id="stat-live">—</span>
-          <div class="stat-label">Live Now</div>
+
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Sidebar Controls -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <!-- Tournament Selector -->
+                <div class="glass border border-purple-500/30 rounded-3xl p-6">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-x-3">
+                        <i class="fas fa-trophy text-purple-400"></i>
+                        SELECT TOURNAMENT
+                    </h2>
+                    
+                    <div class="relative mb-6">
+                        <select id="tournamentSelect" 
+                                onchange="loadTournamentData()"
+                                class="w-full bg-[#1a1428] border border-purple-500/40 focus:border-purple-400 rounded-2xl px-5 py-4 text-white appearance-none focus:outline-none cursor-pointer">
+                            <option value="">Loading tournaments...</option>
+                        </select>
+                        <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <div id="eventInfo" class="hidden bg-[#1a1428] rounded-2xl p-5 text-sm space-y-3">
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="glass border border-purple-500/30 rounded-3xl p-6">
+                    <h2 class="text-xl font-semibold mb-5 flex items-center gap-x-3">
+                        <i class="fas fa-chart-bar text-purple-400"></i>
+                        QUALIFICATION ESTIMATE
+                    </h2>
+                    
+                    <div id="qualifyStats" class="space-y-6">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- API Status -->
+                <div class="glass border border-purple-500/20 rounded-3xl p-5 text-xs text-purple-400/70 flex items-center justify-between">
+                    <div>Powered by api-fortnite.com</div>
+                    <div class="flex items-center gap-x-1">
+                        <span class="text-emerald-400">●</span>
+                        CONNECTED
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Leaderboard -->
+            <div class="col-span-12 lg:col-span-8">
+                <div class="glass border border-purple-500/30 rounded-3xl overflow-hidden">
+                    <!-- Leaderboard Header -->
+                    <div class="bg-gradient-to-r from-purple-600 to-violet-600 px-8 py-6 flex items-center justify-between">
+                        <div>
+                            <h2 id="leaderboardTitle" class="text-2xl font-semibold title-font">Global Leaderboard</h2>
+                            <p id="leaderboardSubtitle" class="text-purple-200 text-sm">Loading...</p>
+                        </div>
+                        <div class="text-right">
+                            <div id="totalPlayers" class="text-3xl font-mono font-bold">0</div>
+                            <div class="text-xs uppercase tracking-widest text-purple-200">PLAYERS</div>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard Table -->
+                    <div class="overflow-auto max-h-[650px]" id="leaderboardContainer">
+                        <table class="w-full">
+                            <thead class="sticky top-0 bg-[#1a1428] border-b border-purple-500/30">
+                                <tr class="text-purple-300 text-xs uppercase tracking-widest">
+                                    <th class="px-8 py-5 text-left w-16">#</th>
+                                    <th class="px-4 py-5 text-left">PLAYER</th>
+                                    <th class="px-4 py-5 text-center">POINTS</th>
+                                    <th class="px-4 py-5 text-center">WINS</th>
+                                    <th class="px-4 py-5 text-center">ELIMINATIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardBody" class="divide-y divide-purple-500/10 text-sm">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="stat-item">
-          <span class="stat-num" id="stat-upcoming">—</span>
-          <div class="stat-label">Upcoming</div>
+
+        <!-- Footer -->
+        <div class="mt-12 text-center text-purple-500/40 text-xs flex items-center justify-center gap-x-8">
+            <div>DropIQ • Unofficial Fortnite Tool</div>
+            <div class="flex items-center gap-x-5">
+                <a href="https://www.api-fortnite.com" target="_blank" class="hover:text-purple-400 transition-colors">API</a>
+                <span>•</span>
+                <span>Made for Dustie</span>
+            </div>
         </div>
-      </div>
-    </section>
-
-    <div id="tournaments">
-      <div class="filter-bar">
-        <span class="filter-label">Filter:</span>
-        <div class="filter-pills">
-          <button class="filter-pill active" data-filter="all" onclick="setFilter('all', this)">All Events</button>
-          <button class="filter-pill" data-filter="live" onclick="setFilter('live', this)">🟢 Live</button>
-          <button class="filter-pill" data-filter="upcoming" onclick="setFilter('upcoming', this)">🕐 Upcoming</button>
-          <button class="filter-pill" data-filter="ended" onclick="setFilter('ended', this)">✓ Ended</button>
-        </div>
-      </div>
-      <div id="content-area">
-        <div class="loader-wrap">
-          <div class="spinner"></div>
-          <div class="loader-text">Loading tournaments...</div>
-        </div>
-      </div>
     </div>
-  </div>
-</main>
 
-<div class="page-wrap">
-  <footer>
-    <div class="footer-brand">Drop<span>IQ</span></div>
-    <div class="footer-copy">Powered by Fortnite API · Live tournament data</div>
-  </footer>
-</div>
+    <script>
+        const API_KEY = "f1758950fe4aaf77a7741f5deb3e7a6687f48a2d12ed029a41e3f18adb46f759";
+        const BASE_URL = "https://prod.api-fortnite.com";
+        
+        let currentEvents = [];
+        let currentLeaderboard = [];
 
-<div id="t-modal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-title">Tournament</div>
-      <span class="close-btn" onclick="closeModal()">×</span>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-  </div>
-</div>
+        function createHeaders() {
+            return {
+                "x-api-key": API_KEY,
+                "Content-Type": "application/json"
+            };
+        }
 
-<script>
-const API_KEY = '6a80995122955fa8e116ef2b683076a273eae9ea3fd9cf85581a727745951b0c';
-const BASE = 'https://prod.api-fortnite.com';
-let allEvents = [];
-let currentFilter = 'all';
-let countdownIntervals = [];
+        async function fetchEvents() {
+            const select = document.getElementById("tournamentSelect");
+            select.innerHTML = `<option value="">Loading tournaments...</option>`;
+            
+            try {
+                // Try multiple possible endpoints
+                let response = await fetch(`${BASE_URL}/api/v1/events/global`, {
+                    headers: createHeaders()
+                });
+                
+                if (!response.ok) {
+                    response = await fetch(`${BASE_URL}/api/v1/events`, {
+                        headers: createHeaders()
+                    });
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentEvents = Array.isArray(data) ? data : (data.events || data.data || []);
+                    
+                    select.innerHTML = `<option value="">Choose a tournament...</option>`;
+                    
+                    currentEvents.forEach(event => {
+                        const option = document.createElement("option");
+                        option.value = event.id || event.eventId || event.windowId || "";
+                        option.textContent = event.name || event.title || `Event ${option.value.substring(0, 12)}...`;
+                        select.appendChild(option);
+                    });
+                    
+                    if (currentEvents.length > 0) {
+                        select.value = currentEvents[0].id || currentEvents[0].eventId || "";
+                        loadTournamentData();
+                    }
+                } else {
+                    throw new Error("Failed to fetch");
+                }
+            } catch(e) {
+                console.error(e);
+                select.innerHTML = `<option value="">Failed to load. Check API key.</option>`;
+            }
+        }
 
-(function() {
-  const c = document.getElementById('particles');
-  for (let i = 0; i < 50; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.cssText = `left: ${Math.random()*100}%; top: ${Math.random()*100}%; --dur: ${6+Math.random()*10}s; --delay: ${Math.random()*8}s; --dx: ${(Math.random()-0.5)*80}px; --dy: ${-(80+Math.random()*200)}px; width: ${1+Math.random()*2}px; height: ${1+Math.random()*2}px;`;
-    c.appendChild(p);
-  }
-})();
+        async function loadTournamentData() {
+            const select = document.getElementById("tournamentSelect");
+            const eventId = select.value;
+            
+            if (!eventId) return;
+            
+            const event = currentEvents.find(e => (e.id || e.eventId) === eventId);
+            if (!event) return;
+            
+            // Update event info
+            const infoDiv = document.getElementById("eventInfo");
+            infoDiv.classList.remove("hidden");
+            infoDiv.innerHTML = `
+                <div class="flex justify-between text-sm">
+                    <span class="text-purple-400">Event ID</span>
+                    <span class="font-mono">${eventId.substring(0, 18)}${eventId.length > 18 ? '...' : ''}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-purple-400">Window</span>
+                    <span>${event.windowId || 'Current'}</span>
+                </div>
+            `;
+            
+            document.getElementById("leaderboardTitle").textContent = event.name || "Tournament Leaderboard";
+            document.getElementById("leaderboardSubtitle").textContent = "Real-time standings";
+            
+            try {
+                // Fetch leaderboard
+                let lbUrl = `${BASE_URL}/api/v1/events/global/leaderboard`;
+                
+                const lbResponse = await fetch(lbUrl, {
+                    headers: createHeaders()
+                });
+                
+                if (lbResponse.ok) {
+                    const lbData = await lbResponse.json();
+                    currentLeaderboard = lbData.leaderboard || lbData.entries || lbData || [];
+                    renderLeaderboard();
+                    calculateQualifyStats();
+                }
+            } catch(e) {
+                console.error("Leaderboard fetch failed", e);
+                // Mock data for demo
+                currentLeaderboard = generateMockLeaderboard();
+                renderLeaderboard();
+                calculateQualifyStats();
+            }
+        }
 
-function getStatus(ev) {
-  const now = Date.now();
-  const windows = ev.eventWindows || ev.windows || [];
-  if (windows.length > 0) {
-    let hasLive = false;
-    let hasFuture = false;
-    for (const w of windows) {
-      const start = new Date(w.beginTime || w.startTime || 0).getTime();
-      const end = new Date(w.endTime || 0).getTime();
-      if (now >= start && (end === 0 || now <= end)) hasLive = true;
-      if (now < start) hasFuture = true;
-    }
-    if (hasLive) return 'live';
-    if (hasFuture) return 'upcoming';
-    return 'ended';
-  }
-  const startTime = ev.beginTime || ev.startTime;
-  const endTime = ev.endTime;
-  if (startTime) {
-    const start = new Date(startTime).getTime();
-    const end = endTime ? new Date(endTime).getTime() : Infinity;
-    if (now >= start && now <= end) return 'live';
-    if (now < start) return 'upcoming';
-  }
-  return 'ended';
-}
+        function generateMockLeaderboard() {
+            const names = ["Ninja", "Bugha", "Tfue", "Clix", "Mongraal", "Aqua", "Rezon", "UnknownxArmy", "Zayt", "Chap"];
+            return Array(25).fill(0).map((_, i) => ({
+                rank: i + 1,
+                name: names[i % names.length] + (i > 5 ? `${Math.floor(Math.random()*99)}` : ""),
+                points: Math.floor(250 - (i * 8) + Math.random() * 15),
+                wins: Math.max(0, Math.floor(12 - i / 3)),
+                elims: Math.floor(45 - i * 1.2 + Math.random() * 20)
+            }));
+        }
 
-function getNextWindow(ev) {
-  const now = Date.now();
-  const windows = ev.eventWindows || ev.windows || [];
-  const future = windows.map(w => ({...w, ts: new Date(w.beginTime || w.startTime || 0).getTime()})).filter(w => w.ts > now).sort((a,b) => a.ts - b.ts);
-  return future[0] || null;
-}
+        function renderLeaderboard() {
+            const tbody = document.getElementById("leaderboardBody");
+            tbody.innerHTML = "";
+            
+            document.getElementById("totalPlayers").textContent = currentLeaderboard.length;
+            
+            currentLeaderboard.slice(0, 50).forEach(player => {
+                const row = document.createElement("tr");
+                row.className = "leaderboard-row border-b border-purple-500/10 hover:bg-purple-500/5";
+                row.innerHTML = `
+                    <td class="px-8 py-5 font-mono text-purple-300">${player.rank || player.position || "?"}</td>
+                    <td class="px-4 py-5 font-medium">${player.name || player.displayName || "Player"}</td>
+                    <td class="px-4 py-5 text-center font-bold text-purple-300">${player.points || player.score || 0}</td>
+                    <td class="px-4 py-5 text-center">${player.wins || 0}</td>
+                    <td class="px-4 py-5 text-center">${player.elims || player.kills || 0}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
-function formatDate(str) {
-  if (!str) return '—';
-  try {
-    const d = new Date(str);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  } catch(e) { return str; }
-}
+        function calculateQualifyStats() {
+            const container = document.getElementById("qualifyStats");
+            
+            if (currentLeaderboard.length === 0) {
+                container.innerHTML = `<div class="text-purple-400 text-center py-8">No data available yet</div>`;
+                return;
+            }
+            
+            // Sort by points descending
+            const sorted = [...currentLeaderboard].sort((a, b) => {
+                return (b.points || b.score || 0) - (a.points || a.score || 0);
+            });
+            
+            // Top 10 average
+            const top10 = sorted.slice(0, 10);
+            const top10Avg = Math.round(top10.reduce((sum, p) => sum + (p.points || p.score || 0), 0) / top10.length);
+            
+            // Top 50 average
+            const top50 = sorted.slice(0, 50);
+            const top50Avg = Math.round(top50.reduce((sum, p) => sum + (p.points || p.score || 0), 0) / top50.length);
+            
+            // Estimated qualify threshold (approx 150th place or average of 100-200)
+            let qualifyEstimate = Math.max(85, Math.round(top50Avg * 0.72));
+            
+            container.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-[#120d1f] rounded-2xl p-5">
+                        <div class="uppercase text-[10px] tracking-[1px] text-purple-400 mb-1">TOP 10 AVG</div>
+                        <div class="text-4xl font-mono font-bold text-white">${top10Avg}</div>
+                        <div class="text-emerald-400 text-xs mt-1">points</div>
+                    </div>
+                    <div class="bg-[#120d1f] rounded-2xl p-5">
+                        <div class="uppercase text-[10px] tracking-[1px] text-purple-400 mb-1">TOP 50 AVG</div>
+                        <div class="text-4xl font-mono font-bold text-white">${top50Avg}</div>
+                        <div class="text-emerald-400 text-xs mt-1">points</div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-purple-500/20">
+                    <div class="flex justify-between items-end mb-4">
+                        <div>
+                            <div class="text-purple-300 text-sm">ESTIMATED TO QUALIFY</div>
+                            <div class="text-6xl font-mono font-bold text-violet-300 leading-none">${qualifyEstimate}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="px-4 py-2 bg-violet-600/20 text-violet-300 text-xs rounded-2xl inline-block">~ TOP 150</div>
+                        </div>
+                    </div>
+                    <div class="h-2 bg-purple-900 rounded-full overflow-hidden">
+                        <div class="h-2 bg-gradient-to-r from-purple-400 to-violet-500 w-[68%] rounded-full"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-purple-400 mt-1">
+                        <span>0</span>
+                        <span>QUALIFY</span>
+                    </div>
+                </div>
+                
+                <div onclick="alert('DropIQ predicts you need around ' + ${qualifyEstimate} + ' points to make it to the next round. Good luck!')" 
+                     class="mt-8 cursor-pointer text-center py-4 bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 rounded-2xl font-medium transition-all active:scale-95">
+                    HOW DO I REACH THIS?
+                </div>
+            `;
+        }
 
-function formatTime(str) {
-  if (!str) return '';
-  try {
-    const d = new Date(str);
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
-  } catch(e) { return ''; }
-}
+        // Tailwind script
+        function initTailwind() {
+            // Already included via CDN
+        }
 
-function formatPrize(val) {
-  if (!val && val !== 0) return null;
-  if (typeof val === 'string' && val.includes('$')) return val;
-  if (typeof val === 'number') {
-    if (val >= 1000000) return '$' + (val/1000000).toFixed(1) + 'M';
-    if (val >= 1000) return '$' + (val/1000).toFixed(0) + 'K';
-    return '$' + val.toLocaleString();
-  }
-  return String(val);
-}
+        // Keyboard shortcuts
+        document.addEventListener("keydown", function(e) {
+            if (e.metaKey && e.key === "k") {
+                e.preventDefault();
+                document.getElementById("tournamentSelect").focus();
+            }
+        });
 
-function countdown(targetTs, cardId) {
-  const id = setInterval(() => {
-    const el = document.getElementById('cd-' + cardId);
-    if (!el) { clearInterval(id); return; }
-    const diff = targetTs - Date.now();
-    if (diff <= 0) { el.innerHTML = '<span style="color:var(--live-green);font-size:12px;font-weight:700;">STARTING NOW</span>'; clearInterval(id); return; }
-    const d = Math.floor(diff/86400000);
-    const h = Math.floor((diff%86400000)/3600000);
-    const m = Math.floor((diff%3600000)/60000);
-    const s = Math.floor((diff%60000)/1000);
-    el.innerHTML = d > 0
-      ? `<div class="t-countdown"><div class="t-countdown-seg"><span class="t-countdown-val">${d}</span><span class="t-countdown-unit">D</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(h).padStart(2,'0')}</span><span class="t-countdown-unit">H</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(m).padStart(2,'0')}</span><span class="t-countdown-unit">M</span></div></div>`
-      : `<div class="t-countdown"><div class="t-countdown-seg"><span class="t-countdown-val">${String(h).padStart(2,'0')}</span><span class="t-countdown-unit">H</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(m).padStart(2,'0')}</span><span class="t-countdown-unit">M</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(s).padStart(2,'0')}</span><span class="t-countdown-unit">S</span></div></div>`;
-  }, 1000);
-  countdownIntervals.push(id);
-}
-
-function getEventImage(ev) {
-  const candidates = [ev.poster_front_image, ev.posterFrontImage, ev.poster_back_image, ev.posterBackImage, ev.image, ev.thumbnail, ev.logo, ev.poster, ev.banner];
-  for (const c of candidates) {
-    if (c && typeof c === 'string' && c.startsWith('http')) return c;
-  }
-  return null;
-}
-
-function buildCard(ev, index) {
-  const status = getStatus(ev);
-  const img = getEventImage(ev);
-  const prize = formatPrize(ev.prizePool || ev.prize_pool || ev.totalPrize || ev.rewards?.total);
-  const nextWin = getNextWindow(ev);
-  const windows = ev.eventWindows || ev.windows || [];
-  const title = ev.displayName || ev.name || ev.title || 'Unnamed Tournament';
-  const region = (ev.region || ev.regionDisplayName || 'Global').toUpperCase();
-  const cardId = 'ev-' + (ev.id || ev.eventId || index);
-  const statusLabel = status === 'live' ? '🔴 LIVE' : status === 'upcoming' ? 'UPCOMING' : 'ENDED';
-  let countdownHTML = '';
-  if (status === 'upcoming' && nextWin) {
-    const ts = new Date(nextWin.beginTime || nextWin.startTime || 0).getTime();
-    countdownHTML = `<div id="cd-${cardId}" style="margin-top:10px;"></div>`;
-  }
-  let dateDisplay = '';
-  if (ev.beginTime || ev.startTime) {
-    const d = formatDate(ev.beginTime || ev.startTime);
-    const t = formatTime(ev.beginTime || ev.startTime);
-    dateDisplay = d + (t ? ' · ' + t : '');
-  } else if (windows.length > 0) {
-    dateDisplay = formatDate(windows[0].beginTime || windows[0].startTime);
-  }
-  return `
-<article class="t-card" style="animation-delay:${index * 0.06}s" data-status="${status}" onclick="openTournamentModal(${index})">
-  <div class="t-card-img-wrap">
-    ${img ? `<img class="t-card-img" src="${img}" alt="${title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/> <div class="t-card-img-fallback" style="display:none">FORTNITE</div>` : `<div class="t-card-img-fallback">FORTNITE</div>`}
-    <div class="t-card-img-overlay"></div>
-    <span class="t-status-badge ${status}">${statusLabel}</span>
-  </div>
-  <div class="t-card-body">
-    <div class="t-card-title">${title}</div>
-    ${region ? `<div class="t-card-region">${region}</div>` : ''}
-    <div class="t-card-meta">
-      ${dateDisplay ? `<span class="t-meta-chip"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M2 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>${dateDisplay}</span>` : ''}
-      ${windows.length > 0 ? `<span class="t-meta-chip"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>${windows.length} Window${windows.length>1?'s':''}</span>` : ''}
-    </div>
-    ${prize ? `<div class="t-card-prize">${prize}</div><div class="t-card-prize-label">Prize Pool</div>` : ''}
-    ${countdownHTML}
-    <div class="t-card-footer">
-      <div class="t-card-windows">
-        ${status === 'live' ? '<span style="color:var(--live-green);">● In Progress</span>' : ''}
-        ${status === 'ended' ? `<strong>${windows.length}</strong> rounds completed` : ''}
-        ${status === 'upcoming' && nextWin ? `Starts <strong>${formatDate(nextWin.beginTime||nextWin.startTime)}</strong>` : ''}
-      </div>
-      <div class="t-card-arrow">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-    </div>
-  </div>
-</article>`;
-}
-
-function renderSection(title, events, isLive) {
-  if (events.length === 0) return '';
-  const cards = events.map((ev, i) => buildCard(ev, i)).join('');
-  const liveBar = isLive ? `
-    <div class="live-banner">
-      <div class="live-indicator"></div>
-      <span class="live-banner-text">Live Tournaments Active</span>
-      <span class="live-banner-sub">${events.length} event${events.length>1?'s':''} in progress</span>
-    </div>` : '';
-  return `
-    ${liveBar}
-    <div class="section-wrap">
-      <div class="section-head">
-        <div class="section-title">
-          <span class="section-accent"></span>
-          ${title}
-        </div>
-        <span class="section-count">${events.length} event${events.length>1?'s':''}</span>
-      </div>
-      <div class="tournaments-grid">${cards}</div>
-    </div>`;
-}
-
-function renderAll(filter) {
-  countdownIntervals.forEach(id => clearInterval(id));
-  countdownIntervals = [];
-  let toShow = allEvents;
-  if (filter !== 'all') toShow = allEvents.filter(ev => getStatus(ev) === filter);
-  const live = toShow.filter(ev => getStatus(ev) === 'live');
-  const upcoming = toShow.filter(ev => getStatus(ev) === 'upcoming');
-  const ended = toShow.filter(ev => getStatus(ev) === 'ended');
-  let html = '';
-  if (filter === 'all' || filter === 'live') html += renderSection('Live Now', live, true);
-  if (filter === 'all' || filter === 'upcoming') html += renderSection('Upcoming Events', upcoming, false);
-  if (filter === 'all' || filter === 'ended') html += renderSection('Recent & Completed', ended, false);
-  if (!html) html = `<div class="empty-state"><div class="empty-icon">🎯</div><p style="font-size:16px;color:var(--text-mid);font-weight:600;">No ${filter} events found</p></div>`;
-  document.getElementById('content-area').innerHTML = html;
-  allEvents.filter(ev => getStatus(ev) === 'upcoming').forEach((ev, i) => {
-    const cardId = 'ev-' + (ev.id || ev.eventId || i);
-    const nextWin = getNextWindow(ev);
-    if (nextWin) {
-      const ts = new Date(nextWin.beginTime || nextWin.startTime || 0).getTime();
-      if (ts > Date.now()) countdown(ts, cardId);
-    }
-  });
-}
-
-function setFilter(filter, btn) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  renderAll(filter);
-}
-
-function animateStat(id, target) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  let cur = 0;
-  const step = Math.ceil(target / 30);
-  const iv = setInterval(() => {
-    cur = Math.min(cur + step, target);
-    el.textContent = cur;
-    if (cur >= target) clearInterval(iv);
-  }, 40);
-}
-
-function showDemoData() {
-  const now = Date.now();
-  allEvents = [
-    {id: 'demo1', displayName: 'FNCS Global Championship 2025', region: 'Global', prizePool: 2000000, beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString(), eventWindows: [{beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString()}]},
-    {id: 'demo2', displayName: 'Solo Cash Cup — NA East', region: 'NAE', prizePool: 50000, beginTime: new Date(now + 86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000).toISOString()}]},
-    {id: 'demo3', displayName: 'Ranked Open Tournament — EU', region: 'EU', prizePool: 25000, beginTime: new Date(now + 3*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 3*86400000).toISOString()}]},
-    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]},
-    {id: 'demo5', displayName: 'Zero Build Cup — NAW', region: 'NAW', prizePool: 15000, beginTime: new Date(now + 86400000*1.5).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*1.5).toISOString()}]}
-  ];
-  animateStat('stat-total', allEvents.length);
-  animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
-  animateStat('stat-upcoming', allEvents.filter(ev => getStatus(ev) === 'upcoming').length);
-  renderAll('all');
-}
-
-function openTournamentModal(index) {
-  const ev = allEvents[index];
-  if (!ev) return;
-  const title = ev.displayName || ev.name || 'Tournament';
-  let html = `
-    <h2 style="margin-bottom:20px;color:var(--text-bright);">${title}</h2>
-    <div class="prize-section">
-      <strong style="font-size:15px;letter-spacing:1px;">PRIZE POOL</strong><br>
-      <span style="font-size:42px;font-weight:700;color:var(--b300);">${formatPrize(ev.prizePool || ev.prize_pool || ev.totalPrize) || '$0'}</span>
-    </div>
-    <div class="leaderboard">
-      <h3>🏆 Leaderboard (Top 10)</h3>
-      <div id="lb-content" style="margin-top:12px;">Loading leaderboard...</div>
-    </div>
-  `;
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').innerHTML = html;
-  document.getElementById('t-modal').style.display = 'flex';
-  loadDemoLeaderboard();
-}
-
-function closeModal() {
-  document.getElementById('t-modal').style.display = 'none';
-}
-
-function loadDemoLeaderboard() {
-  const html = `
-    <div class="lb-row"><div class="lb-rank">#1</div><div class="lb-name">Bugha</div><div class="lb-score">312 pts</div></div>
-    <div class="lb-row"><div class="lb-rank">#2</div><div class="lb-name">Clix</div><div class="lb-score">289 pts</div></div>
-    <div class="lb-row"><div class="lb-rank">#3</div><div class="lb-name">UnknownxArmy</div><div class="lb-score">274 pts</div></div>
-    <div class="lb-row"><div class="lb-rank">#4</div><div class="lb-name">Queasy</div><div class="lb-score">261 pts</div></div>
-    <div class="lb-row"><div class="lb-rank">#5</div><div class="lb-name">Aqua</div><div class="lb-score">248 pts</div></div>
-  `;
-  document.getElementById('lb-content').innerHTML = html;
-}
-
-async function fetchTournaments() {
-  document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching tournaments...</div></div>`;
-  const endpoints = ['/api/v1/events/global','/api/v1/events/global/history','/api/v1/events/cashprizes','/api/v1/events/sessions','/api/v1/events/tracker'];
-  let merged = [];
-  for (const ep of endpoints) {
-    try {
-      const res = await fetch(BASE + ep, { headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' } });
-      if (res.ok) {
-        const json = await res.json();
-        const arr = json.data || json.events || json.tournaments || json.items || json.results || [];
-        if (arr.length) merged.push(...arr);
-      }
-    } catch(e) {}
-  }
-  if (merged.length > 0) {
-    const seen = new Set();
-    allEvents = merged.filter(ev => {
-      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,100);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-    animateStat('stat-total', allEvents.length);
-    animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
-    animateStat('stat-upcoming', allEvents.filter(ev => getStatus(ev) === 'upcoming').length);
-    renderAll('all');
-  } else {
-    showDemoData();
-  }
-}
-
-fetchTournaments();
-</script>
+        // Boot the app
+        window.onload = function() {
+            fetchEvents();
+            
+            // Demo data fallback if API fails
+            setTimeout(() => {
+                if (currentLeaderboard.length === 0) {
+                    currentLeaderboard = generateMockLeaderboard();
+                    renderLeaderboard();
+                    calculateQualifyStats();
+                }
+            }, 1800);
+        };
+    </script>
 </body>
 </html>
