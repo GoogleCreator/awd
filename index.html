@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DropIQ</title>
+<title>DropIQ — Fortnite Tournaments</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --b50: #dbeeff;
     --b100: #b3d9ff;
@@ -30,13 +29,10 @@
     --card-border: rgba(58, 158, 255, 0.22);
     --card-border-hover: rgba(58, 158, 255, 0.6);
     --live-green: #00e676;
-    --live-bg: rgba(0, 230, 118, 0.15);
     --upcoming-amber: #ffc107;
     --ended-gray: #546e8a;
   }
-
   html { scroll-behavior: smooth; }
-
   body {
     font-family: 'Exo 2', sans-serif;
     background: #000b1e;
@@ -44,8 +40,6 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  /* ===== BACKGROUND ===== */
   .bg-layer {
     position: fixed;
     inset: 0;
@@ -95,8 +89,6 @@
     80% { opacity: 0.4; }
     100% { transform: translate(var(--dx, 30px), var(--dy, -180px)) scale(0); opacity: 0; }
   }
-
-  /* ===== LAYOUT ===== */
   .page-wrap {
     position: relative;
     z-index: 1;
@@ -104,97 +96,8 @@
     margin: 0 auto;
     padding: 0 24px;
   }
-
-  /* ===== NAV ===== */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    background: rgba(0, 11, 30, 0.75);
-    border-bottom: 1px solid rgba(58, 158, 255, 0.15);
-    animation: slideDown 0.6s ease both;
-  }
-  @keyframes slideDown {
-    from { transform: translateY(-100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .nav-inner {
-    max-width: 1320px;
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-  }
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--b400), var(--b300));
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: #fff;
-    box-shadow: 0 0 16px var(--glow);
-    flex-shrink: 0;
-  }
-  .logo-text {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    font-size: 24px;
-    letter-spacing: 2px;
-    color: var(--text-bright);
-    text-transform: uppercase;
-  }
-  .logo-text span { color: var(--b300); }
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    list-style: none;
-  }
-  .nav-links a {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--text-mid);
-    text-decoration: none;
-    padding: 6px 14px;
-    border-radius: 6px;
-    transition: all 0.2s;
-  }
-  .nav-links a:hover {
-    color: var(--text-bright);
-    background: rgba(58, 158, 255, 0.1);
-  }
-  .nav-badge {
-    background: linear-gradient(135deg, var(--b400), var(--b300));
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 20px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    box-shadow: 0 0 12px var(--glow);
-  }
-
-  /* ===== HERO ===== */
   .hero {
-    padding: 80px 0 60px;
+    padding: 120px 0 60px;
     text-align: center;
     animation: fadeUp 0.8s 0.2s ease both;
   }
@@ -282,8 +185,6 @@
     color: var(--text-dim);
     margin-top: 4px;
   }
-
-  /* ===== FILTER BAR ===== */
   .filter-bar {
     display: flex;
     align-items: center;
@@ -330,61 +231,6 @@
     color: #fff;
     box-shadow: 0 0 16px var(--glow);
   }
-  .region-select-wrap {
-    margin-left: auto;
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .region-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    white-space: nowrap;
-  }
-  .region-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background: rgba(0, 18, 48, 0.85);
-    border: 1px solid rgba(58, 158, 255, 0.3);
-    color: var(--text-bright);
-    font-family: 'Exo 2', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    padding: 8px 36px 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    min-width: 160px;
-    backdrop-filter: blur(8px);
-  }
-  .region-select:hover {
-    border-color: var(--b300);
-    box-shadow: 0 0 10px var(--glow-soft);
-  }
-  .region-select:focus {
-    outline: none;
-    border-color: var(--b300);
-    box-shadow: 0 0 14px var(--glow-soft);
-  }
-  .region-select option {
-    background: #001233;
-    color: var(--text-bright);
-  }
-  .region-chevron {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--b300);
-  }
-
-  /* ===== SECTION HEADER ===== */
   .section-head {
     display: flex;
     align-items: center;
@@ -417,8 +263,6 @@
     font-weight: 400;
     letter-spacing: 1px;
   }
-
-  /* ===== LIVE BANNER ===== */
   .live-banner {
     display: flex;
     align-items: center;
@@ -454,16 +298,12 @@
     margin-left: auto;
     letter-spacing: 0.5px;
   }
-
-  /* ===== TOURNAMENT GRID ===== */
   .tournaments-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 20px;
     margin-bottom: 60px;
   }
-
-  /* ===== TOURNAMENT CARD ===== */
   .t-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -606,7 +446,6 @@
     border-radius: 6px;
     padding: 4px 10px;
   }
-  .t-meta-chip svg { flex-shrink: 0; }
   .t-card-prize {
     font-family: 'Rajdhani', sans-serif;
     font-size: 20px;
@@ -653,8 +492,6 @@
     box-shadow: 0 0 10px var(--glow);
     transform: translateX(2px);
   }
-
-  /* ===== EMPTY / LOADER ===== */
   .loader-wrap {
     display: flex;
     flex-direction: column;
@@ -679,31 +516,6 @@
     text-transform: uppercase;
     color: var(--text-dim);
   }
-  .error-msg {
-    text-align: center;
-    padding: 40px 24px;
-    color: var(--text-dim);
-    font-size: 15px;
-    line-height: 1.6;
-  }
-  .error-msg strong { color: #ff6b6b; display: block; margin-bottom: 8px; font-size: 18px; }
-  .retry-btn {
-    margin-top: 16px;
-    background: var(--b400);
-    border: none;
-    color: #fff;
-    font-family: 'Exo 2', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 10px 28px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.25s;
-    box-shadow: 0 0 16px var(--glow);
-  }
-  .retry-btn:hover { background: var(--b300); transform: translateY(-2px); }
   .empty-state {
     grid-column: 1 / -1;
     text-align: center;
@@ -715,8 +527,6 @@
     margin-bottom: 12px;
     opacity: 0.4;
   }
-
-  /* ===== FOOTER ===== */
   footer {
     margin-top: 40px;
     padding: 32px 0;
@@ -724,10 +534,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: gap;
     flex-wrap: wrap;
     gap: 16px;
-    animation: fadeUp 0.6s ease both;
   }
   .footer-brand {
     font-family: 'Rajdhani', sans-serif;
@@ -743,14 +551,10 @@
     color: var(--text-dim);
     opacity: 0.6;
   }
-
-  /* ===== SECTIONS ===== */
   .section-wrap {
     margin-bottom: 48px;
     animation: fadeUp 0.7s ease both;
   }
-
-  /* ===== COUNTDOWN ===== */
   .t-countdown {
     display: flex;
     gap: 6px;
@@ -783,33 +587,13 @@
 </style>
 </head>
 <body>
-
-<!-- Background -->
 <div class="bg-layer">
   <div class="grid-overlay"></div>
   <div class="particle-container" id="particles"></div>
 </div>
 
-<!-- Nav -->
-<nav>
-  <div class="nav-inner">
-    <a href="#" class="nav-logo">
-      <div class="logo-icon">DQ</div>
-      <span class="logo-text">Drop<span>IQ</span></span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#tournaments">Tournaments</a></li>
-      <li><a href="#live">Live</a></li>
-      <li><a href="#upcoming">Upcoming</a></li>
-      <li><span class="nav-badge">Live Data</span></li>
-    </ul>
-  </div>
-</nav>
-
 <main>
   <div class="page-wrap">
-
-    <!-- Hero -->
     <section class="hero">
       <div class="hero-eyebrow">
         <span class="eyebrow-dot"></span>
@@ -836,10 +620,7 @@
       </div>
     </section>
 
-    <!-- Tournaments Content -->
-    <div id="tournaments" style="scroll-margin-top:80px">
-
-      <!-- Filter Bar -->
+    <div id="tournaments">
       <div class="filter-bar">
         <span class="filter-label">Filter:</span>
         <div class="filter-pills">
@@ -848,33 +629,14 @@
           <button class="filter-pill" data-filter="upcoming" onclick="setFilter('upcoming', this)">🕐 Upcoming</button>
           <button class="filter-pill" data-filter="ended" onclick="setFilter('ended', this)">✓ Ended</button>
         </div>
-        <div class="region-select-wrap">
-          <span class="region-label">Region:</span>
-          <div style="position:relative;">
-            <select class="region-select" id="regionSelect" onchange="setRegion(this.value)">
-              <option value="NAC">NAC — North America Central</option>
-              <option value="NAE">NAE — North America East</option>
-              <option value="NAW">NAW — North America West</option>
-              <option value="EU">EU — Europe</option>
-              <option value="BR">BR — Brazil</option>
-              <option value="ASIA">ASIA — Asia</option>
-              <option value="OCE">OCE — Oceania</option>
-              <option value="ME">ME — Middle East</option>
-              <option value="">🌍 All Regions</option>
-            </select>
-            <svg class="region-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
       </div>
 
-      <!-- Main content area -->
       <div id="content-area">
         <div class="loader-wrap">
           <div class="spinner"></div>
           <div class="loader-text">Loading tournaments...</div>
         </div>
       </div>
-
     </div>
   </div>
 </main>
@@ -891,70 +653,41 @@ const API_KEY = '6a80995122955fa8e116ef2b683076a273eae9ea3fd9cf85581a727745951b0
 const BASE = 'https://prod.api-fortnite.com';
 let allEvents = [];
 let currentFilter = 'all';
-let currentRegion = 'NAC';
 let countdownIntervals = [];
 
-// Particles
 (function() {
   const c = document.getElementById('particles');
   for (let i = 0; i < 50; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
-    p.style.cssText = `
-      left: ${Math.random()*100}%;
-      top: ${Math.random()*100}%;
-      --dur: ${6+Math.random()*10}s;
-      --delay: ${Math.random()*8}s;
-      --dx: ${(Math.random()-0.5)*80}px;
-      --dy: ${-(80+Math.random()*200)}px;
-      width: ${1+Math.random()*2}px;
-      height: ${1+Math.random()*2}px;
-    `;
+    p.style.cssText = `left: ${Math.random()*100}%; top: ${Math.random()*100}%; --dur: ${6+Math.random()*10}s; --delay: ${Math.random()*8}s; --dx: ${(Math.random()-0.5)*80}px; --dy: ${-(80+Math.random()*200)}px; width: ${1+Math.random()*2}px; height: ${1+Math.random()*2}px;`;
     c.appendChild(p);
   }
 })();
 
-// Parse a timestamp safely
-function parseTS(val) {
-  if (!val) return null;
-  const ts = new Date(val).getTime();
-  return isNaN(ts) ? null : ts;
-}
-
-// Determine event status — robust against missing/partial fields
 function getStatus(ev) {
   const now = Date.now();
   const windows = ev.eventWindows || ev.windows || [];
-
   if (windows.length > 0) {
-    let hasLive = false, hasFuture = false, latestEnd = 0, hasValid = false;
+    let hasLive = false;
+    let hasFuture = false;
     for (const w of windows) {
-      const s = parseTS(w.beginTime || w.startTime);
-      const e = parseTS(w.endTime || w.endtime);
-      if (!s) continue;
-      hasValid = true;
-      if (e && e > latestEnd) latestEnd = e;
-      if (e && now >= s && now <= e) { hasLive = true; }
-      else if (!e && now >= s && now <= s + 4*3600000) { hasLive = true; }
-      else if (now < s) { hasFuture = true; }
+      const start = new Date(w.beginTime || w.startTime || 0).getTime();
+      const end = new Date(w.endTime || 0).getTime();
+      if (now >= start && (end === 0 || now <= end)) hasLive = true;
+      if (now < start) hasFuture = true;
     }
     if (hasLive) return 'live';
     if (hasFuture) return 'upcoming';
-    if (hasValid) return 'ended';
-  }
-
-  const begin = parseTS(ev.beginTime || ev.startTime || ev.start_time);
-  const end   = parseTS(ev.endTime   || ev.end_time  || ev.finishTime);
-
-  if (begin && end) {
-    if (now >= begin && now <= end) return 'live';
-    if (now < begin) return 'upcoming';
     return 'ended';
   }
-  if (begin) {
-    if (now < begin) return 'upcoming';
-    if (now - begin < 8*3600000) return 'live';
-    return 'ended';
+  const startTime = ev.beginTime || ev.startTime;
+  const endTime = ev.endTime;
+  if (startTime) {
+    const start = new Date(startTime).getTime();
+    const end = endTime ? new Date(endTime).getTime() : Infinity;
+    if (now >= start && now <= end) return 'live';
+    if (now < start) return 'upcoming';
   }
   return 'ended';
 }
@@ -1007,27 +740,14 @@ function countdown(targetTs, cardId) {
     const m = Math.floor((diff%3600000)/60000);
     const s = Math.floor((diff%60000)/1000);
     el.innerHTML = d > 0
-      ? `<div class="t-countdown">
-           <div class="t-countdown-seg"><span class="t-countdown-val">${d}</span><span class="t-countdown-unit">D</span></div>
-           <div class="t-countdown-seg"><span class="t-countdown-val">${String(h).padStart(2,'0')}</span><span class="t-countdown-unit">H</span></div>
-           <div class="t-countdown-seg"><span class="t-countdown-val">${String(m).padStart(2,'0')}</span><span class="t-countdown-unit">M</span></div>
-         </div>`
-      : `<div class="t-countdown">
-           <div class="t-countdown-seg"><span class="t-countdown-val">${String(h).padStart(2,'0')}</span><span class="t-countdown-unit">H</span></div>
-           <div class="t-countdown-seg"><span class="t-countdown-val">${String(m).padStart(2,'0')}</span><span class="t-countdown-unit">M</span></div>
-           <div class="t-countdown-seg"><span class="t-countdown-val">${String(s).padStart(2,'0')}</span><span class="t-countdown-unit">S</span></div>
-         </div>`;
+      ? `<div class="t-countdown"><div class="t-countdown-seg"><span class="t-countdown-val">${d}</span><span class="t-countdown-unit">D</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(h).padStart(2,'0')}</span><span class="t-countdown-unit">H</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(m).padStart(2,'0')}</span><span class="t-countdown-unit">M</span></div></div>`
+      : `<div class="t-countdown"><div class="t-countdown-seg"><span class="t-countdown-val">${String(h).padStart(2,'0')}</span><span class="t-countdown-unit">H</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(m).padStart(2,'0')}</span><span class="t-countdown-unit">M</span></div><div class="t-countdown-seg"><span class="t-countdown-val">${String(s).padStart(2,'0')}</span><span class="t-countdown-unit">S</span></div></div>`;
   }, 1000);
   countdownIntervals.push(id);
 }
 
 function getEventImage(ev) {
-  const candidates = [
-    ev.poster_front_image, ev.posterFrontImage,
-    ev.poster_back_image, ev.posterBackImage,
-    ev.image, ev.thumbnail, ev.logo,
-    ev.poster, ev.banner,
-  ];
+  const candidates = [ev.poster_front_image, ev.posterFrontImage, ev.poster_back_image, ev.posterBackImage, ev.image, ev.thumbnail, ev.logo, ev.poster, ev.banner];
   for (const c of candidates) {
     if (c && typeof c === 'string' && c.startsWith('http')) return c;
   }
@@ -1041,17 +761,14 @@ function buildCard(ev, index) {
   const nextWin = getNextWindow(ev);
   const windows = ev.eventWindows || ev.windows || [];
   const title = ev.displayName || ev.name || ev.title || 'Unnamed Tournament';
-  const region = ev.region || ev.regionDisplayName || '';
+  const region = (ev.region || ev.regionDisplayName || 'Global').toUpperCase();
   const cardId = 'ev-' + (ev.id || ev.eventId || index);
-
   const statusLabel = status === 'live' ? '🔴 LIVE' : status === 'upcoming' ? 'UPCOMING' : 'ENDED';
-
   let countdownHTML = '';
   if (status === 'upcoming' && nextWin) {
     const ts = new Date(nextWin.beginTime || nextWin.startTime || 0).getTime();
     countdownHTML = `<div id="cd-${cardId}" style="margin-top:10px;"></div>`;
   }
-
   let dateDisplay = '';
   if (ev.beginTime || ev.startTime) {
     const d = formatDate(ev.beginTime || ev.startTime);
@@ -1059,18 +776,12 @@ function buildCard(ev, index) {
     dateDisplay = d + (t ? ' · ' + t : '');
   } else if (windows.length > 0 && (windows[0].beginTime || windows[0].startTime)) {
     const first = windows[0].beginTime || windows[0].startTime;
-    const last = windows[windows.length-1].endTime;
-    dateDisplay = formatDate(first) + (last && formatDate(last) !== formatDate(first) ? ' — ' + formatDate(last) : '');
+    dateDisplay = formatDate(first);
   }
-
   return `
 <article class="t-card" style="animation-delay:${index * 0.06}s" data-status="${status}" data-id="${cardId}">
   <div class="t-card-img-wrap">
-    ${img
-      ? `<img class="t-card-img" src="${img}" alt="${title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-         <div class="t-card-img-fallback" style="display:none">FORTNITE</div>`
-      : `<div class="t-card-img-fallback">FORTNITE</div>`
-    }
+    ${img ? `<img class="t-card-img" src="${img}" alt="${title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><div class="t-card-img-fallback" style="display:none">FORTNITE</div>` : `<div class="t-card-img-fallback">FORTNITE</div>`}
     <div class="t-card-img-overlay"></div>
     <span class="t-status-badge ${status}">${statusLabel}</span>
   </div>
@@ -1078,14 +789,8 @@ function buildCard(ev, index) {
     <div class="t-card-title">${title}</div>
     ${region ? `<div class="t-card-region">${region}</div>` : ''}
     <div class="t-card-meta">
-      ${dateDisplay ? `<span class="t-meta-chip">
-        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M2 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        ${dateDisplay}
-      </span>` : ''}
-      ${windows.length > 0 ? `<span class="t-meta-chip">
-        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        ${windows.length} Window${windows.length>1?'s':''}
-      </span>` : ''}
+      ${dateDisplay ? `<span class="t-meta-chip"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M2 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>${dateDisplay}</span>` : ''}
+      ${windows.length > 0 ? `<span class="t-meta-chip"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5L10.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>${windows.length} Window${windows.length>1?'s':''}</span>` : ''}
     </div>
     ${prize ? `<div class="t-card-prize">${prize}</div><div class="t-card-prize-label">Prize Pool</div>` : ''}
     ${countdownHTML}
@@ -1107,14 +812,14 @@ function renderSection(title, events, sectionId, showLiveBanner) {
   if (events.length === 0) return '';
   const cards = events.map((ev, i) => buildCard(ev, i)).join('');
   const liveBar = showLiveBanner && events.length > 0 ? `
-    <div class="live-banner" id="${sectionId}">
+    <div class="live-banner">
       <div class="live-indicator"></div>
       <span class="live-banner-text">Live Tournaments Active</span>
       <span class="live-banner-sub">${events.length} event${events.length>1?'s':''} in progress</span>
     </div>` : '';
   return `
     ${liveBar}
-    <div class="section-wrap" id="section-${sectionId}">
+    <div class="section-wrap">
       <div class="section-head">
         <div class="section-title">
           <span class="section-accent"></span>
@@ -1129,33 +834,22 @@ function renderSection(title, events, sectionId, showLiveBanner) {
 function renderAll(filter) {
   countdownIntervals.forEach(id => clearInterval(id));
   countdownIntervals = [];
-
-  let toShow = allEvents.filter(ev => matchesRegion(ev, currentRegion));
+  let toShow = allEvents;
   if (filter !== 'all') {
-    toShow = toShow.filter(ev => getStatus(ev) === filter);
+    toShow = allEvents.filter(ev => getStatus(ev) === filter);
   }
-
   const live = toShow.filter(ev => getStatus(ev) === 'live');
   const upcoming = toShow.filter(ev => getStatus(ev) === 'upcoming');
   const ended = toShow.filter(ev => getStatus(ev) === 'ended');
-
   let html = '';
   if (filter === 'all' || filter === 'live') html += renderSection('Live Now', live, 'live', true);
   if (filter === 'all' || filter === 'upcoming') html += renderSection('Upcoming Events', upcoming, 'upcoming', false);
   if (filter === 'all' || filter === 'ended') html += renderSection('Recent & Completed', ended, 'ended', false);
-
   if (!html) {
-    html = `<div class="empty-state">
-      <div class="empty-icon">🎯</div>
-      <p style="font-size:16px;color:var(--text-mid);font-weight:600;">No ${filter} events found</p>
-      <p style="font-size:13px;margin-top:8px;">Try a different filter to see more tournaments.</p>
-    </div>`;
+    html = `<div class="empty-state"><div class="empty-icon">🎯</div><p style="font-size:16px;color:var(--text-mid);font-weight:600;">No ${filter} events found</p></div>`;
   }
-
   document.getElementById('content-area').innerHTML = html;
-
-  // Start countdowns
-  toShow.filter(ev => getStatus(ev) === 'upcoming').forEach((ev, i) => {
+  allEvents.filter(ev => getStatus(ev) === 'upcoming').forEach((ev, i) => {
     const cardId = 'ev-' + (ev.id || ev.eventId || i);
     const nextWin = getNextWindow(ev);
     if (nextWin) {
@@ -1169,104 +863,23 @@ function setFilter(filter, btn) {
   currentFilter = filter;
   document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
-  renderAll(currentFilter);
+  renderAll(filter);
 }
 
-function setRegion(region) {
-  currentRegion = region;
-  renderAll(currentFilter);
-}
-
-function matchesRegion(ev, region) {
-  if (!region) return true;
-  const r = (ev.region || ev.regionDisplayName || ev.regionId || '').toUpperCase();
-  const name = (ev.displayName || ev.name || ev.title || '').toUpperCase();
-  const regionUp = region.toUpperCase();
-  // Direct match on region field
-  if (r === regionUp) return true;
-  // Partial match (e.g. "NAC" in "NAC_SOLO_CASHCUP")
-  if (r.includes(regionUp)) return true;
-  // Match in event name/id
-  if (name.includes(regionUp)) return true;
-  const id = (ev.id || ev.eventId || '').toUpperCase();
-  if (id.includes(regionUp)) return true;
-  return false;
-}
-
-async function fetchTournaments() {
-  document.getElementById('content-area').innerHTML = `
-    <div class="loader-wrap">
-      <div class="spinner"></div>
-      <div class="loader-text">Fetching live tournament data...</div>
-    </div>`;
-
-  const endpoints = [
-    '/api/v1/events/global',
-    '/api/v1/events/global/history',
-    '/api/v1/events/tracker',
-    '/api/v1/events/cashprizes',
-    '/api/v1/events/sessions',
-    '/api/v1/events/tokens',
+function showDemoData() {
+  const now = Date.now();
+  allEvents = [
+    {id: 'demo1', displayName: 'FNCS Global Championship 2025', region: 'Global', prizePool: 2000000, beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString(), eventWindows: [{beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString()}]},
+    {id: 'demo2', displayName: 'Solo Cash Cup — NA East', region: 'NAE', prizePool: 50000, beginTime: new Date(now + 86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000).toISOString()}]},
+    {id: 'demo3', displayName: 'Ranked Open Tournament — EU', region: 'EU', prizePool: 25000, beginTime: new Date(now + 3*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 3*86400000).toISOString()}]},
+    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]},
+    {id: 'demo5', displayName: 'Zero Build Cup — NAW', region: 'NAW', prizePool: 15000, beginTime: new Date(now + 86400000*1.5).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*1.5).toISOString()}]},
+    {id: 'demo6', displayName: 'FNCS Qualifier — Asia', region: 'Asia', prizePool: 30000, beginTime: new Date(now + 86400000*2).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*2).toISOString()}]},
+    {id: 'demo7', displayName: 'Cash Cup — Middle East', region: 'ME', prizePool: 12000, beginTime: new Date(now + 43200000).toISOString(), eventWindows: [{beginTime: new Date(now + 43200000).toISOString()}]}
   ];
-
-  let data = null;
-  let lastErr = '';
-
-  // Try merging global + history for the richest dataset
-  let merged = [];
-  const primaryEndpoints = ['/api/v1/events/global', '/api/v1/events/global/history'];
-  for (const ep of primaryEndpoints) {
-    try {
-      const res = await fetch(BASE + ep, {
-        headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
-      });
-      if (!res.ok) continue;
-      const json = await res.json();
-      const arr = json.data || json.events || json.tournaments || json.items || json.results || (Array.isArray(json) ? json : null);
-      if (arr && arr.length > 0) merged.push(...arr);
-    } catch(e) { lastErr = e.message; }
-  }
-  // Deduplicate by id
-  if (merged.length > 0) {
-    const seen = new Set();
-    data = merged.filter(ev => {
-      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,80);
-      if (seen.has(key)) return false;
-      seen.add(key); return true;
-    });
-  }
-
-  // Fallback to other endpoints if still nothing
-  if (!data || data.length === 0) {
-    for (const ep of endpoints.slice(2)) {
-      try {
-        const res = await fetch(BASE + ep, {
-          headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
-        });
-        if (!res.ok) { lastErr = `HTTP ${res.status} from ${ep}`; continue; }
-        const json = await res.json();
-        const arr = json.data || json.events || json.tournaments || json.items || json.results || (Array.isArray(json) ? json : null);
-        if (arr && arr.length > 0) { data = arr; break; }
-        lastErr = `Empty response from ${ep}`;
-      } catch(e) { lastErr = e.message; }
-    }
-  }
-
-  if (!data || data.length === 0) {
-    // Show demo cards if API fails
-    showDemoData(lastErr);
-    return;
-  }
-
-  allEvents = data;
-  const live = data.filter(ev => getStatus(ev) === 'live').length;
-  const upcoming = data.filter(ev => getStatus(ev) === 'upcoming').length;
-  animateStat('stat-total', data.length);
-  animateStat('stat-live', live);
-  animateStat('stat-upcoming', upcoming);
-  // Set NAC as default region in dropdown
-  const sel = document.getElementById('regionSelect');
-  if (sel) sel.value = 'NAC';
+  animateStat('stat-total', allEvents.length);
+  animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
+  animateStat('stat-upcoming', allEvents.filter(ev => getStatus(ev) === 'upcoming').length);
   renderAll('all');
 }
 
@@ -1282,74 +895,26 @@ function animateStat(id, target) {
   }, 40);
 }
 
-function showDemoData(errMsg) {
-  const now = Date.now();
-  const demo = [
-    {
-      id: 'demo1', displayName: 'FNCS NAC Championship — Live',
-      region: 'NAC', prizePool: 2000000,
-      eventWindows: [{ beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString() }],
-    },
-    {
-      id: 'demo2', displayName: 'Solo Cash Cup — NAC',
-      region: 'NAC', prizePool: 50000,
-      eventWindows: [{ beginTime: new Date(now + 86400000).toISOString(), endTime: new Date(now + 90000000).toISOString() }],
-    },
-    {
-      id: 'demo3', displayName: 'Zero Build Trios — NAC',
-      region: 'NAC', prizePool: 25000,
-      eventWindows: [{ beginTime: new Date(now + 3*86400000).toISOString(), endTime: new Date(now + 3*86400000 + 14400000).toISOString() }],
-    },
-    {
-      id: 'demo4', displayName: 'NAC FNCS Qualifier #1',
-      region: 'NAC', prizePool: 30000,
-      eventWindows: [{ beginTime: new Date(now - 5*86400000).toISOString(), endTime: new Date(now - 4*86400000).toISOString() }],
-    },
-    {
-      id: 'demo5', displayName: 'NAC Ranked Open Series',
-      region: 'NAC', prizePool: 15000,
-      eventWindows: [{ beginTime: new Date(now - 2*86400000).toISOString(), endTime: new Date(now - 86400000).toISOString() }],
-    },
-    {
-      id: 'demo6', displayName: 'Duos Cash Cup — NAC',
-      region: 'NAC', prizePool: 10000,
-      eventWindows: [{ beginTime: new Date(now + 2*86400000).toISOString(), endTime: new Date(now + 2*86400000 + 10800000).toISOString() }],
-    },
-    {
-      id: 'demo7', displayName: 'Solo Cash Cup — NAE',
-      region: 'NAE', prizePool: 50000,
-      eventWindows: [{ beginTime: new Date(now + 86400000).toISOString(), endTime: new Date(now + 90000000).toISOString() }],
-    },
-    {
-      id: 'demo8', displayName: 'FNCS Qualifier — EU',
-      region: 'EU', prizePool: 80000,
-      eventWindows: [{ beginTime: new Date(now + 2*86400000).toISOString(), endTime: new Date(now + 2*86400000 + 14400000).toISOString() }],
-    },
-    {
-      id: 'demo9', displayName: 'Duos Invitational — BR',
-      region: 'BR', prizePool: 10000,
-      eventWindows: [{ beginTime: new Date(now - 5*86400000).toISOString(), endTime: new Date(now - 4*86400000).toISOString() }],
-    },
-    {
-      id: 'demo10', displayName: 'Zero Build Cup — ASIA',
-      region: 'ASIA', prizePool: 20000,
-      eventWindows: [{ beginTime: new Date(now + 86400000).toISOString(), endTime: new Date(now + 90000000).toISOString() }],
-    },
-  ];
-  allEvents = demo;
-  animateStat('stat-total', demo.length);
-  const live = demo.filter(ev => getStatus(ev) === 'live').length;
-  const upcoming = demo.filter(ev => getStatus(ev) === 'upcoming').length;
-  animateStat('stat-live', live);
-  animateStat('stat-upcoming', upcoming);
-  const sel = document.getElementById('regionSelect');
-  if (sel) sel.value = 'NAC';
-  renderAll('all');
-
-  const note = document.createElement('div');
-  note.style.cssText = 'text-align:center;padding:12px 24px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.2);border-radius:10px;margin-bottom:32px;font-size:12px;color:rgba(255,193,7,0.7);';
-  note.textContent = `⚠ Live API unavailable (${errMsg || 'CORS or endpoint issue'}) — showing demo data. Data will load in a hosted environment.`;
-  document.getElementById('content-area').prepend(note);
+async function fetchTournaments() {
+  document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching live tournament data...</div></div>`;
+  try {
+    const res = await fetch(BASE + '/api/v1/events/global', {
+      headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const json = await res.json();
+      let data = json.data || json.events || json.tournaments || [];
+      if (data.length > 0) {
+        allEvents = data;
+        animateStat('stat-total', data.length);
+        animateStat('stat-live', data.filter(ev => getStatus(ev) === 'live').length);
+        animateStat('stat-upcoming', data.filter(ev => getStatus(ev) === 'upcoming').length);
+        renderAll('all');
+        return;
+      }
+    }
+  } catch(e) {}
+  showDemoData();
 }
 
 fetchTournaments();
