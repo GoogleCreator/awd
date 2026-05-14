@@ -775,8 +775,7 @@ function buildCard(ev, index) {
     const t = formatTime(ev.beginTime || ev.startTime);
     dateDisplay = d + (t ? ' · ' + t : '');
   } else if (windows.length > 0 && (windows[0].beginTime || windows[0].startTime)) {
-    const first = windows[0].beginTime || windows[0].startTime;
-    dateDisplay = formatDate(first);
+    dateDisplay = formatDate(windows[0].beginTime || windows[0].startTime);
   }
   return `
 <article class="t-card" style="animation-delay:${index * 0.06}s" data-status="${status}" data-id="${cardId}">
@@ -835,9 +834,7 @@ function renderAll(filter) {
   countdownIntervals.forEach(id => clearInterval(id));
   countdownIntervals = [];
   let toShow = allEvents;
-  if (filter !== 'all') {
-    toShow = allEvents.filter(ev => getStatus(ev) === filter);
-  }
+  if (filter !== 'all') toShow = allEvents.filter(ev => getStatus(ev) === filter);
   const live = toShow.filter(ev => getStatus(ev) === 'live');
   const upcoming = toShow.filter(ev => getStatus(ev) === 'upcoming');
   const ended = toShow.filter(ev => getStatus(ev) === 'ended');
@@ -866,23 +863,6 @@ function setFilter(filter, btn) {
   renderAll(filter);
 }
 
-function showDemoData() {
-  const now = Date.now();
-  allEvents = [
-    {id: 'demo1', displayName: 'FNCS Global Championship 2025', region: 'Global', prizePool: 2000000, beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString(), eventWindows: [{beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString()}]},
-    {id: 'demo2', displayName: 'Solo Cash Cup — NA East', region: 'NAE', prizePool: 50000, beginTime: new Date(now + 86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000).toISOString()}]},
-    {id: 'demo3', displayName: 'Ranked Open Tournament — EU', region: 'EU', prizePool: 25000, beginTime: new Date(now + 3*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 3*86400000).toISOString()}]},
-    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]},
-    {id: 'demo5', displayName: 'Zero Build Cup — NAW', region: 'NAW', prizePool: 15000, beginTime: new Date(now + 86400000*1.5).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*1.5).toISOString()}]},
-    {id: 'demo6', displayName: 'FNCS Qualifier — Asia', region: 'Asia', prizePool: 30000, beginTime: new Date(now + 86400000*2).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*2).toISOString()}]},
-    {id: 'demo7', displayName: 'Cash Cup — Middle East', region: 'ME', prizePool: 12000, beginTime: new Date(now + 43200000).toISOString(), eventWindows: [{beginTime: new Date(now + 43200000).toISOString()}]}
-  ];
-  animateStat('stat-total', allEvents.length);
-  animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
-  animateStat('stat-upcoming', allEvents.filter(ev => getStatus(ev) === 'upcoming').length);
-  renderAll('all');
-}
-
 function animateStat(id, target) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -895,26 +875,52 @@ function animateStat(id, target) {
   }, 40);
 }
 
+function showDemoData() {
+  const now = Date.now();
+  allEvents = [
+    {id: 'demo1', displayName: 'FNCS Global Championship 2025', region: 'Global', prizePool: 2000000, beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString(), eventWindows: [{beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString()}]},
+    {id: 'demo2', displayName: 'Solo Cash Cup — NA East', region: 'NAE', prizePool: 50000, beginTime: new Date(now + 86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000).toISOString()}]},
+    {id: 'demo3', displayName: 'Ranked Open Tournament — EU', region: 'EU', prizePool: 25000, beginTime: new Date(now + 3*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 3*86400000).toISOString()}]},
+    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]},
+    {id: 'demo5', displayName: 'Zero Build Cup — NAW', region: 'NAW', prizePool: 15000, beginTime: new Date(now + 86400000*1.5).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*1.5).toISOString()}]}
+  ];
+  animateStat('stat-total', allEvents.length);
+  animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
+  animateStat('stat-upcoming', allEvents.filter(ev => getStatus(ev) === 'upcoming').length);
+  renderAll('all');
+}
+
 async function fetchTournaments() {
   document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching live tournament data...</div></div>`;
-  try {
-    const res = await fetch(BASE + '/api/v1/events/global', {
-      headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
-    });
-    if (res.ok) {
-      const json = await res.json();
-      let data = json.data || json.events || json.tournaments || [];
-      if (data.length > 0) {
-        allEvents = data;
-        animateStat('stat-total', data.length);
-        animateStat('stat-live', data.filter(ev => getStatus(ev) === 'live').length);
-        animateStat('stat-upcoming', data.filter(ev => getStatus(ev) === 'upcoming').length);
-        renderAll('all');
-        return;
+  const endpoints = ['/api/v1/events/global', '/api/v1/events/global/history', '/api/v1/events/tracker', '/api/v1/events/cashprizes'];
+  let merged = [];
+  for (const ep of endpoints) {
+    try {
+      const res = await fetch(BASE + ep, {
+        headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const arr = json.data || json.events || json.tournaments || json.items || json.results || (Array.isArray(json) ? json : []);
+        if (arr.length > 0) merged.push(...arr);
       }
-    }
-  } catch(e) {}
-  showDemoData();
+    } catch(e) {}
+  }
+  if (merged.length > 0) {
+    const seen = new Set();
+    allEvents = merged.filter(ev => {
+      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,100);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    animateStat('stat-total', allEvents.length);
+    animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
+    animateStat('stat-upcoming', allEvents.filter(ev => getStatus(ev) === 'upcoming').length);
+    renderAll('all');
+  } else {
+    showDemoData();
+  }
 }
 
 fetchTournaments();
