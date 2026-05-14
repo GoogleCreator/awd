@@ -11,10 +11,10 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --p0: #0a0010;
-    --p1: #100820;
-    --p2: #1a0d35;
-    --p3: #240f4a;
+    --p0: #191919;
+    --p1: #1e1e1e;
+    --p2: #242030;
+    --p3: #2c1f45;
     --p4: #3b1a7a;
     --p5: #5a2db5;
     --p6: #7c4fd4;
@@ -33,14 +33,14 @@
     --text-main: #f0e8ff;
     --text-muted: #9980c0;
     --border: rgba(124,79,212,0.3);
-    --card-bg: rgba(26,13,53,0.8);
-    --card-border: rgba(124,79,212,0.25);
+    --card-bg: rgba(30,28,42,0.92);
+    --card-border: rgba(124,79,212,0.22);
   }
 
   html { scroll-behavior: smooth; }
 
   body {
-    background: var(--p0);
+    background: #191919;
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
     font-weight: 300;
@@ -53,9 +53,9 @@
     position: fixed;
     inset: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(91,45,181,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(124,79,212,0.12) 0%, transparent 55%),
-      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(191,78,255,0.06) 0%, transparent 70%);
+      radial-gradient(ellipse 70% 50% at 15% 10%, rgba(91,45,181,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 85% 85%, rgba(124,79,212,0.08) 0%, transparent 55%),
+      radial-gradient(ellipse 30% 25% at 50% 50%, rgba(191,78,255,0.04) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -220,7 +220,7 @@
   select {
     width: 100%;
     padding: 16px 50px 16px 20px;
-    background: rgba(16,8,32,0.9);
+    background: rgba(25,25,25,0.95);
     border: 1px solid rgba(124,79,212,0.4);
     border-radius: 12px;
     color: var(--text-main);
@@ -237,7 +237,7 @@
   select:focus { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(191,78,255,0.15); }
 
   select option {
-    background: #1a0d35;
+    background: #242030;
     color: var(--text-main);
   }
 
@@ -740,11 +740,15 @@ const BASE = 'https://prod.api-fortnite.com';
 
 let allEvents = [];
 let selectedWindowId = null;
-let currentWindows = [];
+let currentSessions = [];
+let globalAvgForAnalyze = 0;
 
 async function apiFetch(path) {
   const res = await fetch(BASE + path, { headers: { 'x-api-key': API_KEY } });
-  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    throw new Error(`${res.status} ${res.statusText}${txt ? ': ' + txt.slice(0,120) : ''}`);
+  }
   return res.json();
 }
 
@@ -774,22 +778,16 @@ function setStatus(msg) {
 }
 
 async function loadEvents() {
-  setStatus('Loading tournaments...');
+  setStatus('Fetching global events...');
   try {
-    const data = await apiFetch('/api/v2/events');
-    const events = data.events || data.data || data || [];
-    allEvents = Array.isArray(events) ? events : [];
+    const data = await apiFetch('/api/v1/events/global');
+    const events = data.events || data.data || (Array.isArray(data) ? data : []);
+    allEvents = events;
     populateSelect();
   } catch(e) {
-    try {
-      const data = await apiFetch('/api/v1/events');
-      const events = data.events || data.data || data || [];
-      allEvents = Array.isArray(events) ? events : [];
-      populateSelect();
-    } catch(e2) {
-      showError('Could not load tournaments. ' + e.message);
-      document.getElementById('eventSelect').innerHTML = '<option value="">Failed to load tournaments</option>';
-    }
+    showError('Could not load events: ' + e.message);
+    document.getElementById('eventSelect').innerHTML = '<option value="">Failed to load — check console</option>';
+    console.error(e);
   }
   setStatus('');
 }
@@ -797,16 +795,17 @@ async function loadEvents() {
 function populateSelect() {
   const sel = document.getElementById('eventSelect');
   if (!allEvents.length) {
-    sel.innerHTML = '<option value="">No tournaments found</option>';
+    sel.innerHTML = '<option value="">No events found</option>';
     return;
   }
   sel.innerHTML = '<option value="">— Choose a tournament —</option>';
   allEvents.forEach(ev => {
     const opt = document.createElement('option');
-    opt.value = ev.id || ev.eventId || ev.event_id || '';
-    const name = ev.name || ev.displayName || ev.title || ev.id || 'Unnamed Tournament';
+    const id = ev.eventId || ev.id || ev.event_id || '';
+    opt.value = id;
+    const name = ev.eventDisplayName || ev.name || ev.displayName || ev.title || id || 'Unnamed';
     const date = ev.beginTime || ev.startTime || ev.start_time || '';
-    opt.textContent = name + (date ? ` (${new Date(date).toLocaleDateString()})` : '');
+    opt.textContent = name + (date ? ` · ${new Date(date).toLocaleDateString()}` : '');
     sel.appendChild(opt);
   });
   sel.onchange = onEventChange;
@@ -820,30 +819,30 @@ async function onEventChange() {
   document.getElementById('windowSection').style.display = 'none';
   document.getElementById('windowPills').innerHTML = '';
   selectedWindowId = null;
-  currentWindows = [];
+  currentSessions = [];
   document.getElementById('analyzeBtn').disabled = true;
 
   if (!eventId) return;
   document.getElementById('analyzeBtn').disabled = false;
 
-  setStatus('Loading event windows...');
+  setStatus('Loading sessions...');
   setLoading(true);
   try {
-    const data = await apiFetch(`/api/v2/events/${eventId}/windows`);
-    const windows = data.windows || data.data || data || [];
-    currentWindows = Array.isArray(windows) ? windows : [];
-    if (currentWindows.length > 0) {
-      renderWindowPills(currentWindows);
+    const data = await apiFetch(`/api/v1/events/sessions?eventId=${encodeURIComponent(eventId)}`);
+    const sessions = data.sessions || data.windows || data.data || (Array.isArray(data) ? data : []);
+    currentSessions = sessions;
+    if (currentSessions.length > 0) {
+      renderWindowPills(currentSessions);
       document.getElementById('windowSection').style.display = 'block';
     }
   } catch(e) {
-    // Windows may not exist or may be in leaderboard directly; proceed
+    // Sessions endpoint may 404 for some events — just proceed without window filter
   }
   setLoading(false);
   setStatus('');
 }
 
-function renderWindowPills(windows) {
+function renderWindowPills(sessions) {
   const container = document.getElementById('windowPills');
   container.innerHTML = '';
 
@@ -854,12 +853,13 @@ function renderWindowPills(windows) {
   allPill.onclick = () => selectWindow('all', allPill);
   container.appendChild(allPill);
 
-  windows.forEach((w, i) => {
+  sessions.forEach((s, i) => {
     const pill = document.createElement('button');
     pill.className = 'window-pill';
-    const label = w.name || w.windowId || w.id || `Session ${i+1}`;
+    const wid = s.eventWindowId || s.windowId || s.id || i;
+    const label = s.name || s.sessionName || s.eventWindowId || `Session ${i + 1}`;
     pill.textContent = String(label).toUpperCase();
-    pill.dataset.id = w.windowId || w.id || i;
+    pill.dataset.id = wid;
     pill.onclick = () => selectWindow(pill.dataset.id, pill);
     container.appendChild(pill);
   });
@@ -888,7 +888,7 @@ function resetAll() {
   resetResults();
   setStatus('');
   selectedWindowId = null;
-  currentWindows = [];
+  currentSessions = [];
 }
 
 async function analyze() {
@@ -899,47 +899,64 @@ async function analyze() {
   hideError();
   resetResults();
   setLoading(true);
-  setStatus('Fetching leaderboard data...');
+  setStatus('Fetching leaderboard...');
 
   try {
     let entries = [];
+    let cashPrizes = null;
 
-    if (currentWindows.length && selectedWindowId && selectedWindowId !== 'all') {
-      const data = await apiFetch(`/api/v2/events/${eventId}/windows/${selectedWindowId}/leaderboard`).catch(() => null)
-        || await apiFetch(`/api/v2/events/${eventId}/leaderboard?windowId=${selectedWindowId}`).catch(() => null)
-        || await apiFetch(`/api/v2/events/${eventId}/windows/${selectedWindowId}`).catch(() => null);
-      entries = extractEntries(data);
+    if (selectedWindowId && selectedWindowId !== 'all') {
+      // Specific session window — use cashprize endpoint
+      setStatus('Loading session leaderboard...');
+      const [lbData, prizeData] = await Promise.all([
+        apiFetch(`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}&eventWindowId=${encodeURIComponent(selectedWindowId)}`).catch(() => null),
+        apiFetch(`/api/v1/events/cashprize/${encodeURIComponent(selectedWindowId)}`).catch(() => null)
+      ]);
+      entries = extractEntries(lbData);
+      cashPrizes = prizeData;
     } else {
-      // Try leaderboard endpoint variants
-      const data = await apiFetch(`/api/v2/events/${eventId}/leaderboard`).catch(() => null)
-        || await apiFetch(`/api/v2/events/${eventId}/windows`).catch(() => null)
-        || await apiFetch(`/api/v2/events/${eventId}/eligibility`).catch(() => null);
-      entries = extractEntries(data);
+      // All sessions — use global leaderboard
+      const lbData = await apiFetch(`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}`).catch(() => null)
+        || await apiFetch(`/api/v1/events/global/leaderboard`).catch(() => null);
+      entries = extractEntries(lbData);
 
-      // If multiple windows and all selected, aggregate
-      if ((!entries.length) && currentWindows.length) {
-        const allEntries = [];
-        setStatus('Aggregating all session windows...');
-        for (const w of currentWindows.slice(0, 5)) {
-          const wid = w.windowId || w.id;
-          const wd = await apiFetch(`/api/v2/events/${eventId}/windows/${wid}`).catch(() => null)
-            || await apiFetch(`/api/v2/events/${eventId}/leaderboard?windowId=${wid}`).catch(() => null);
-          const wEntries = extractEntries(wd);
-          allEntries.push(...wEntries);
+      // If still empty, try aggregating from cashprizes list
+      if (!entries.length) {
+        setStatus('Trying cashprizes endpoint...');
+        const cpData = await apiFetch(`/api/v1/events/cashprizes`).catch(() => null);
+        if (cpData) {
+          const cpEntries = extractEntries(cpData);
+          const filtered = cpEntries.filter(e => {
+            const eid = e.eventId || e.event_id || '';
+            return !eid || eid === eventId;
+          });
+          entries = filtered.length ? filtered : cpEntries;
         }
-        entries = mergeEntries(allEntries);
+      }
+
+      // Try per-session aggregation if still empty
+      if (!entries.length && currentSessions.length) {
+        setStatus('Aggregating sessions...');
+        const all = [];
+        for (const s of currentSessions.slice(0, 6)) {
+          const wid = s.eventWindowId || s.windowId || s.id;
+          const sd = await apiFetch(`/api/v1/events/global/leaderboard?eventId=${encodeURIComponent(eventId)}&eventWindowId=${encodeURIComponent(wid)}`).catch(() => null);
+          all.push(...extractEntries(sd));
+        }
+        entries = mergeEntries(all);
       }
     }
 
     if (!entries.length) {
-      throw new Error('No leaderboard data returned. This tournament may not have results yet, or the endpoint format differs.');
+      throw new Error('No leaderboard data found for this tournament. It may not have results yet, or try selecting a specific session window.');
     }
 
-    const eventName = sel.options[sel.selectedIndex].textContent;
-    renderResults(entries, eventName);
+    const eventName = sel.options[sel.selectedIndex].textContent.split('·')[0].trim();
+    renderResults(entries, eventName, cashPrizes);
 
   } catch(e) {
     showError(e.message || 'Failed to fetch data.');
+    console.error(e);
   }
 
   setLoading(false);
@@ -950,12 +967,18 @@ function extractEntries(data) {
   if (!data) return [];
   const candidates = [
     data.entries, data.leaderboard, data.data, data.players, data.results,
-    data.scores, data.rankings, data.items,
-    data.leaderboardEntries, data.eventEntries, data
+    data.scores, data.rankings, data.items, data.leaderboardEntries,
+    data.eventEntries, data.cashPrizes, data.prizes,
+    Array.isArray(data) ? data : null
   ];
   for (const c of candidates) {
-    if (Array.isArray(c) && c.length && (c[0].points !== undefined || c[0].score !== undefined || c[0].rank !== undefined || c[0].totalPoints !== undefined || c[0].teamPoints !== undefined)) {
-      return c;
+    if (Array.isArray(c) && c.length) {
+      const first = c[0];
+      if (first && (first.points !== undefined || first.score !== undefined || first.totalPoints !== undefined
+          || first.teamPoints !== undefined || first.value !== undefined || first.rank !== undefined
+          || first.cashPrize !== undefined || first.prize !== undefined)) {
+        return c;
+      }
     }
   }
   return [];
@@ -964,38 +987,44 @@ function extractEntries(data) {
 function mergeEntries(all) {
   const map = {};
   for (const e of all) {
-    const id = e.accountId || e.playerId || e.epicAccountId || e.teamId || Math.random();
+    const id = e.accountId || e.playerId || e.epicAccountId || e.teamId || JSON.stringify(e);
     const pts = getPoints(e);
     if (!map[id] || pts > getPoints(map[id])) map[id] = e;
   }
-  return Object.values(map).sort((a,b) => getPoints(b) - getPoints(a));
+  return Object.values(map).sort((a, b) => getPoints(b) - getPoints(a));
 }
 
 function getPoints(e) {
-  return e.points ?? e.score ?? e.totalPoints ?? e.teamPoints ?? e.value ?? e.pts ?? 0;
+  return e.points ?? e.score ?? e.totalPoints ?? e.teamPoints ?? e.value ?? e.pts ?? e.cashPrize ?? e.prize ?? 0;
 }
 
 function getPlayerName(e) {
-  return e.playerName || e.displayName || e.epicDisplayName || e.teamName || e.name || e.accountId || e.playerId || 'Unknown';
+  return e.playerName || e.displayName || e.epicDisplayName || e.teamName || e.name
+    || e.accountId || e.playerId || e.teamId || 'Unknown';
 }
 
-function renderResults(entries, eventName) {
+function renderResults(entries, eventName, cashPrizes) {
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('resultsSection').classList.add('visible');
 
-  const points = entries.map(getPoints).filter(p => typeof p === 'number');
-  const avg = points.reduce((a,b) => a+b, 0) / points.length;
+  const points = entries.map(getPoints).filter(p => typeof p === 'number' && !isNaN(p));
+  const sorted = [...points].sort((a, b) => b - a);
+  const avg = points.reduce((a, b) => a + b, 0) / points.length;
   const median = calcMedian(points);
-  const max = Math.max(...points);
-  const min = Math.min(...points);
-  const top10Cutoff = points.sort((a,b)=>b-a)[Math.floor(points.length * 0.1)] ?? 0;
+  const max = sorted[0] || 0;
+  const min = sorted[sorted.length - 1] || 0;
+  const top10Cutoff = sorted[Math.floor(sorted.length * 0.1)] ?? 0;
   const qualifiers = entries.filter(e => getPoints(e) >= avg).length;
+  globalAvgForAnalyze = avg;
+
+  const hasPrize = cashPrizes && (cashPrizes.totalPrize || cashPrizes.prizePool || cashPrizes.cashPrize);
+  const prizeLabel = hasPrize ? `$${Number(cashPrizes.totalPrize || cashPrizes.prizePool || cashPrizes.cashPrize).toLocaleString()}` : null;
 
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card gold fade-in">
       <div class="stat-label">Avg Qual. Points</div>
       <div class="stat-value">${Math.round(avg).toLocaleString()}</div>
-      <div class="stat-sub">Your target score to compete</div>
+      <div class="stat-sub">Your target score to qualify</div>
     </div>
     <div class="stat-card silver fade-in">
       <div class="stat-label">Median Score</div>
@@ -1005,12 +1034,12 @@ function renderResults(entries, eventName) {
     <div class="stat-card fade-in">
       <div class="stat-label">Top 10% Cutoff</div>
       <div class="stat-value">${Math.round(top10Cutoff).toLocaleString()}</div>
-      <div class="stat-sub">Elite qualification threshold</div>
+      <div class="stat-sub">Elite threshold</div>
     </div>
     <div class="stat-card fade-in">
       <div class="stat-label">Total Players</div>
       <div class="stat-value">${entries.length.toLocaleString()}</div>
-      <div class="stat-sub">${qualifiers} above average</div>
+      <div class="stat-sub">${qualifiers.toLocaleString()} above avg${prizeLabel ? ` · ${prizeLabel} prize` : ''}</div>
     </div>
   `;
 
@@ -1018,21 +1047,20 @@ function renderResults(entries, eventName) {
   document.getElementById('insightBox').innerHTML = `
     <div class="insight-icon">🧠</div>
     <div class="insight-text">
-      <strong>${eventName.split('(')[0].trim()}</strong> had <strong>${entries.length.toLocaleString()} participants</strong> with scores ranging from <strong>${Math.round(min).toLocaleString()}</strong> to <strong>${Math.round(max).toLocaleString()}</strong> points. 
-      To qualify at an average level you need approximately <strong>${Math.round(avg).toLocaleString()} pts</strong>, 
-      while the top 10% required <strong>${Math.round(top10Cutoff).toLocaleString()} pts</strong>. 
-      The field is considered <strong>${difficulty}</strong> based on score distribution.
+      <strong>${eventName}</strong> had <strong>${entries.length.toLocaleString()} participants</strong> with scores ranging from <strong>${Math.round(min).toLocaleString()}</strong> to <strong>${Math.round(max).toLocaleString()} pts</strong>. 
+      To qualify at an average level, target <strong>${Math.round(avg).toLocaleString()} pts</strong>. 
+      The top 10% required <strong>${Math.round(top10Cutoff).toLocaleString()} pts</strong> — the field is <strong>${difficulty}</strong>.
+      ${prizeLabel ? `Total prize pool: <strong>${prizeLabel}</strong>.` : ''}
     </div>
   `;
 
-  const sorted = [...entries].sort((a,b) => getPoints(b) - getPoints(a));
-  const top = sorted.slice(0, 50);
-  const maxPts = getPoints(top[0]) || 1;
+  const topEntries = [...entries].sort((a, b) => getPoints(b) - getPoints(a)).slice(0, 50);
+  const maxPts = getPoints(topEntries[0]) || 1;
 
   document.getElementById('lbTitle').textContent = 'Top 50 Leaderboard';
   document.getElementById('lbCount').textContent = `${entries.length.toLocaleString()} total players`;
 
-  const tableHTML = `
+  document.getElementById('lbBody').innerHTML = `
     <table class="lb-table">
       <thead>
         <tr>
@@ -1043,18 +1071,16 @@ function renderResults(entries, eventName) {
         </tr>
       </thead>
       <tbody>
-        ${top.map((e, i) => {
+        ${topEntries.map((e, i) => {
           const pts = getPoints(e);
           const pct = Math.round((pts / maxPts) * 100);
           const aboveAvg = pts >= avg;
           const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
           const pillClass = aboveAvg ? 'above' : 'below';
           return `<tr class="${rankClass}">
-            <td><span class="rank-num">#${i+1}</span></td>
+            <td><span class="rank-num">#${i + 1}</span></td>
             <td><div class="player-name">${escHtml(String(getPlayerName(e)))}</div></td>
-            <td style="min-width:100px;">
-              <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
-            </td>
+            <td style="min-width:100px;"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div></td>
             <td><span class="points-pill ${pillClass}">${Math.round(pts).toLocaleString()}</span></td>
           </tr>`;
         }).join('')}
@@ -1062,19 +1088,18 @@ function renderResults(entries, eventName) {
     </table>
   `;
 
-  document.getElementById('lbBody').innerHTML = tableHTML;
   document.getElementById('resultsSection').classList.add('fade-in');
 }
 
 function calcMedian(arr) {
   if (!arr.length) return 0;
-  const s = [...arr].sort((a,b) => a-b);
+  const s = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : (s[mid-1] + s[mid]) / 2;
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
 }
 
 function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 loadEvents();
