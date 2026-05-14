@@ -330,6 +330,59 @@
     color: #fff;
     box-shadow: 0 0 16px var(--glow);
   }
+  .region-select-wrap {
+    margin-left: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .region-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .region-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(0, 18, 48, 0.85);
+    border: 1px solid rgba(58, 158, 255, 0.3);
+    color: var(--text-bright);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 8px 36px 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 160px;
+    backdrop-filter: blur(8px);
+  }
+  .region-select:hover {
+    border-color: var(--b300);
+    box-shadow: 0 0 10px var(--glow-soft);
+  }
+  .region-select:focus {
+    outline: none;
+    border-color: var(--b300);
+    box-shadow: 0 0 14px var(--glow-soft);
+  }
+  .region-select option {
+    background: #001233;
+    color: var(--text-bright);
+  }
+  .region-chevron {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--b300);
+  }
 
   /* ===== SECTION HEADER ===== */
   .section-head {
@@ -795,6 +848,23 @@
           <button class="filter-pill" data-filter="upcoming" onclick="setFilter('upcoming', this)">🕐 Upcoming</button>
           <button class="filter-pill" data-filter="ended" onclick="setFilter('ended', this)">✓ Ended</button>
         </div>
+        <div class="region-select-wrap">
+          <span class="region-label">Region:</span>
+          <div style="position:relative;">
+            <select class="region-select" id="regionSelect" onchange="setRegion(this.value)">
+              <option value="NAC">NAC — North America Central</option>
+              <option value="NAE">NAE — North America East</option>
+              <option value="NAW">NAW — North America West</option>
+              <option value="EU">EU — Europe</option>
+              <option value="BR">BR — Brazil</option>
+              <option value="ASIA">ASIA — Asia</option>
+              <option value="OCE">OCE — Oceania</option>
+              <option value="ME">ME — Middle East</option>
+              <option value="">🌍 All Regions</option>
+            </select>
+            <svg class="region-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
       </div>
 
       <!-- Main content area -->
@@ -821,6 +891,7 @@ const API_KEY = '6a80995122955fa8e116ef2b683076a273eae9ea3fd9cf85581a727745951b0
 const BASE = 'https://prod.api-fortnite.com';
 let allEvents = [];
 let currentFilter = 'all';
+let currentRegion = 'NAC';
 let countdownIntervals = [];
 
 // Particles
@@ -843,29 +914,48 @@ let countdownIntervals = [];
   }
 })();
 
-// Determine event status
+// Parse a timestamp safely
+function parseTS(val) {
+  if (!val) return null;
+  const ts = new Date(val).getTime();
+  return isNaN(ts) ? null : ts;
+}
+
+// Determine event status — robust against missing/partial fields
 function getStatus(ev) {
   const now = Date.now();
   const windows = ev.eventWindows || ev.windows || [];
-  if (windows.length === 0) {
-    const begin = ev.beginTime ? new Date(ev.beginTime).getTime() : null;
-    const end = ev.endTime ? new Date(ev.endTime).getTime() : null;
-    if (begin && end) {
-      if (now >= begin && now <= end) return 'live';
-      if (now < begin) return 'upcoming';
-      return 'ended';
+
+  if (windows.length > 0) {
+    let hasLive = false, hasFuture = false, latestEnd = 0, hasValid = false;
+    for (const w of windows) {
+      const s = parseTS(w.beginTime || w.startTime);
+      const e = parseTS(w.endTime || w.endtime);
+      if (!s) continue;
+      hasValid = true;
+      if (e && e > latestEnd) latestEnd = e;
+      if (e && now >= s && now <= e) { hasLive = true; }
+      else if (!e && now >= s && now <= s + 4*3600000) { hasLive = true; }
+      else if (now < s) { hasFuture = true; }
     }
-    return 'upcoming';
+    if (hasLive) return 'live';
+    if (hasFuture) return 'upcoming';
+    if (hasValid) return 'ended';
   }
-  let hasLive = false, hasFuture = false, allPast = true;
-  for (const w of windows) {
-    const s = new Date(w.beginTime || w.startTime || 0).getTime();
-    const e = new Date(w.endTime || 0).getTime();
-    if (now >= s && now <= e) { hasLive = true; allPast = false; }
-    else if (now < s) { hasFuture = true; allPast = false; }
+
+  const begin = parseTS(ev.beginTime || ev.startTime || ev.start_time);
+  const end   = parseTS(ev.endTime   || ev.end_time  || ev.finishTime);
+
+  if (begin && end) {
+    if (now >= begin && now <= end) return 'live';
+    if (now < begin) return 'upcoming';
+    return 'ended';
   }
-  if (hasLive) return 'live';
-  if (hasFuture) return 'upcoming';
+  if (begin) {
+    if (now < begin) return 'upcoming';
+    if (now - begin < 8*3600000) return 'live';
+    return 'ended';
+  }
   return 'ended';
 }
 
@@ -1040,9 +1130,9 @@ function renderAll(filter) {
   countdownIntervals.forEach(id => clearInterval(id));
   countdownIntervals = [];
 
-  let toShow = allEvents;
+  let toShow = allEvents.filter(ev => matchesRegion(ev, currentRegion));
   if (filter !== 'all') {
-    toShow = allEvents.filter(ev => getStatus(ev) === filter);
+    toShow = toShow.filter(ev => getStatus(ev) === filter);
   }
 
   const live = toShow.filter(ev => getStatus(ev) === 'live');
@@ -1065,7 +1155,7 @@ function renderAll(filter) {
   document.getElementById('content-area').innerHTML = html;
 
   // Start countdowns
-  allEvents.filter(ev => getStatus(ev) === 'upcoming').forEach((ev, i) => {
+  toShow.filter(ev => getStatus(ev) === 'upcoming').forEach((ev, i) => {
     const cardId = 'ev-' + (ev.id || ev.eventId || i);
     const nextWin = getNextWindow(ev);
     if (nextWin) {
@@ -1079,7 +1169,28 @@ function setFilter(filter, btn) {
   currentFilter = filter;
   document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
-  renderAll(filter);
+  renderAll(currentFilter);
+}
+
+function setRegion(region) {
+  currentRegion = region;
+  renderAll(currentFilter);
+}
+
+function matchesRegion(ev, region) {
+  if (!region) return true;
+  const r = (ev.region || ev.regionDisplayName || ev.regionId || '').toUpperCase();
+  const name = (ev.displayName || ev.name || ev.title || '').toUpperCase();
+  const regionUp = region.toUpperCase();
+  // Direct match on region field
+  if (r === regionUp) return true;
+  // Partial match (e.g. "NAC" in "NAC_SOLO_CASHCUP")
+  if (r.includes(regionUp)) return true;
+  // Match in event name/id
+  if (name.includes(regionUp)) return true;
+  const id = (ev.id || ev.eventId || '').toUpperCase();
+  if (id.includes(regionUp)) return true;
+  return false;
 }
 
 async function fetchTournaments() {
@@ -1153,6 +1264,9 @@ async function fetchTournaments() {
   animateStat('stat-total', data.length);
   animateStat('stat-live', live);
   animateStat('stat-upcoming', upcoming);
+  // Set NAC as default region in dropdown
+  const sel = document.getElementById('regionSelect');
+  if (sel) sel.value = 'NAC';
   renderAll('all');
 }
 
@@ -1172,47 +1286,54 @@ function showDemoData(errMsg) {
   const now = Date.now();
   const demo = [
     {
-      id: 'demo1', displayName: 'FNCS Global Championship 2025',
-      region: 'Global', prizePool: 2000000,
-      beginTime: new Date(now - 3600000).toISOString(),
-      endTime: new Date(now + 7200000).toISOString(),
+      id: 'demo1', displayName: 'FNCS NAC Championship — Live',
+      region: 'NAC', prizePool: 2000000,
       eventWindows: [{ beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString() }],
-      poster_front_image: 'https://cdn2.unrealengine.com/fncs-tournament-image-1920x1080-1920x1080-f04b6ca7b84b.jpg',
     },
     {
-      id: 'demo2', displayName: 'Solo Cash Cup — NA East',
-      region: 'NAE', prizePool: 50000,
-      beginTime: new Date(now + 86400000).toISOString(),
-      endTime: new Date(now + 172800000).toISOString(),
+      id: 'demo2', displayName: 'Solo Cash Cup — NAC',
+      region: 'NAC', prizePool: 50000,
       eventWindows: [{ beginTime: new Date(now + 86400000).toISOString(), endTime: new Date(now + 90000000).toISOString() }],
     },
     {
-      id: 'demo3', displayName: 'Ranked Open Tournament — EU',
-      region: 'EU', prizePool: 25000,
-      beginTime: new Date(now + 3*86400000).toISOString(),
-      endTime: new Date(now + 4*86400000).toISOString(),
-      eventWindows: [{ beginTime: new Date(now + 3*86400000).toISOString(), endTime: new Date(now + 3*86400000 + 3600000*4).toISOString() }],
+      id: 'demo3', displayName: 'Zero Build Trios — NAC',
+      region: 'NAC', prizePool: 25000,
+      eventWindows: [{ beginTime: new Date(now + 3*86400000).toISOString(), endTime: new Date(now + 3*86400000 + 14400000).toISOString() }],
     },
     {
-      id: 'demo4', displayName: 'Duos Invitational — BR',
-      region: 'Brazil', prizePool: 10000,
-      beginTime: new Date(now - 5*86400000).toISOString(),
-      endTime: new Date(now - 4*86400000).toISOString(),
+      id: 'demo4', displayName: 'NAC FNCS Qualifier #1',
+      region: 'NAC', prizePool: 30000,
       eventWindows: [{ beginTime: new Date(now - 5*86400000).toISOString(), endTime: new Date(now - 4*86400000).toISOString() }],
     },
     {
-      id: 'demo5', displayName: 'Zero Build Cup — NAW',
-      region: 'NAW', prizePool: 15000,
-      beginTime: new Date(now + 2*86400000).toISOString(),
-      endTime: new Date(now + 2*86400000 + 3600000*3).toISOString(),
+      id: 'demo5', displayName: 'NAC Ranked Open Series',
+      region: 'NAC', prizePool: 15000,
+      eventWindows: [{ beginTime: new Date(now - 2*86400000).toISOString(), endTime: new Date(now - 86400000).toISOString() }],
+    },
+    {
+      id: 'demo6', displayName: 'Duos Cash Cup — NAC',
+      region: 'NAC', prizePool: 10000,
       eventWindows: [{ beginTime: new Date(now + 2*86400000).toISOString(), endTime: new Date(now + 2*86400000 + 10800000).toISOString() }],
     },
     {
-      id: 'demo6', displayName: 'FNCS Qualifier — Asia',
-      region: 'Asia', prizePool: 30000,
-      beginTime: new Date(now - 2*86400000).toISOString(),
-      endTime: new Date(now - 86400000).toISOString(),
-      eventWindows: [{ beginTime: new Date(now - 2*86400000).toISOString(), endTime: new Date(now - 86400000).toISOString() }],
+      id: 'demo7', displayName: 'Solo Cash Cup — NAE',
+      region: 'NAE', prizePool: 50000,
+      eventWindows: [{ beginTime: new Date(now + 86400000).toISOString(), endTime: new Date(now + 90000000).toISOString() }],
+    },
+    {
+      id: 'demo8', displayName: 'FNCS Qualifier — EU',
+      region: 'EU', prizePool: 80000,
+      eventWindows: [{ beginTime: new Date(now + 2*86400000).toISOString(), endTime: new Date(now + 2*86400000 + 14400000).toISOString() }],
+    },
+    {
+      id: 'demo9', displayName: 'Duos Invitational — BR',
+      region: 'BR', prizePool: 10000,
+      eventWindows: [{ beginTime: new Date(now - 5*86400000).toISOString(), endTime: new Date(now - 4*86400000).toISOString() }],
+    },
+    {
+      id: 'demo10', displayName: 'Zero Build Cup — ASIA',
+      region: 'ASIA', prizePool: 20000,
+      eventWindows: [{ beginTime: new Date(now + 86400000).toISOString(), endTime: new Date(now + 90000000).toISOString() }],
     },
   ];
   allEvents = demo;
@@ -1221,6 +1342,8 @@ function showDemoData(errMsg) {
   const upcoming = demo.filter(ev => getStatus(ev) === 'upcoming').length;
   animateStat('stat-live', live);
   animateStat('stat-upcoming', upcoming);
+  const sel = document.getElementById('regionSelect');
+  if (sel) sel.value = 'NAC';
   renderAll('all');
 
   const note = document.createElement('div');
