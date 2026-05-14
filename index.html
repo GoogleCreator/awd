@@ -10,32 +10,32 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --b50: #ffe8d1;
-    --b100: #ffd4a3;
-    --b200: #ffb66b;
-    --b300: #ff9500;
-    --b400: #ff7a00;
-    --b500: #e66a00;
-    --b600: #c45a00;
-    --b700: #9e4a00;
-    --b800: #6b3300;
-    --b900: #3d1e00;
-    --glow: rgba(255, 149, 0, 0.55);
-    --glow-soft: rgba(255, 149, 0, 0.25);
-    --text-bright: #fff4e8;
-    --text-mid: #ffcc99;
-    --text-dim: #cc8a55;
-    --card-bg: rgba(20, 12, 8, 0.92);
-    --card-border: rgba(255, 149, 0, 0.22);
-    --card-border-hover: rgba(255, 149, 0, 0.65);
+    --b50: #f3e8ff;
+    --b100: #e0cfff;
+    --b200: #c4a8ff;
+    --b300: #a855f7;
+    --b400: #9333ea;
+    --b500: #7c3aed;
+    --b600: #6b21a8;
+    --b700: #581c87;
+    --b800: #3b0764;
+    --b900: #1e0338;
+    --glow: rgba(167, 85, 247, 0.55);
+    --glow-soft: rgba(167, 85, 247, 0.25);
+    --text-bright: #f8f0ff;
+    --text-mid: #d8b4fe;
+    --text-dim: #a78bfa;
+    --card-bg: rgba(15, 8, 28, 0.92);
+    --card-border: rgba(167, 85, 247, 0.22);
+    --card-border-hover: rgba(167, 85, 247, 0.65);
     --live-green: #00e676;
-    --upcoming-amber: #ffcc00;
-    --ended-gray: #888888;
+    --upcoming-amber: #facc15;
+    --ended-gray: #777777;
   }
   html { scroll-behavior: smooth; }
   body {
     font-family: 'Exo 2', sans-serif;
-    background: #0f0a05;
+    background: #0a0614;
     color: var(--text-bright);
     min-height: 100vh;
     overflow-x: hidden;
@@ -51,15 +51,15 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 20% -10%, rgba(255, 110, 0, 0.35) 0%, transparent 65%),
-                radial-gradient(ellipse 60% 50% at 85% 30%, rgba(255, 149, 0, 0.25) 0%, transparent 60%),
-                radial-gradient(ellipse 100% 80% at 50% 100%, rgba(80, 30, 0, 0.75) 0%, transparent 70%);
+    background: radial-gradient(ellipse 80% 60% at 20% -10%, rgba(124, 58, 237, 0.35) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 50% at 85% 30%, rgba(167, 85, 247, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse 100% 80% at 50% 100%, rgba(30, 10, 60, 0.8) 0%, transparent 70%);
   }
   .grid-overlay {
     position: absolute;
     inset: 0;
-    background-image: linear-gradient(rgba(255,149,0,0.06) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255,149,0,0.06) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(167,85,247,0.06) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(167,85,247,0.06) 1px, transparent 1px);
     background-size: 48px 48px;
     animation: gridScroll 25s linear infinite;
   }
@@ -103,8 +103,8 @@
     letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--b300);
-    background: rgba(255,149,0,0.1);
-    border: 1px solid rgba(255,149,0,0.25);
+    background: rgba(167,85,247,0.1);
+    border: 1px solid rgba(167,85,247,0.25);
     padding: 6px 18px;
     border-radius: 20px;
     margin-bottom: 28px;
@@ -130,7 +130,7 @@
   .hero h1 .line1 { display: block; color: var(--text-bright); }
   .hero h1 .line2 {
     display: block;
-    background: linear-gradient(135deg, var(--b300) 0%, #ffcc66 50%, var(--b200) 100%);
+    background: linear-gradient(135deg, var(--b300) 0%, #c084fc 50%, var(--b200) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -195,7 +195,7 @@
     text-transform: uppercase;
     padding: 7px 18px;
     border-radius: 20px;
-    border: 1px solid rgba(255,149,0,0.25);
+    border: 1px solid rgba(167,85,247,0.25);
     background: transparent;
     color: var(--text-mid);
     cursor: pointer;
@@ -205,7 +205,7 @@
   .filter-pill:hover {
     border-color: var(--b300);
     color: var(--text-bright);
-    background: rgba(255,149,0,0.1);
+    background: rgba(167,85,247,0.1);
   }
   .filter-pill.active {
     background: var(--b400);
@@ -308,7 +308,7 @@
   .t-card:hover {
     transform: translateY(-4px);
     border-color: var(--card-border-hover);
-    box-shadow: 0 12px 40px rgba(255,149,0,0.3), 0 0 0 1px rgba(255,149,0,0.15);
+    box-shadow: 0 12px 40px rgba(167,85,247,0.3), 0 0 0 1px rgba(167,85,247,0.15);
   }
   .t-card:hover::before { opacity: 1; }
   @keyframes cardReveal {
@@ -320,7 +320,7 @@
     width: 100%;
     height: 180px;
     overflow: hidden;
-    background: linear-gradient(135deg, #2b1a00, #3f2600);
+    background: linear-gradient(135deg, #1a0f2b, #2e1a4d);
   }
   .t-card-img {
     width: 100%;
@@ -342,14 +342,14 @@
     font-family: 'Rajdhani', sans-serif;
     font-size: 48px;
     font-weight: 700;
-    color: rgba(255,149,0,0.3);
+    color: rgba(167,85,247,0.3);
     letter-spacing: 3px;
-    background: linear-gradient(135deg, #1a0f00, #2b1a00);
+    background: linear-gradient(135deg, #120822, #1f1438);
   }
   .t-card-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(15,10,5,0.9) 0%, transparent 60%);
+    background: linear-gradient(to top, rgba(10,6,20,0.9) 0%, transparent 60%);
   }
   .t-status-badge {
     position: absolute;
@@ -369,13 +369,13 @@
     color: var(--live-green);
   }
   .t-status-badge.upcoming {
-    background: rgba(255,204,0,0.15);
-    border: 1px solid rgba(255,204,0,0.4);
+    background: rgba(250,204,21,0.15);
+    border: 1px solid rgba(250,204,21,0.4);
     color: var(--upcoming-amber);
   }
   .t-status-badge.ended {
-    background: rgba(136,136,136,0.2);
-    border: 1px solid rgba(136,136,136,0.35);
+    background: rgba(119,119,119,0.2);
+    border: 1px solid rgba(119,119,119,0.35);
     color: var(--ended-gray);
   }
   .t-card-body { padding: 16px 18px 18px; }
@@ -413,8 +413,8 @@
     font-size: 11px;
     font-weight: 600;
     color: var(--text-mid);
-    background: rgba(255,149,0,0.08);
-    border: 1px solid rgba(255,149,0,0.15);
+    background: rgba(167,85,247,0.08);
+    border: 1px solid rgba(167,85,247,0.15);
     border-radius: 6px;
     padding: 4px 10px;
   }
@@ -437,7 +437,7 @@
   .t-card-footer {
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid rgba(255,149,0,0.1);
+    border-top: 1px solid rgba(167,85,247,0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -450,8 +450,8 @@
   .t-card-windows strong { color: var(--text-mid); }
   .t-card-arrow {
     width: 28px; height: 28px;
-    background: rgba(255,149,0,0.1);
-    border: 1px solid rgba(255,149,0,0.2);
+    background: rgba(167,85,247,0.1);
+    border: 1px solid rgba(167,85,247,0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -474,7 +474,7 @@
   }
   .spinner {
     width: 48px; height: 48px;
-    border: 3px solid rgba(255,149,0,0.15);
+    border: 3px solid rgba(167,85,247,0.15);
     border-top-color: var(--b300);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -501,7 +501,7 @@
   footer {
     margin-top: 40px;
     padding: 32px 0;
-    border-top: 1px solid rgba(255,149,0,0.1);
+    border-top: 1px solid rgba(167,85,247,0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -532,8 +532,8 @@
   }
   .t-countdown-seg {
     text-align: center;
-    background: rgba(255,149,0,0.1);
-    border: 1px solid rgba(255,149,0,0.2);
+    background: rgba(167,85,247,0.1);
+    border: 1px solid rgba(167,85,247,0.2);
     border-radius: 5px;
     padding: 3px 7px;
     min-width: 36px;
@@ -554,13 +554,11 @@
     text-transform: uppercase;
     color: var(--text-dim);
   }
-
-  /* Modal */
   .modal {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(15,10,5,0.97);
+    background: rgba(10,6,20,0.97);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -574,11 +572,11 @@
     max-width: 920px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 0 50px rgba(255,149,0,0.4);
+    box-shadow: 0 0 50px rgba(167,85,247,0.4);
   }
   .modal-header {
     padding: 20px 24px;
-    border-bottom: 1px solid rgba(255,149,0,0.2);
+    border-bottom: 1px solid rgba(167,85,247,0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -602,8 +600,8 @@
   .close-btn:hover { color: #fff; }
   .modal-body { padding: 24px; }
   .prize-section {
-    background: rgba(255,149,0,0.1);
-    border: 1px solid rgba(255,149,0,0.3);
+    background: rgba(167,85,247,0.1);
+    border: 1px solid rgba(167,85,247,0.3);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 24px;
@@ -617,11 +615,11 @@
   .lb-row {
     display: flex;
     padding: 14px 18px;
-    border-bottom: 1px solid rgba(255,149,0,0.1);
+    border-bottom: 1px solid rgba(167,85,247,0.1);
     align-items: center;
     transition: background 0.2s;
   }
-  .lb-row:hover { background: rgba(255,149,0,0.12); }
+  .lb-row:hover { background: rgba(167,85,247,0.12); }
   .lb-rank {
     width: 60px;
     font-weight: 700;
@@ -983,7 +981,7 @@ function loadDemoLeaderboard() {
 
 async function fetchTournaments() {
   document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching tournaments...</div></div>`;
-  const endpoints = ['/api/v1/events/global','/api/v1/events/cashprizes','/api/v1/events/sessions','/api/v1/events/tracker'];
+  const endpoints = ['/api/v1/events/global','/api/v1/events/global/history','/api/v1/events/cashprizes','/api/v1/events/sessions','/api/v1/events/tracker'];
   let merged = [];
   for (const ep of endpoints) {
     try {
