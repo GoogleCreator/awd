@@ -1,401 +1,1084 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DropIQ • Fortnite Events</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
-        
-        :root {
-            --purple-1: #6b21a8;
-            --purple-2: #7e22ce;
-            --purple-3: #a855f7;
-        }
-        
-        body {
-            font-family: 'Inter', system_ui, sans-serif;
-        }
-        
-        .title-font {
-            font-family: 'Space Grotesk', sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropIQ — Fortnite Tournament Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-        }
+  :root {
+    --p0: #0a0010;
+    --p1: #100820;
+    --p2: #1a0d35;
+    --p3: #240f4a;
+    --p4: #3b1a7a;
+    --p5: #5a2db5;
+    --p6: #7c4fd4;
+    --p7: #a37de8;
+    --p8: #c9aef5;
+    --p9: #ede0ff;
+    --acc: #bf4eff;
+    --acc2: #7c3aff;
+    --glow: rgba(124,79,212,0.35);
+    --glowbright: rgba(191,78,255,0.5);
+    --gold: #f5c842;
+    --silver: #b0bec5;
+    --bronze: #cd7f32;
+    --danger: #ff4e6a;
+    --success: #3cffa0;
+    --text-main: #f0e8ff;
+    --text-muted: #9980c0;
+    --border: rgba(124,79,212,0.3);
+    --card-bg: rgba(26,13,53,0.8);
+    --card-border: rgba(124,79,212,0.25);
+  }
 
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px -12px rgb(168 85 247 / 0.25);
-        }
+  html { scroll-behavior: smooth; }
 
-        .leaderboard-row {
-            transition: all 0.2s ease;
-        }
-        
-        .leaderboard-row:hover {
-            background-color: rgba(168, 85, 247, 0.1) !important;
-        }
+  body {
+    background: var(--p0);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-        .purple-glow {
-            box-shadow: 0 0 35px -5px rgb(168 85 247);
-        }
-    </style>
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(91,45,181,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(124,79,212,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(191,78,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .grid-lines {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,79,212,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,79,212,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 28px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--acc2), var(--acc));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px var(--glowbright);
+  }
+
+  .logo-icon svg { width: 24px; height: 24px; }
+
+  .logo-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #e0c8ff, var(--acc));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+    margin-top: -2px;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(124,79,212,0.4);
+    color: var(--p7);
+    background: rgba(60,25,120,0.4);
+  }
+
+  .hero {
+    padding: 70px 0 50px;
+    text-align: center;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--acc);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0.85;
+  }
+
+  .hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -1px;
+    margin-bottom: 18px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(90deg, #bf4eff, #7c3aff, #a37de8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--p5), transparent);
+    margin: 0 0 50px;
+    opacity: 0.4;
+  }
+
+  .controls-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 36px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,79,212,0.1);
+  }
+
+  .controls-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .select-wrap {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  select {
+    width: 100%;
+    padding: 16px 50px 16px 20px;
+    background: rgba(16,8,32,0.9);
+    border: 1px solid rgba(124,79,212,0.4);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  select:hover { border-color: rgba(124,79,212,0.7); }
+  select:focus { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(191,78,255,0.15); }
+
+  select option {
+    background: #1a0d35;
+    color: var(--text-main);
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--p6);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--acc2), var(--acc));
+    color: #fff;
+    box-shadow: 0 4px 24px rgba(191,78,255,0.35);
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:hover { box-shadow: 0 6px 32px rgba(191,78,255,0.5); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid rgba(124,79,212,0.3);
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(124,79,212,0.6);
+    color: var(--text-main);
+    background: rgba(124,79,212,0.1);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .loading-bar {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--acc), var(--acc2), var(--acc), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    display: none;
+  }
+
+  .loading-bar.active { display: block; }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .status-msg {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 12px 0;
+    display: none;
+  }
+
+  .status-msg.visible { display: block; }
+
+  .results-section { display: none; }
+  .results-section.visible { display: block; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px 24px 20px;
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(124,79,212,0.5);
+    transform: translateY(-2px);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--acc2), var(--acc));
+    opacity: 0.7;
+  }
+
+  .stat-card.gold::before { background: linear-gradient(90deg, #f5c842, #ffdf6b); }
+  .stat-card.silver::before { background: linear-gradient(90deg, #90a4ae, #cfd8dc); }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--acc);
+    letter-spacing: -1px;
+  }
+
+  .stat-card.gold .stat-value { color: var(--gold); }
+  .stat-card.silver .stat-value { color: var(--silver); }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .insight-box {
+    background: rgba(60,25,120,0.3);
+    border: 1px solid rgba(124,79,212,0.35);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 36px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .insight-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .insight-text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--p8);
+  }
+
+  .insight-text strong {
+    color: var(--acc);
+    font-weight: 500;
+  }
+
+  .leaderboard-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    margin-bottom: 36px;
+  }
+
+  .lb-header {
+    padding: 22px 28px 18px;
+    border-bottom: 1px solid rgba(124,79,212,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .lb-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--p8);
+  }
+
+  .lb-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .lb-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .lb-table thead th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 1px solid rgba(124,79,212,0.15);
+    background: rgba(10,0,16,0.4);
+  }
+
+  .lb-table thead th:last-child { text-align: right; }
+
+  .lb-table tbody tr {
+    border-bottom: 1px solid rgba(124,79,212,0.1);
+    transition: background 0.15s;
+  }
+
+  .lb-table tbody tr:hover { background: rgba(124,79,212,0.08); }
+  .lb-table tbody tr:last-child { border-bottom: none; }
+
+  .lb-table tbody td {
+    padding: 13px 18px;
+    font-size: 14px;
+    color: var(--text-main);
+    font-weight: 300;
+  }
+
+  .lb-table tbody td:last-child {
+    text-align: right;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+  }
+
+  .rank-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 32px;
+    display: inline-block;
+  }
+
+  .rank-1 .rank-num { color: var(--gold); }
+  .rank-2 .rank-num { color: var(--silver); }
+  .rank-3 .rank-num { color: var(--bronze); }
+
+  .points-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 13px;
+    background: rgba(91,45,181,0.25);
+    color: var(--acc);
+    border: 1px solid rgba(124,79,212,0.3);
+  }
+
+  .points-pill.above { background: rgba(60,255,160,0.1); color: var(--success); border-color: rgba(60,255,160,0.25); }
+  .points-pill.below { background: rgba(255,78,106,0.1); color: var(--danger); border-color: rgba(255,78,106,0.25); }
+
+  .player-name {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bar-bg {
+    height: 4px;
+    background: rgba(60,25,120,0.5);
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--acc2), var(--acc));
+    transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .window-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .window-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(124,79,212,0.3);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+  }
+
+  .window-pill:hover { border-color: rgba(124,79,212,0.6); color: var(--text-main); }
+  .window-pill.active { border-color: var(--acc); color: var(--acc); background: rgba(191,78,255,0.1); }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+  }
+
+  .empty-state .big-icon {
+    font-size: 52px;
+    margin-bottom: 18px;
+    opacity: 0.4;
+  }
+
+  .empty-state p {
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  .error-msg {
+    background: rgba(255,78,106,0.1);
+    border: 1px solid rgba(255,78,106,0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: #ff8fa0;
+    font-size: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    display: none;
+    margin-bottom: 20px;
+  }
+
+  .error-msg.visible { display: block; }
+
+  footer {
+    text-align: center;
+    padding: 50px 0 36px;
+    font-size: 12px;
+    color: rgba(153,128,192,0.5);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  footer a { color: var(--p6); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 38px; }
+    .controls-card { padding: 22px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stat-value { font-size: 32px; }
+    .lb-table thead th:nth-child(3),
+    .lb-table tbody td:nth-child(3) { display: none; }
+  }
+
+  .pulse-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--success);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 1.8s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(60,255,160,0.5);
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(60,255,160,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(60,255,160,0); }
+    100% { box-shadow: 0 0 0 0 rgba(60,255,160,0); }
+  }
+
+  .fade-in {
+    animation: fadeUp 0.4s ease-out;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
 </head>
-<body class="bg-[#0a0618] text-white min-h-screen">
-    <div class="max-w-7xl mx-auto p-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-10">
-            <div class="flex items-center gap-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
-                    💧
-                </div>
-                <div>
-                    <h1 class="title-font text-5xl font-semibold tracking-tighter">DropIQ</h1>
-                    <p class="text-purple-400 text-sm -mt-1">Fortnite Tournament Intelligence</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-x-6 text-sm">
-                <div onclick="fetchEvents()" class="flex items-center gap-x-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-3xl cursor-pointer transition-colors">
-                    <i class="fas fa-sync-alt"></i>
-                    <span>Refresh Events</span>
-                </div>
-                <div class="px-4 py-2 bg-white/5 rounded-3xl flex items-center gap-x-2 text-purple-300">
-                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                    LIVE
-                </div>
-            </div>
-        </div>
+<body>
 
-        <div class="grid grid-cols-12 gap-6">
-            <!-- Sidebar Controls -->
-            <div class="col-span-12 lg:col-span-4 space-y-6">
-                <!-- Tournament Selector -->
-                <div class="glass border border-purple-500/30 rounded-3xl p-6">
-                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-x-3">
-                        <i class="fas fa-trophy text-purple-400"></i>
-                        SELECT TOURNAMENT
-                    </h2>
-                    
-                    <div class="relative mb-6">
-                        <select id="tournamentSelect" 
-                                onchange="loadTournamentData()"
-                                class="w-full bg-[#1a1428] border border-purple-500/40 focus:border-purple-400 rounded-2xl px-5 py-4 text-white appearance-none focus:outline-none cursor-pointer">
-                            <option value="">Loading tournaments...</option>
-                        </select>
-                        <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                    </div>
+<div class="noise"></div>
+<div class="grid-lines"></div>
 
-                    <div id="eventInfo" class="hidden bg-[#1a1428] rounded-2xl p-5 text-sm space-y-3">
-                    </div>
-                </div>
+<div class="wrap">
 
-                <!-- Stats Card -->
-                <div class="glass border border-purple-500/30 rounded-3xl p-6">
-                    <h2 class="text-xl font-semibold mb-5 flex items-center gap-x-3">
-                        <i class="fas fa-chart-bar text-purple-400"></i>
-                        QUALIFICATION ESTIMATE
-                    </h2>
-                    
-                    <div id="qualifyStats" class="space-y-6">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">DropIQ</div>
+        <div class="logo-sub">Tournament Intelligence</div>
+      </div>
+    </div>
+    <div class="badge">FORTNITE API v2</div>
+  </header>
 
-                <!-- API Status -->
-                <div class="glass border border-purple-500/20 rounded-3xl p-5 text-xs text-purple-400/70 flex items-center justify-between">
-                    <div>Powered by api-fortnite.com</div>
-                    <div class="flex items-center gap-x-1">
-                        <span class="text-emerald-400">●</span>
-                        CONNECTED
-                    </div>
-                </div>
-            </div>
+  <div class="hero">
+    <div class="hero-eyebrow">⬡ Qualification Intelligence</div>
+    <h1>Know Your <span>Target Score</span></h1>
+    <p>Analyze tournament leaderboards and calculate the average points needed to qualify — before you drop.</p>
+  </div>
 
-            <!-- Main Leaderboard -->
-            <div class="col-span-12 lg:col-span-8">
-                <div class="glass border border-purple-500/30 rounded-3xl overflow-hidden">
-                    <!-- Leaderboard Header -->
-                    <div class="bg-gradient-to-r from-purple-600 to-violet-600 px-8 py-6 flex items-center justify-between">
-                        <div>
-                            <h2 id="leaderboardTitle" class="text-2xl font-semibold title-font">Global Leaderboard</h2>
-                            <p id="leaderboardSubtitle" class="text-purple-200 text-sm">Loading...</p>
-                        </div>
-                        <div class="text-right">
-                            <div id="totalPlayers" class="text-3xl font-mono font-bold">0</div>
-                            <div class="text-xs uppercase tracking-widest text-purple-200">PLAYERS</div>
-                        </div>
-                    </div>
+  <div class="divider"></div>
 
-                    <!-- Leaderboard Table -->
-                    <div class="overflow-auto max-h-[650px]" id="leaderboardContainer">
-                        <table class="w-full">
-                            <thead class="sticky top-0 bg-[#1a1428] border-b border-purple-500/30">
-                                <tr class="text-purple-300 text-xs uppercase tracking-widest">
-                                    <th class="px-8 py-5 text-left w-16">#</th>
-                                    <th class="px-4 py-5 text-left">PLAYER</th>
-                                    <th class="px-4 py-5 text-center">POINTS</th>
-                                    <th class="px-4 py-5 text-center">WINS</th>
-                                    <th class="px-4 py-5 text-center">ELIMINATIONS</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leaderboardBody" class="divide-y divide-purple-500/10 text-sm">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-12 text-center text-purple-500/40 text-xs flex items-center justify-center gap-x-8">
-            <div>DropIQ • Unofficial Fortnite Tool</div>
-            <div class="flex items-center gap-x-5">
-                <a href="https://www.api-fortnite.com" target="_blank" class="hover:text-purple-400 transition-colors">API</a>
-                <span>•</span>
-                <span>Made for Dustie</span>
-            </div>
-        </div>
+  <div class="controls-card">
+    <div class="controls-label">01 — Select Tournament</div>
+    <div class="select-wrap">
+      <select id="eventSelect">
+        <option value="">Loading tournaments...</option>
+      </select>
+      <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
     </div>
 
-    <script>
-        const API_KEY = "f1758950fe4aaf77a7741f5deb3e7a6687f48a2d12ed029a41e3f18adb46f759";
-        const BASE_URL = "https://prod.api-fortnite.com";
-        
-        let currentEvents = [];
-        let currentLeaderboard = [];
+    <div id="windowSection" style="display:none;">
+      <div class="controls-label">02 — Select Session Window</div>
+      <div class="window-pills" id="windowPills"></div>
+    </div>
 
-        function createHeaders() {
-            return {
-                "x-api-key": API_KEY,
-                "Content-Type": "application/json"
-            };
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="loading-bar" id="loadingBar"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()" disabled>
+        ⚡ Analyze Tournament
+      </button>
+      <button class="btn btn-ghost" onclick="resetAll()">
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <div class="status-msg" id="statusMsg"></div>
+
+  <div class="results-section" id="resultsSection">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="insight-box" id="insightBox"></div>
+    <div class="leaderboard-section">
+      <div class="lb-header">
+        <div class="lb-title" id="lbTitle">Leaderboard</div>
+        <div class="lb-count" id="lbCount"></div>
+      </div>
+      <div id="lbBody"></div>
+    </div>
+  </div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="big-icon">🎯</div>
+    <p>Select a tournament above and click Analyze to see qualification data.</p>
+  </div>
+
+  <footer>
+    <p>DropIQ — Powered by <a href="https://api-fortnite.com" target="_blank">api-fortnite.com</a> &nbsp;|&nbsp; Unofficial. Not affiliated with Epic Games.</p>
+  </footer>
+
+</div>
+
+<script>
+const API_KEY = 'f1758950fe4aaf77a7741f5deb3e7a6687f48a2d12ed029a41e3f18adb46f759';
+const BASE = 'https://prod.api-fortnite.com';
+
+let allEvents = [];
+let selectedWindowId = null;
+let currentWindows = [];
+
+async function apiFetch(path) {
+  const res = await fetch(BASE + path, { headers: { 'x-api-key': API_KEY } });
+  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+  return res.json();
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function hideError() {
+  document.getElementById('errorMsg').classList.remove('visible');
+}
+
+function setLoading(on) {
+  document.getElementById('loadingBar').classList.toggle('active', on);
+  document.getElementById('analyzeBtn').disabled = on;
+}
+
+function setStatus(msg) {
+  const el = document.getElementById('statusMsg');
+  if (msg) {
+    el.innerHTML = `<span class="pulse-dot"></span>${msg}`;
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
+  }
+}
+
+async function loadEvents() {
+  setStatus('Loading tournaments...');
+  try {
+    const data = await apiFetch('/api/v2/events');
+    const events = data.events || data.data || data || [];
+    allEvents = Array.isArray(events) ? events : [];
+    populateSelect();
+  } catch(e) {
+    try {
+      const data = await apiFetch('/api/v1/events');
+      const events = data.events || data.data || data || [];
+      allEvents = Array.isArray(events) ? events : [];
+      populateSelect();
+    } catch(e2) {
+      showError('Could not load tournaments. ' + e.message);
+      document.getElementById('eventSelect').innerHTML = '<option value="">Failed to load tournaments</option>';
+    }
+  }
+  setStatus('');
+}
+
+function populateSelect() {
+  const sel = document.getElementById('eventSelect');
+  if (!allEvents.length) {
+    sel.innerHTML = '<option value="">No tournaments found</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— Choose a tournament —</option>';
+  allEvents.forEach(ev => {
+    const opt = document.createElement('option');
+    opt.value = ev.id || ev.eventId || ev.event_id || '';
+    const name = ev.name || ev.displayName || ev.title || ev.id || 'Unnamed Tournament';
+    const date = ev.beginTime || ev.startTime || ev.start_time || '';
+    opt.textContent = name + (date ? ` (${new Date(date).toLocaleDateString()})` : '');
+    sel.appendChild(opt);
+  });
+  sel.onchange = onEventChange;
+}
+
+async function onEventChange() {
+  const sel = document.getElementById('eventSelect');
+  const eventId = sel.value;
+  hideError();
+  resetResults();
+  document.getElementById('windowSection').style.display = 'none';
+  document.getElementById('windowPills').innerHTML = '';
+  selectedWindowId = null;
+  currentWindows = [];
+  document.getElementById('analyzeBtn').disabled = true;
+
+  if (!eventId) return;
+  document.getElementById('analyzeBtn').disabled = false;
+
+  setStatus('Loading event windows...');
+  setLoading(true);
+  try {
+    const data = await apiFetch(`/api/v2/events/${eventId}/windows`);
+    const windows = data.windows || data.data || data || [];
+    currentWindows = Array.isArray(windows) ? windows : [];
+    if (currentWindows.length > 0) {
+      renderWindowPills(currentWindows);
+      document.getElementById('windowSection').style.display = 'block';
+    }
+  } catch(e) {
+    // Windows may not exist or may be in leaderboard directly; proceed
+  }
+  setLoading(false);
+  setStatus('');
+}
+
+function renderWindowPills(windows) {
+  const container = document.getElementById('windowPills');
+  container.innerHTML = '';
+
+  const allPill = document.createElement('button');
+  allPill.className = 'window-pill active';
+  allPill.textContent = 'ALL SESSIONS';
+  allPill.dataset.id = 'all';
+  allPill.onclick = () => selectWindow('all', allPill);
+  container.appendChild(allPill);
+
+  windows.forEach((w, i) => {
+    const pill = document.createElement('button');
+    pill.className = 'window-pill';
+    const label = w.name || w.windowId || w.id || `Session ${i+1}`;
+    pill.textContent = String(label).toUpperCase();
+    pill.dataset.id = w.windowId || w.id || i;
+    pill.onclick = () => selectWindow(pill.dataset.id, pill);
+    container.appendChild(pill);
+  });
+
+  selectedWindowId = 'all';
+}
+
+function selectWindow(id, el) {
+  document.querySelectorAll('.window-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  selectedWindowId = id;
+}
+
+function resetResults() {
+  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('emptyState').style.display = 'block';
+  document.getElementById('statsGrid').innerHTML = '';
+  document.getElementById('lbBody').innerHTML = '';
+}
+
+function resetAll() {
+  document.getElementById('eventSelect').value = '';
+  document.getElementById('windowSection').style.display = 'none';
+  document.getElementById('analyzeBtn').disabled = true;
+  hideError();
+  resetResults();
+  setStatus('');
+  selectedWindowId = null;
+  currentWindows = [];
+}
+
+async function analyze() {
+  const sel = document.getElementById('eventSelect');
+  const eventId = sel.value;
+  if (!eventId) return;
+
+  hideError();
+  resetResults();
+  setLoading(true);
+  setStatus('Fetching leaderboard data...');
+
+  try {
+    let entries = [];
+
+    if (currentWindows.length && selectedWindowId && selectedWindowId !== 'all') {
+      const data = await apiFetch(`/api/v2/events/${eventId}/windows/${selectedWindowId}/leaderboard`).catch(() => null)
+        || await apiFetch(`/api/v2/events/${eventId}/leaderboard?windowId=${selectedWindowId}`).catch(() => null)
+        || await apiFetch(`/api/v2/events/${eventId}/windows/${selectedWindowId}`).catch(() => null);
+      entries = extractEntries(data);
+    } else {
+      // Try leaderboard endpoint variants
+      const data = await apiFetch(`/api/v2/events/${eventId}/leaderboard`).catch(() => null)
+        || await apiFetch(`/api/v2/events/${eventId}/windows`).catch(() => null)
+        || await apiFetch(`/api/v2/events/${eventId}/eligibility`).catch(() => null);
+      entries = extractEntries(data);
+
+      // If multiple windows and all selected, aggregate
+      if ((!entries.length) && currentWindows.length) {
+        const allEntries = [];
+        setStatus('Aggregating all session windows...');
+        for (const w of currentWindows.slice(0, 5)) {
+          const wid = w.windowId || w.id;
+          const wd = await apiFetch(`/api/v2/events/${eventId}/windows/${wid}`).catch(() => null)
+            || await apiFetch(`/api/v2/events/${eventId}/leaderboard?windowId=${wid}`).catch(() => null);
+          const wEntries = extractEntries(wd);
+          allEntries.push(...wEntries);
         }
+        entries = mergeEntries(allEntries);
+      }
+    }
 
-        async function fetchEvents() {
-            const select = document.getElementById("tournamentSelect");
-            select.innerHTML = `<option value="">Loading tournaments...</option>`;
-            
-            try {
-                // Try multiple possible endpoints
-                let response = await fetch(`${BASE_URL}/api/v1/events/global`, {
-                    headers: createHeaders()
-                });
-                
-                if (!response.ok) {
-                    response = await fetch(`${BASE_URL}/api/v1/events`, {
-                        headers: createHeaders()
-                    });
-                }
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    currentEvents = Array.isArray(data) ? data : (data.events || data.data || []);
-                    
-                    select.innerHTML = `<option value="">Choose a tournament...</option>`;
-                    
-                    currentEvents.forEach(event => {
-                        const option = document.createElement("option");
-                        option.value = event.id || event.eventId || event.windowId || "";
-                        option.textContent = event.name || event.title || `Event ${option.value.substring(0, 12)}...`;
-                        select.appendChild(option);
-                    });
-                    
-                    if (currentEvents.length > 0) {
-                        select.value = currentEvents[0].id || currentEvents[0].eventId || "";
-                        loadTournamentData();
-                    }
-                } else {
-                    throw new Error("Failed to fetch");
-                }
-            } catch(e) {
-                console.error(e);
-                select.innerHTML = `<option value="">Failed to load. Check API key.</option>`;
-            }
-        }
+    if (!entries.length) {
+      throw new Error('No leaderboard data returned. This tournament may not have results yet, or the endpoint format differs.');
+    }
 
-        async function loadTournamentData() {
-            const select = document.getElementById("tournamentSelect");
-            const eventId = select.value;
-            
-            if (!eventId) return;
-            
-            const event = currentEvents.find(e => (e.id || e.eventId) === eventId);
-            if (!event) return;
-            
-            // Update event info
-            const infoDiv = document.getElementById("eventInfo");
-            infoDiv.classList.remove("hidden");
-            infoDiv.innerHTML = `
-                <div class="flex justify-between text-sm">
-                    <span class="text-purple-400">Event ID</span>
-                    <span class="font-mono">${eventId.substring(0, 18)}${eventId.length > 18 ? '...' : ''}</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-purple-400">Window</span>
-                    <span>${event.windowId || 'Current'}</span>
-                </div>
-            `;
-            
-            document.getElementById("leaderboardTitle").textContent = event.name || "Tournament Leaderboard";
-            document.getElementById("leaderboardSubtitle").textContent = "Real-time standings";
-            
-            try {
-                // Fetch leaderboard
-                let lbUrl = `${BASE_URL}/api/v1/events/global/leaderboard`;
-                
-                const lbResponse = await fetch(lbUrl, {
-                    headers: createHeaders()
-                });
-                
-                if (lbResponse.ok) {
-                    const lbData = await lbResponse.json();
-                    currentLeaderboard = lbData.leaderboard || lbData.entries || lbData || [];
-                    renderLeaderboard();
-                    calculateQualifyStats();
-                }
-            } catch(e) {
-                console.error("Leaderboard fetch failed", e);
-                // Mock data for demo
-                currentLeaderboard = generateMockLeaderboard();
-                renderLeaderboard();
-                calculateQualifyStats();
-            }
-        }
+    const eventName = sel.options[sel.selectedIndex].textContent;
+    renderResults(entries, eventName);
 
-        function generateMockLeaderboard() {
-            const names = ["Ninja", "Bugha", "Tfue", "Clix", "Mongraal", "Aqua", "Rezon", "UnknownxArmy", "Zayt", "Chap"];
-            return Array(25).fill(0).map((_, i) => ({
-                rank: i + 1,
-                name: names[i % names.length] + (i > 5 ? `${Math.floor(Math.random()*99)}` : ""),
-                points: Math.floor(250 - (i * 8) + Math.random() * 15),
-                wins: Math.max(0, Math.floor(12 - i / 3)),
-                elims: Math.floor(45 - i * 1.2 + Math.random() * 20)
-            }));
-        }
+  } catch(e) {
+    showError(e.message || 'Failed to fetch data.');
+  }
 
-        function renderLeaderboard() {
-            const tbody = document.getElementById("leaderboardBody");
-            tbody.innerHTML = "";
-            
-            document.getElementById("totalPlayers").textContent = currentLeaderboard.length;
-            
-            currentLeaderboard.slice(0, 50).forEach(player => {
-                const row = document.createElement("tr");
-                row.className = "leaderboard-row border-b border-purple-500/10 hover:bg-purple-500/5";
-                row.innerHTML = `
-                    <td class="px-8 py-5 font-mono text-purple-300">${player.rank || player.position || "?"}</td>
-                    <td class="px-4 py-5 font-medium">${player.name || player.displayName || "Player"}</td>
-                    <td class="px-4 py-5 text-center font-bold text-purple-300">${player.points || player.score || 0}</td>
-                    <td class="px-4 py-5 text-center">${player.wins || 0}</td>
-                    <td class="px-4 py-5 text-center">${player.elims || player.kills || 0}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+  setLoading(false);
+  setStatus('');
+}
 
-        function calculateQualifyStats() {
-            const container = document.getElementById("qualifyStats");
-            
-            if (currentLeaderboard.length === 0) {
-                container.innerHTML = `<div class="text-purple-400 text-center py-8">No data available yet</div>`;
-                return;
-            }
-            
-            // Sort by points descending
-            const sorted = [...currentLeaderboard].sort((a, b) => {
-                return (b.points || b.score || 0) - (a.points || a.score || 0);
-            });
-            
-            // Top 10 average
-            const top10 = sorted.slice(0, 10);
-            const top10Avg = Math.round(top10.reduce((sum, p) => sum + (p.points || p.score || 0), 0) / top10.length);
-            
-            // Top 50 average
-            const top50 = sorted.slice(0, 50);
-            const top50Avg = Math.round(top50.reduce((sum, p) => sum + (p.points || p.score || 0), 0) / top50.length);
-            
-            // Estimated qualify threshold (approx 150th place or average of 100-200)
-            let qualifyEstimate = Math.max(85, Math.round(top50Avg * 0.72));
-            
-            container.innerHTML = `
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-[#120d1f] rounded-2xl p-5">
-                        <div class="uppercase text-[10px] tracking-[1px] text-purple-400 mb-1">TOP 10 AVG</div>
-                        <div class="text-4xl font-mono font-bold text-white">${top10Avg}</div>
-                        <div class="text-emerald-400 text-xs mt-1">points</div>
-                    </div>
-                    <div class="bg-[#120d1f] rounded-2xl p-5">
-                        <div class="uppercase text-[10px] tracking-[1px] text-purple-400 mb-1">TOP 50 AVG</div>
-                        <div class="text-4xl font-mono font-bold text-white">${top50Avg}</div>
-                        <div class="text-emerald-400 text-xs mt-1">points</div>
-                    </div>
-                </div>
-                
-                <div class="mt-6 pt-6 border-t border-purple-500/20">
-                    <div class="flex justify-between items-end mb-4">
-                        <div>
-                            <div class="text-purple-300 text-sm">ESTIMATED TO QUALIFY</div>
-                            <div class="text-6xl font-mono font-bold text-violet-300 leading-none">${qualifyEstimate}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="px-4 py-2 bg-violet-600/20 text-violet-300 text-xs rounded-2xl inline-block">~ TOP 150</div>
-                        </div>
-                    </div>
-                    <div class="h-2 bg-purple-900 rounded-full overflow-hidden">
-                        <div class="h-2 bg-gradient-to-r from-purple-400 to-violet-500 w-[68%] rounded-full"></div>
-                    </div>
-                    <div class="flex justify-between text-[10px] text-purple-400 mt-1">
-                        <span>0</span>
-                        <span>QUALIFY</span>
-                    </div>
-                </div>
-                
-                <div onclick="alert('DropIQ predicts you need around ' + ${qualifyEstimate} + ' points to make it to the next round. Good luck!')" 
-                     class="mt-8 cursor-pointer text-center py-4 bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 rounded-2xl font-medium transition-all active:scale-95">
-                    HOW DO I REACH THIS?
-                </div>
-            `;
-        }
+function extractEntries(data) {
+  if (!data) return [];
+  const candidates = [
+    data.entries, data.leaderboard, data.data, data.players, data.results,
+    data.scores, data.rankings, data.items,
+    data.leaderboardEntries, data.eventEntries, data
+  ];
+  for (const c of candidates) {
+    if (Array.isArray(c) && c.length && (c[0].points !== undefined || c[0].score !== undefined || c[0].rank !== undefined || c[0].totalPoints !== undefined || c[0].teamPoints !== undefined)) {
+      return c;
+    }
+  }
+  return [];
+}
 
-        // Tailwind script
-        function initTailwind() {
-            // Already included via CDN
-        }
+function mergeEntries(all) {
+  const map = {};
+  for (const e of all) {
+    const id = e.accountId || e.playerId || e.epicAccountId || e.teamId || Math.random();
+    const pts = getPoints(e);
+    if (!map[id] || pts > getPoints(map[id])) map[id] = e;
+  }
+  return Object.values(map).sort((a,b) => getPoints(b) - getPoints(a));
+}
 
-        // Keyboard shortcuts
-        document.addEventListener("keydown", function(e) {
-            if (e.metaKey && e.key === "k") {
-                e.preventDefault();
-                document.getElementById("tournamentSelect").focus();
-            }
-        });
+function getPoints(e) {
+  return e.points ?? e.score ?? e.totalPoints ?? e.teamPoints ?? e.value ?? e.pts ?? 0;
+}
 
-        // Boot the app
-        window.onload = function() {
-            fetchEvents();
-            
-            // Demo data fallback if API fails
-            setTimeout(() => {
-                if (currentLeaderboard.length === 0) {
-                    currentLeaderboard = generateMockLeaderboard();
-                    renderLeaderboard();
-                    calculateQualifyStats();
-                }
-            }, 1800);
-        };
-    </script>
+function getPlayerName(e) {
+  return e.playerName || e.displayName || e.epicDisplayName || e.teamName || e.name || e.accountId || e.playerId || 'Unknown';
+}
+
+function renderResults(entries, eventName) {
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsSection').classList.add('visible');
+
+  const points = entries.map(getPoints).filter(p => typeof p === 'number');
+  const avg = points.reduce((a,b) => a+b, 0) / points.length;
+  const median = calcMedian(points);
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const top10Cutoff = points.sort((a,b)=>b-a)[Math.floor(points.length * 0.1)] ?? 0;
+  const qualifiers = entries.filter(e => getPoints(e) >= avg).length;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card gold fade-in">
+      <div class="stat-label">Avg Qual. Points</div>
+      <div class="stat-value">${Math.round(avg).toLocaleString()}</div>
+      <div class="stat-sub">Your target score to compete</div>
+    </div>
+    <div class="stat-card silver fade-in">
+      <div class="stat-label">Median Score</div>
+      <div class="stat-value">${Math.round(median).toLocaleString()}</div>
+      <div class="stat-sub">Mid-point of the field</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-label">Top 10% Cutoff</div>
+      <div class="stat-value">${Math.round(top10Cutoff).toLocaleString()}</div>
+      <div class="stat-sub">Elite qualification threshold</div>
+    </div>
+    <div class="stat-card fade-in">
+      <div class="stat-label">Total Players</div>
+      <div class="stat-value">${entries.length.toLocaleString()}</div>
+      <div class="stat-sub">${qualifiers} above average</div>
+    </div>
+  `;
+
+  const difficulty = avg > top10Cutoff * 0.7 ? 'extremely competitive' : avg > top10Cutoff * 0.5 ? 'competitive' : 'approachable';
+  document.getElementById('insightBox').innerHTML = `
+    <div class="insight-icon">🧠</div>
+    <div class="insight-text">
+      <strong>${eventName.split('(')[0].trim()}</strong> had <strong>${entries.length.toLocaleString()} participants</strong> with scores ranging from <strong>${Math.round(min).toLocaleString()}</strong> to <strong>${Math.round(max).toLocaleString()}</strong> points. 
+      To qualify at an average level you need approximately <strong>${Math.round(avg).toLocaleString()} pts</strong>, 
+      while the top 10% required <strong>${Math.round(top10Cutoff).toLocaleString()} pts</strong>. 
+      The field is considered <strong>${difficulty}</strong> based on score distribution.
+    </div>
+  `;
+
+  const sorted = [...entries].sort((a,b) => getPoints(b) - getPoints(a));
+  const top = sorted.slice(0, 50);
+  const maxPts = getPoints(top[0]) || 1;
+
+  document.getElementById('lbTitle').textContent = 'Top 50 Leaderboard';
+  document.getElementById('lbCount').textContent = `${entries.length.toLocaleString()} total players`;
+
+  const tableHTML = `
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th style="width:52px;">Rank</th>
+          <th>Player</th>
+          <th>Progress</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${top.map((e, i) => {
+          const pts = getPoints(e);
+          const pct = Math.round((pts / maxPts) * 100);
+          const aboveAvg = pts >= avg;
+          const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+          const pillClass = aboveAvg ? 'above' : 'below';
+          return `<tr class="${rankClass}">
+            <td><span class="rank-num">#${i+1}</span></td>
+            <td><div class="player-name">${escHtml(String(getPlayerName(e)))}</div></td>
+            <td style="min-width:100px;">
+              <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+            </td>
+            <td><span class="points-pill ${pillClass}">${Math.round(pts).toLocaleString()}</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+
+  document.getElementById('lbBody').innerHTML = tableHTML;
+  document.getElementById('resultsSection').classList.add('fade-in');
+}
+
+function calcMedian(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b) => a-b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid-1] + s[mid]) / 2;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadEvents();
+</script>
+
 </body>
 </html>
