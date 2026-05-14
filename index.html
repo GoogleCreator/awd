@@ -10,13 +10,11 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', system-ui, sans-serif; }
         .shop-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1f1208 100%); }
-
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 20px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         * { scrollbar-width: thin; scrollbar-color: #4b5563 transparent; }
-
         * {
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -29,7 +27,6 @@
             -ms-user-select: text;
             user-select: text;
         }
-
         .nav-tab { transition: all 0.3s ease; }
         .nav-tab-active {
             background-color: #f97316;
@@ -40,7 +37,6 @@
         .card:hover { transform: translateY(-10px); }
         .item-img { transition: transform 0.4s ease; }
         .card:hover .item-img { transform: scale(1.08); }
-
         .modal { animation: fadeInModal 0.3s ease forwards; }
         @keyframes fadeInModal {
             from { opacity: 0; transform: scale(0.95); }
@@ -53,7 +49,6 @@
             vertical-align: middle;
             margin-bottom: 3px;
         }
-
         #map-wrapper {
             overflow: hidden;
             border-radius: 1.5rem;
@@ -64,7 +59,6 @@
             width: 100%;
         }
         #map-wrapper:active { cursor: grabbing; }
-
         #main-map {
             position: absolute;
             top: 50%;
@@ -74,7 +68,6 @@
             user-select: none;
             pointer-events: none;
         }
-
         .poi-marker {
             position: absolute;
             width: 28px;
@@ -86,10 +79,21 @@
             pointer-events: none;
             animation: drop 0.4s ease;
         }
-
         @keyframes drop {
             0% { transform: translate(-50%, -200%); }
             100% { transform: translate(-50%, -100%); }
+        }
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
     </style>
 </head>
@@ -103,19 +107,86 @@
             </div>
         </div>
         <div class="flex items-center gap-3 text-sm">
-            <div onclick="switchMainTab(0)" id="tab-shop-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+            <div onclick="switchMainTab(0)" id="tab-tourney-btn" class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+                <i class="fas fa-trophy"></i><span>TOURNAMENTS</span>
+            </div>
+            <div onclick="switchMainTab(1)" id="tab-shop-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
                 <i class="fas fa-store"></i><span>SHOP</span>
             </div>
-            <div onclick="switchMainTab(1)" id="tab-map-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+            <div onclick="switchMainTab(2)" id="tab-map-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
                 <i class="fas fa-map"></i><span>MAP</span>
             </div>
-            <div onclick="switchMainTab(2)" id="tab-info-btn" class="nav-tab nav-tab-active cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
+            <div onclick="switchMainTab(3)" id="tab-info-btn" class="nav-tab cursor-pointer px-8 py-3 rounded-3xl flex items-center gap-2">
                 <i class="fas fa-info-circle"></i><span>INFO</span>
             </div>
         </div>
     </header>
 
-    <div id="shop-section">
+    <!-- TOURNAMENTS SECTION -->
+    <div id="tourney-section">
+        <div class="flex items-center justify-between my-8">
+            <div>
+                <h2 class="text-4xl font-bold">Competitive Tournaments</h2>
+                <p class="text-orange-400">Live • Upcoming • Past</p>
+            </div>
+            <button onclick="refreshTourneys()" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+
+        <div class="flex gap-4 mb-8">
+            <div onclick="switchTourneyTab(0)" id="t-sub-live" class="nav-tab nav-tab-active cursor-pointer px-6 py-3 rounded-3xl flex items-center gap-2">
+                <span class="live-dot"></span><span>LIVE</span>
+            </div>
+            <div onclick="switchTourneyTab(1)" id="t-sub-upcoming" class="nav-tab cursor-pointer px-6 py-3 rounded-3xl flex items-center gap-2">
+                <i class="fas fa-clock"></i><span>UPCOMING</span>
+            </div>
+            <div onclick="switchTourneyTab(2)" id="t-sub-past" class="nav-tab cursor-pointer px-6 py-3 rounded-3xl flex items-center gap-2">
+                <i class="fas fa-history"></i><span>PAST</span>
+            </div>
+        </div>
+
+        <div id="tourney-loading" class="flex flex-col items-center justify-center py-32">
+            <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+            <p class="text-xl">Loading tournament data...</p>
+        </div>
+
+        <div id="tourney-content" class="hidden">
+            <!-- LIVE -->
+            <div id="live-tourney" class="space-y-8">
+                <div class="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-3xl p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="live-dot"></div>
+                            <div>
+                                <h3 class="text-3xl font-bold">FNCS Division 1 - Europe</h3>
+                                <p class="text-white/70">Round 3 • 47/50 matches played</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-white/60">Ends in</div>
+                            <div id="live-timer" class="text-2xl font-mono font-bold text-orange-400">2h 14m</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="live-leaderboard">
+                    </div>
+                </div>
+            </div>
+
+            <!-- UPCOMING -->
+            <div id="upcoming-tourney" class="hidden space-y-8">
+                <div id="upcoming-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+
+            <!-- PAST -->
+            <div id="past-tourney" class="hidden space-y-8">
+                <div id="past-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHOP SECTION -->
+    <div id="shop-section" class="hidden">
         <div class="flex items-center justify-between my-8">
             <h2 class="text-4xl font-bold">Item Shop</h2>
             <button onclick="refreshShop()" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-2xl">
@@ -139,7 +210,7 @@
                 <option value="uncommon">Uncommon</option>
             </select>
         </div>
-        <div id="loading" class="flex flex-col items-center justify-center py-32">
+        <div id="shop-loading" class="flex flex-col items-center justify-center py-32">
             <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-6"></div>
             <p class="text-xl">Loading live shop data...</p>
         </div>
@@ -148,6 +219,7 @@
         </div>
     </div>
 
+    <!-- MAP SECTION -->
     <div id="map-section" class="hidden">
         <div class="mb-8">
             <h2 class="text-4xl font-bold mb-2">Battle Royale Map</h2>
@@ -173,6 +245,7 @@
         </div>
     </div>
 
+    <!-- INFO SECTION -->
     <div id="info-section" class="hidden">
         <div class="max-w-3xl mx-auto pt-12">
             <div class="bg-zinc-900/70 border border-white/10 rounded-3xl p-10">
@@ -191,6 +264,7 @@
     </div>
 </div>
 
+<!-- ITEM MODAL -->
 <div id="item-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
     <div class="modal bg-zinc-900 border border-white/10 rounded-3xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
         <div class="flex items-center justify-between p-6 border-b border-white/10">
@@ -229,7 +303,6 @@
     let posY = 0;
     let isDragging = false;
     let startX, startY, startPosX, startPosY;
-
     const mapWrapper = document.getElementById('map-wrapper');
     const mapImage = document.getElementById('main-map');
 
@@ -325,25 +398,30 @@
     }, { passive: false });
 
     function switchMainTab(tab) {
-        document.getElementById('shop-section').classList.toggle('hidden', tab !== 0);
-        document.getElementById('map-section').classList.toggle('hidden', tab !== 1);
-        document.getElementById('info-section').classList.toggle('hidden', tab !== 2);
-        document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 0);
-        document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 1);
-        document.getElementById('tab-info-btn').classList.toggle('nav-tab-active', tab === 2);
+        document.getElementById('tourney-section').classList.toggle('hidden', tab !== 0);
+        document.getElementById('shop-section').classList.toggle('hidden', tab !== 1);
+        document.getElementById('map-section').classList.toggle('hidden', tab !== 2);
+        document.getElementById('info-section').classList.toggle('hidden', tab !== 3);
+
+        document.getElementById('tab-tourney-btn').classList.toggle('nav-tab-active', tab === 0);
+        document.getElementById('tab-shop-btn').classList.toggle('nav-tab-active', tab === 1);
+        document.getElementById('tab-map-btn').classList.toggle('nav-tab-active', tab === 2);
+        document.getElementById('tab-info-btn').classList.toggle('nav-tab-active', tab === 3);
+    }
+
+    function switchTourneyTab(tab) {
+        document.getElementById('live-tourney').classList.toggle('hidden', tab !== 0);
+        document.getElementById('upcoming-tourney').classList.toggle('hidden', tab !== 1);
+        document.getElementById('past-tourney').classList.toggle('hidden', tab !== 2);
+
+        document.getElementById('t-sub-live').classList.toggle('nav-tab-active', tab === 0);
+        document.getElementById('t-sub-upcoming').classList.toggle('nav-tab-active', tab === 1);
+        document.getElementById('t-sub-past').classList.toggle('nav-tab-active', tab === 2);
     }
 
     function getRarityColor(rarity) {
         const map = { legendary: '#f59e0b', epic: '#c026d3', rare: '#3b82f6', uncommon: '#22c55e', common: '#94a3b8' };
         return map[rarity?.toLowerCase()] || '#64748b';
-    }
-
-    function extractDanceId(itemId) {
-        if (!itemId) return null;
-        const numericMatch = itemId.match(/\d+/);
-        if (numericMatch) return numericMatch[0];
-        if (/^\d+$/.test(itemId)) return itemId;
-        return null;
     }
 
     function categorizeItem(entry) {
@@ -358,9 +436,6 @@
         let albumArt = null;
         let artist = '';
         let trackId = '';
-        let inDate = entry.inDate;
-        let outDate = entry.outDate;
-
         if (entry.tracks?.length > 0) {
             const track = entry.tracks[0];
             type = 'Jam Tracks';
@@ -396,47 +471,34 @@
             description = item.description || '';
             showcaseVideo = item.showcaseVideo;
         } else return null;
-
-        return { ...item, finalPrice, type, rarity, displayName: displayName || item.name, imageUrl, description, showcaseVideo, albumArt, artist, trackId, inDate, outDate };
+        return { ...item, finalPrice, type, rarity, displayName: displayName || item.name, imageUrl, description, showcaseVideo, albumArt, artist, trackId };
     }
 
     function showItemModal(item) {
         document.getElementById('modal-name').textContent = item.displayName || item.title || item.name;
         document.getElementById('modal-price').innerHTML = `${item.finalPrice} <span class="vbucks-icon"></span>`;
         document.getElementById('modal-type').textContent = item.type;
-
         const rarityEl = document.getElementById('modal-rarity');
         rarityEl.textContent = (item.rarity || 'common').toUpperCase();
         rarityEl.style.backgroundColor = `rgba(249, 115, 22, 0.15)`;
         rarityEl.style.color = getRarityColor(item.rarity);
-
         const descContainer = document.getElementById('modal-description-container');
-        const descText = item.description && item.description.trim() !== '' ? item.description : 'No description available.';
-        document.getElementById('modal-description').textContent = descText;
-        descContainer.classList.remove('hidden');
-
+        if (item.description && item.description.trim() !== '') {
+            document.getElementById('modal-description').textContent = item.description;
+            descContainer.classList.remove('hidden');
+        } else {
+            descContainer.classList.add('hidden');
+        }
         const mediaSection = document.getElementById('media-section');
         mediaSection.innerHTML = '';
-
         if (item.type === 'Jam Tracks' && item.albumArt) {
             const audioSrc = item.trackId ? `https://cdn.fortnite-api.com/tracks/${item.trackId}.mp3` : '';
             mediaSection.innerHTML = `<div class="w-full max-w-md text-center"><img src="${item.albumArt}" class="w-52 h-52 mx-auto rounded-3xl shadow-2xl mb-6 object-cover" alt=""><h4 class="text-lg font-semibold mb-1">${item.displayName}</h4><p class="text-white/60 text-sm mb-6">${item.artist || ''}</p>${audioSrc ? `<audio id="jam-audio" controls class="w-full accent-orange-500"><source src="${audioSrc}" type="audio/mpeg"></audio>` : '<p class="text-white/50">Preview not available</p>'}</div>`;
-        } else if (item.type === 'Emotes' && item.id) {
-            const danceId = extractDanceId(item.id);
-            const videoUrl = danceId ? `https://fnggcdn.com/items/${danceId}/video.mp4?1` : '';
-            if (videoUrl) {
-                mediaSection.innerHTML = `<div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden relative"><video controls autoplay loop muted playsinline class="w-full h-full object-contain" poster="${item.imageUrl || ''}"><source src="${videoUrl}" type="video/mp4">Your browser does not support the video tag.</video></div>`;
-            } else if (item.showcaseVideo) {
-                mediaSection.innerHTML = `<div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${item.showcaseVideo}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-            } else {
-                mediaSection.innerHTML = `<img src="${item.imageUrl || 'https://picsum.photos/600'}" class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">`;
-            }
         } else if (item.type === 'Emotes' && item.showcaseVideo) {
             mediaSection.innerHTML = `<div class="aspect-video w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${item.showcaseVideo}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
         } else {
             mediaSection.innerHTML = `<img src="${item.imageUrl || 'https://picsum.photos/600'}" class="max-h-[420px] w-auto object-contain rounded-3xl shadow-2xl" alt="">`;
         }
-
         const modal = document.getElementById('item-modal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -458,7 +520,6 @@
             if (!groups[item.type]) groups[item.type] = [];
             groups[item.type].push(item);
         });
-
         let html = '';
         Object.keys(groups).sort((a,b) => a === 'Jam Tracks' ? -1 : b === 'Jam Tracks' ? 1 : a.localeCompare(b)).forEach(category => {
             const categoryItems = groups[category];
@@ -477,23 +538,20 @@
         const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
         const sortMode = document.getElementById('sort-select').value;
         const rarityFilter = document.getElementById('rarity-filter').value;
-
         let items = (shopData.entries || []).map(categorizeItem).filter(Boolean);
-
-        if (searchTerm) items = items.filter(item => 
-            (item.displayName || item.name || '').toLowerCase().includes(searchTerm) || 
+        if (searchTerm) items = items.filter(item =>
+            (item.displayName || item.name || '').toLowerCase().includes(searchTerm) ||
             (item.artist || '').toLowerCase().includes(searchTerm)
         );
         if (rarityFilter) items = items.filter(item => (item.rarity || 'common') === rarityFilter);
         if (sortMode === 'price-low') items.sort((a, b) => a.finalPrice - b.finalPrice);
         else if (sortMode === 'price-high') items.sort((a, b) => b.finalPrice - a.finalPrice);
         else if (sortMode === 'name') items.sort((a, b) => (a.displayName || a.name || '').localeCompare(b.displayName || b.name || ''));
-
         renderOrganizedShop(items);
     }
 
     async function fetchShop() {
-        const loading = document.getElementById('loading');
+        const loading = document.getElementById('shop-loading');
         const content = document.getElementById('shop-content');
         loading.classList.remove('hidden');
         content.classList.add('hidden');
@@ -534,21 +592,159 @@
         } catch (e) { console.error(e); }
     }
 
-    async function refreshShop() {
-        await fetchShop();
+    // Tournament Mock Data & Functions
+    let mockTourneys = {
+        live: [
+            {
+                name: "FNCS Division 1 - Europe",
+                region: "EU",
+                round: "Grand Finals",
+                progress: "47/50",
+                players: [
+                    { rank: 1, name: "queasy", points: 1240, elims: 68 },
+                    { rank: 2, name: "Th0masHD", points: 980, elims: 52 },
+                    { rank: 3, name: "Peterbot", points: 875, elims: 61 }
+                ]
+            }
+        ],
+        upcoming: [
+            {
+                name: "FNCS Division 2 - NA Central",
+                time: "Tomorrow 6:00 PM EDT",
+                prize: "$25,000",
+                region: "NA-C"
+            },
+            {
+                name: "Solo Cash Cup",
+                time: "May 15, 2026 • 3:00 PM",
+                prize: "$8,000",
+                region: "Global"
+            }
+        ],
+        past: [
+            {
+                name: "FNCS Major 1 - Finals",
+                winner: "XSET Higgs",
+                date: "May 4, 2026",
+                prizePool: "$500,000"
+            }
+        ]
+    };
+
+    function renderLiveLeaderboard() {
+        const container = document.getElementById('live-leaderboard');
+        container.innerHTML = '';
+        mockTourneys.live.forEach(t => {
+            let html = `<div class="lg:col-span-3 bg-zinc-900/70 rounded-2xl p-6"><h4 class="font-semibold mb-4 flex justify-between"><span>${t.name}</span><span class="text-xs text-orange-400">${t.progress}</span></h4>`;
+            t.players.forEach(p => {
+                html += `
+                    <div class="flex justify-between items-center py-3 border-b border-white/10 last:border-0">
+                        <div class="flex items-center gap-4">
+                            <span class="font-mono text-orange-400 w-6">${p.rank}</span>
+                            <span>${p.name}</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold">${p.points}</div>
+                            <div class="text-xs text-white/50">${p.elims} elims</div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div>`;
+            container.innerHTML += html;
+        });
+    }
+
+    function renderUpcoming() {
+        const container = document.getElementById('upcoming-list');
+        container.innerHTML = '';
+        mockTourneys.upcoming.forEach(t => {
+            const div = document.createElement('div');
+            div.className = "bg-zinc-900/70 border border-white/10 rounded-3xl p-6 hover:border-orange-500/50 transition";
+            div.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="text-xl font-semibold">${t.name}</h4>
+                        <p class="text-white/60 text-sm mt-1">${t.region}</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-emerald-400 font-medium">${t.prize}</div>
+                    </div>
+                </div>
+                <div class="mt-8 flex items-center justify-between text-sm">
+                    <div class="text-white/70">${t.time}</div>
+                    <button onclick="alert('Registered for ${t.name}! (Demo)')" class="bg-orange-500 hover:bg-orange-600 text-black px-6 py-2 rounded-2xl text-sm font-semibold">Register</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderPast() {
+        const container = document.getElementById('past-list');
+        container.innerHTML = '';
+        mockTourneys.past.forEach(t => {
+            const div = document.createElement('div');
+            div.className = "bg-zinc-900/70 border border-white/10 rounded-3xl p-6";
+            div.innerHTML = `
+                <h4 class="text-xl font-semibold">${t.name}</h4>
+                <div class="mt-6 flex justify-between items-end">
+                    <div>
+                        <div class="text-white/60 text-sm">WINNER</div>
+                        <div class="text-2xl font-bold text-orange-400">${t.winner}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-white/60">${t.date}</div>
+                        <div class="font-medium">${t.prizePool}</div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    async function fetchTourneys() {
+        const loading = document.getElementById('tourney-loading');
+        const content = document.getElementById('tourney-content');
+        loading.classList.remove('hidden');
+        content.classList.add('hidden');
+        setTimeout(() => {
+            renderLiveLeaderboard();
+            renderUpcoming();
+            renderPast();
+            loading.classList.add('hidden');
+            content.classList.remove('hidden');
+        }, 850);
+    }
+
+    async function refreshTourneys() {
+        await fetchTourneys();
+    }
+
+    function refreshShop() {
+        fetchShop();
     }
 
     document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
     document.getElementById('item-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 
     window.onload = () => {
+        switchMainTab(0);
+        fetchTourneys();
         fetchShop();
         loadMap();
-        switchMainTab(0);
         mapImage.onload = () => {
             scale = 1;
             centerImage();
         };
+        setInterval(() => {
+            const timer = document.getElementById('live-timer');
+            if (timer) {
+                let t = timer.textContent;
+                if (t.includes('h')) {
+                    timer.textContent = "2h 09m";
+                }
+            }
+        }, 45000);
     };
 </script>
 </body>
