@@ -774,7 +774,7 @@ function buildCard(ev, index) {
     const d = formatDate(ev.beginTime || ev.startTime);
     const t = formatTime(ev.beginTime || ev.startTime);
     dateDisplay = d + (t ? ' · ' + t : '');
-  } else if (windows.length > 0 && (windows[0].beginTime || windows[0].startTime)) {
+  } else if (windows.length > 0) {
     dateDisplay = formatDate(windows[0].beginTime || windows[0].startTime);
   }
   return `
@@ -807,10 +807,11 @@ function buildCard(ev, index) {
 </article>`;
 }
 
-function renderSection(title, events, sectionId, showLiveBanner) {
+function renderSection(title, events) {
   if (events.length === 0) return '';
   const cards = events.map((ev, i) => buildCard(ev, i)).join('');
-  const liveBar = showLiveBanner && events.length > 0 ? `
+  const isLiveSection = title.includes('Live');
+  const liveBar = isLiveSection ? `
     <div class="live-banner">
       <div class="live-indicator"></div>
       <span class="live-banner-text">Live Tournaments Active</span>
@@ -839,12 +840,10 @@ function renderAll(filter) {
   const upcoming = toShow.filter(ev => getStatus(ev) === 'upcoming');
   const ended = toShow.filter(ev => getStatus(ev) === 'ended');
   let html = '';
-  if (filter === 'all' || filter === 'live') html += renderSection('Live Now', live, 'live', true);
-  if (filter === 'all' || filter === 'upcoming') html += renderSection('Upcoming Events', upcoming, 'upcoming', false);
-  if (filter === 'all' || filter === 'ended') html += renderSection('Recent & Completed', ended, 'ended', false);
-  if (!html) {
-    html = `<div class="empty-state"><div class="empty-icon">🎯</div><p style="font-size:16px;color:var(--text-mid);font-weight:600;">No ${filter} events found</p></div>`;
-  }
+  if (filter === 'all' || filter === 'live') html += renderSection('Live Now', live);
+  if (filter === 'all' || filter === 'upcoming') html += renderSection('Upcoming Events', upcoming);
+  if (filter === 'all' || filter === 'ended') html += renderSection('Recent & Completed', ended);
+  if (!html) html = `<div class="empty-state"><div class="empty-icon">🎯</div><p style="font-size:16px;color:var(--text-mid);font-weight:600;">No ${filter} events found</p></div>`;
   document.getElementById('content-area').innerHTML = html;
   allEvents.filter(ev => getStatus(ev) === 'upcoming').forEach((ev, i) => {
     const cardId = 'ev-' + (ev.id || ev.eventId || i);
@@ -881,8 +880,7 @@ function showDemoData() {
     {id: 'demo1', displayName: 'FNCS Global Championship 2025', region: 'Global', prizePool: 2000000, beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString(), eventWindows: [{beginTime: new Date(now - 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString()}]},
     {id: 'demo2', displayName: 'Solo Cash Cup — NA East', region: 'NAE', prizePool: 50000, beginTime: new Date(now + 86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000).toISOString()}]},
     {id: 'demo3', displayName: 'Ranked Open Tournament — EU', region: 'EU', prizePool: 25000, beginTime: new Date(now + 3*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 3*86400000).toISOString()}]},
-    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]},
-    {id: 'demo5', displayName: 'Zero Build Cup — NAW', region: 'NAW', prizePool: 15000, beginTime: new Date(now + 86400000*1.5).toISOString(), eventWindows: [{beginTime: new Date(now + 86400000*1.5).toISOString()}]}
+    {id: 'demo4', displayName: 'Duos Invitational — BR', region: 'Brazil', prizePool: 10000, beginTime: new Date(now + 2*86400000).toISOString(), eventWindows: [{beginTime: new Date(now + 2*86400000).toISOString()}]}
   ];
   animateStat('stat-total', allEvents.length);
   animateStat('stat-live', allEvents.filter(ev => getStatus(ev) === 'live').length);
@@ -891,10 +889,18 @@ function showDemoData() {
 }
 
 async function fetchTournaments() {
-  document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching live tournament data...</div></div>`;
-  const endpoints = ['/api/v1/events/global', '/api/v1/events/global/history', '/api/v1/events/tracker', '/api/v1/events/cashprizes'];
+  document.getElementById('content-area').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Fetching upcoming tournaments...</div></div>`;
+
+  const priorityEndpoints = [
+    '/api/v1/events/global',
+    '/api/v1/events/cashprizes',
+    '/api/v1/events/sessions',
+    '/api/v1/events/tracker',
+    '/api/v1/events/global/history'
+  ];
+
   let merged = [];
-  for (const ep of endpoints) {
+  for (const ep of priorityEndpoints) {
     try {
       const res = await fetch(BASE + ep, {
         headers: { 'x-api-key': API_KEY, 'Accept': 'application/json' }
@@ -902,14 +908,15 @@ async function fetchTournaments() {
       if (res.ok) {
         const json = await res.json();
         const arr = json.data || json.events || json.tournaments || json.items || json.results || (Array.isArray(json) ? json : []);
-        if (arr.length > 0) merged.push(...arr);
+        if (arr && arr.length > 0) merged.push(...arr);
       }
     } catch(e) {}
   }
+
   if (merged.length > 0) {
     const seen = new Set();
     allEvents = merged.filter(ev => {
-      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,100);
+      const key = ev.id || ev.eventId || JSON.stringify(ev).slice(0,120);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
